@@ -1,0 +1,13 @@
+{
+  "about": "the named ranges of radiation, in nanometres, short end first. the iso ones are iso 21348's, as its authors give them in their account of its draft: tobiska and nusinov, \"status of iso draft international standard for determining solar irradiances (dis 21348)\", cospar 2004, read 2026-10-31 from space environment technologies' copy (spacewx.com), section 3. each is as there: gamma 0.00001 to 0.001 nm, x-rays hard and soft together 0.001 to 10, extreme ultraviolet 10 to 120, ultraviolet 100 to 400, infrared 760 to 1 000 000, microwave 1 000 000 to 15 000 000 and radio 100 000 to 100 000 000 000, each from its short end up to but not including its long end. libtheme-css had typed extreme ultraviolet to 121, as its author recalled the published standard; the draft says 120, and the published iso 21348:2007 is not open and was not read, so it may differ. they overlap in places (ultraviolet and extreme ultraviolet; radio and microwave), and are carried as they came. fermi's is given in energies, 10 keV to 300 GeV, as nasa's heasarc gives the mission's range: \"studies the cosmos in the energy range 10 keV – 300 GeV\", read 2026-10-31 at heasarc.gsfc.nasa.gov/docs/heasarc/missions/fermi.html, where game run extract finds it. it is the mission's whole range as heasarc states it; its instruments each cover a part",
+  "iso": {
+    "gamma ray": {"short": 1e-5, "long": 1e-3},
+    "x-ray": {"short": 1e-3, "long": 10},
+    "extreme ultraviolet": {"short": 10, "long": 120},
+    "ultraviolet": {"short": 100, "long": 400},
+    "infrared": {"short": 760, "long": 1e6},
+    "microwave": {"short": 1e6, "long": 1.5e7},
+    "radio": {"short": 1e5, "long": 1e11}
+  },
+  "fermi ev": {"highest": 300e9, "lowest": 10e3}
+}

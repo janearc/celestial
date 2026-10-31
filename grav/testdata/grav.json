@@ -1,0 +1,7 @@
+{
+  "about": "numbers grav's tests use, picked: masses that are no body's, a sun's mass, and how close two ways of reaching the sun's GM must agree. drawn is picked for the property, 2026-10-31: masses from 10^-30 suns, about two kilograms, to 10^30, far past any body, as powers of ten",
+  "drawn": {"lowest power": -30, "highest power": 30},
+  "not suns": [0, -1],
+  "one sun": 1,
+  "tolerance": 1e-12
+}

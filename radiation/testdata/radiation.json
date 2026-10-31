@@ -1,0 +1,66 @@
+{
+  "picked by": "the radiation test author, 2026-10-30, from the libtheme-css tests of 2026-10-24.",
+  "units": {
+    "about": "hc is the Planck constant times the speed of light over the charge of an electron, 1239.84198 eV nm; the other lines are worked from it and from the 21 cm line, which is the hydrogen line at 1420.405751 MHz",
+    "hc ev nm": 1239.84198,
+    "hc tolerance": 1e-4,
+    "kev nm": 1.23984,
+    "hydrogen mhz": 1420.405751,
+    "hydrogen cm": 21.106,
+    "hydrogen tolerance": 1e-3,
+    "wise micron": 3.4,
+    "wise nm": 3400,
+    "angstrom nm": 0.1,
+    "relative tolerance": 1e-9,
+    "gamma nm": 1e-4,
+    "ten metres": 10
+  },
+  "named ranges source": "the ranges as ranges.json holds them, there to catch a change to it nobody meant: iso 21348's, as tobiska and nusinov's account of its draft (cospar 2004, section 3) gives them, read 2026-10-31; ranges.json's about says where. Extreme ultraviolet ends at 120 nm there; libtheme-css had 121, as its author recalled the published standard, which was not read. They overlap each other in places (ultraviolet and extreme ultraviolet; radio and microwave).",
+  "named ranges": {
+    "gamma ray": {"lo": 1e-5, "hi": 1e-3},
+    "x-ray": {"lo": 1e-3, "hi": 10},
+    "extreme ultraviolet": {"lo": 10, "hi": 120},
+    "ultraviolet": {"lo": 100, "hi": 400},
+    "infrared": {"lo": 760, "hi": 1e6},
+    "microwave": {"lo": 1e6, "hi": 1.5e7},
+    "radio": {"lo": 1e5, "hi": 1e11}
+  },
+  "fermi": {
+    "about": "the short edge is 300 GeV and the long edge is 10 keV: the fermi mission's range as nasa's heasarc gives it, 10 keV to 300 GeV, read 2026-10-31 (ranges.json says where)",
+    "highest ev": 300e9,
+    "lowest ev": 10e3,
+    "tolerance": 1e-9
+  },
+  "mapping": {
+    "about": "numbers for the mapping of one range onto another. The target is a range picked to map onto, 400 to 800 nm; it is not the observer's.",
+    "target": {"lo": 400, "hi": 800},
+    "wide": {"lo": 300, "hi": 900},
+    "just inside": 0.999,
+    "fractions": [0.1, 0.5, 0.9],
+    "tolerance": 1e-9,
+    "flat": {"name": "flat", "source": {"lo": 100, "hi": 400}, "render": {"lo": 500, "hi": 500}},
+    "backwards render": {"name": "backwards render", "source": {"lo": 100, "hi": 400}, "render": {"lo": 500, "hi": 400}},
+    "backwards source": {"name": "backwards source", "source": {"lo": 400, "hi": 100}, "render": {"lo": 360, "hi": 830}},
+    "source from nothing": {"name": "source from nothing", "source": {"lo": 0, "hi": 400}, "render": {"lo": 500, "hi": 600}},
+    "render from below nothing": {"name": "render from below nothing", "source": {"lo": 100, "hi": 400}, "render": {"lo": -1, "hi": 600}},
+    "sound": {"name": "sound", "source": {"lo": 100, "hi": 400}, "render": {"lo": 500, "hi": 600}},
+    "inside nm": 200,
+    "above nm": 1000,
+    "render inside nm": 550
+  },
+  "jansky": {
+    "about": "hand values for the jansky. One jansky is 1e-23 erg s^-1 cm^-2 Hz^-1 in cgs, as radio astronomy texts give it, and 1 erg s^-1 is 1e-7 W and 1 cm^-2 is 1e4 m^-2, so 1e-23 * 1e-7 * 1e4 = 1e-26 W m^-2 Hz^-1. The AB zero point, 3631 Jy (Oke and Gunn 1983, ApJ 266, 713), is 3.631e-20 erg s^-1 cm^-2 Hz^-1 as they write it, so 3.631e-23 W m^-2 Hz^-1.",
+    "one jansky": 1e-26,
+    "cgs one jansky": 1e-23,
+    "ab zero jy": 3631,
+    "ab zero si": 3.631e-23,
+    "tolerance": 1e-12,
+    "lowest jy": 1e-6,
+    "highest jy": 1e6
+  },
+  "ladders": {
+    "about": "the SI prefixes, which are exact powers of ten",
+    "energy": [1, 1e3, 1e6, 1e9, 1e12],
+    "frequency": [1, 1e3, 1e6, 1e9, 1e12]
+  }
+}

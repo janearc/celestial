@@ -1,0 +1,23 @@
+{
+  "about": "numbers the bands tests pick. Picked by the test author, 2026-10-30. The visible bands are worked from the Band comment in bands.go, 380 and 780 nm at 24 to an octave. The spectrum is four lines of invented power, with nothing about colour in it.",
+  "spectrum": {"450": 1, "460": 2, "640": 3, "700": 1},
+  "other spectrum": {"500": 4, "640": 1, "900": 2},
+  "octave nm": [1, 380, 555, 780, 28000],
+  "shift": 7,
+  "visible": {"short nm": 380, "long nm": 780, "first band": 205, "last band": 230, "width": 26},
+  "same band": {"low nm": 600, "high nm": 601, "low part": 0.2, "high part": 0.4, "mean": 0.3},
+  "between": {"low nm": 400, "high nm": 700, "low part": 0.2, "high part": 0.8, "middle nm": 550, "sample part": 0.9},
+  "run": {"low nm": 600, "high nm": 650, "inside nm": 620, "outside nm": 450},
+  "half": 0.5,
+  "refused parts": [-0.1, 1.1],
+  "bad nm": [0, -5],
+  "shortest nm": 1,
+  "line power": 3,
+  "line nm": 550,
+  "gamma nm": 1e-4,
+  "gamma power": 2,
+  "infrared nm": [1000, 5000, 28000],
+  "repeats": 200,
+  "band": 220,
+  "relative tolerance": 1e-9
+}

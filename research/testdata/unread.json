@@ -1,0 +1,6 @@
+{
+  "about": "the ledger of numbers measured from a source not yet read against, 2 on 2026-10-31: each was carried from slayer with the citation its comment gave, and its text is the number as slayer's code typed it, not the source's own print. sources.yaml says which sources are unread, its read beginning not yet: peck-reeder-1972. a number leaves this list when its source is read against, as ame-2020's two, usno-circular-179's nine, planck-2018-vi's one, bodhaine-1999's thirty and iugg-mean-radius's one did on 2026-10-31; peck and reeder's range was cited to bodhaine, whose paper does not hold it",
+  "unread": [
+    "peck-reeder-longest-um", "peck-reeder-shortest-um"
+  ]
+}

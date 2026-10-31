@@ -1,0 +1,24 @@
+{
+  "about": "numbers the tangent plane's and the ellipse's tests use. tan of one degree is a hand value from the definition of the gnomonic projection: a point a degree along the equator from a centre on it lands tan(1 degree) away. the rest are picked: centres and offsets across the sky, small fields of a degree, and the bounds the small-angle shortcut is held inside",
+  "tan one degree": 0.017455064928217585,
+  "one degree": 1,
+  "quarter turn degrees": 90,
+  "behind degrees": [90, 120, 180],
+  "ascensions": {"least": 0, "most": 359.999},
+  "declinations": {"least": -89, "most": 89},
+  "field degrees": {"least": -1, "most": 1},
+  "round trip arcseconds": 1e-9,
+  "shortcut": {
+    "declination degrees": 60,
+    "one arcminute degrees": 0.016666666666666666,
+    "within arcseconds": 0.1,
+    "beyond arcseconds": 10
+  },
+  "ellipse": {"major arcseconds": 2, "minor arcseconds": 1, "points": 8},
+  "not ellipses arcseconds": [
+    {"major": 1, "minor": 2, "angle": 0},
+    {"major": 1, "minor": -1, "angle": 0}
+  ],
+  "too few points": [0, 2, -1],
+  "tolerance": 1e-12
+}

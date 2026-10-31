@@ -1,0 +1,26 @@
+{
+  "about": "numbers si's tests check against. powers and constants are the SI Brochure, 9th edition (BIPM, 2019), tables 1 and 7; scale is picked for these tests, 2026-10-31: small whole numbers whose products are exact in binary or near it. drawn is picked for the property, 2026-10-31: magnitudes from 10^-100 to 10^100, whose prefixes stay far from where floats lose digits or overflow, and a tolerance of a few roundings; undoes pairs each prefix with the one whose power is its opposite",
+  "drawn": {
+    "lowest power": -100,
+    "highest power": 100,
+    "relative tolerance": 1e-15
+  },
+  "undoes": {"kilo": "milli", "mega": "micro", "giga": "nano"},
+  "powers": {
+    "nano": -9, "micro": -6, "milli": -3, "centi": -2, "kilo": 3,
+    "mega": 6, "giga": 9, "tera": 12
+  },
+  "constants": {
+    "planck": 6.62607015e-34,
+    "speed": 299792458,
+    "charge": 1.602176634e-19,
+    "boltzmann": 1.380649e-23,
+    "avogadro": 6.02214076e23
+  },
+  "scale": {
+    "units": 3,
+    "kilo of units": 3000,
+    "there and back": 7,
+    "tolerance": 1e-12
+  }
+}

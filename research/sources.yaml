@@ -1,0 +1,116 @@
+# sources.yaml: the published work celestial's measured numbers are read
+# from, by the key research-derived-data.yml names. each says what it
+# is, where it is published and what it may be used under. a source
+# fetched as a file also carries its sha256 and size; a web page is
+# cited by its address and the day it was read.
+
+sources:
+  - key: codata-2022-g
+    title: "CODATA Value: Newtonian constant of gravitation"
+    by: "Committee on Data of the International Science Council (CODATA), as published by NIST"
+    year: 2022
+    from: https://physics.nist.gov/cgi-bin/cuu/Value?bg
+    licence: "public: a work of the us government (nist)"
+    read: 2026-10-30
+
+  - key: codata-2022-alpha
+    title: "CODATA Value: fine-structure constant"
+    by: "Committee on Data of the International Science Council (CODATA), as published by NIST"
+    year: 2022
+    from: https://physics.nist.gov/cgi-bin/cuu/Value?alph
+    licence: "public: a work of the us government (nist)"
+    read: 2026-10-31
+
+  - key: codata-2022-electron-mev
+    title: "CODATA Value: electron mass energy equivalent in MeV"
+    by: "Committee on Data of the International Science Council (CODATA), as published by NIST"
+    year: 2022
+    from: https://physics.nist.gov/cgi-bin/cuu/Value?mec2mev
+    licence: "public: a work of the us government (nist)"
+    read: 2026-10-31
+
+  - key: codata-2022-proton-mev
+    title: "CODATA Value: proton mass energy equivalent in MeV"
+    by: "Committee on Data of the International Science Council (CODATA), as published by NIST"
+    year: 2022
+    from: https://physics.nist.gov/cgi-bin/cuu/Value?mpc2mev
+    licence: "public: a work of the us government (nist)"
+    read: 2026-10-31
+
+  - key: codata-2022-dalton-mev
+    title: "CODATA Value: atomic mass constant energy equivalent in MeV"
+    by: "Committee on Data of the International Science Council (CODATA), as published by NIST"
+    year: 2022
+    from: https://physics.nist.gov/cgi-bin/cuu/Value?muc2mev
+    licence: "public: a work of the us government (nist)"
+    read: 2026-10-31
+
+  - key: wise-allsky-expsup-iv4h
+    title: "WISE All-Sky Release Explanatory Supplement, section IV.4.h, Photometric Calibration"
+    by: "Cutri and others, IPAC"
+    from: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/sec4_4h.html
+    table: https://wise2.ipac.caltech.edu/docs/release/allsky/expsup/figures/sec4_4ht1.png
+    sha256: 27cd54f6f4898b39aa63e8c03b2fc80e2f9931bceb9d8baeae81f12e0a075ab1
+    size: 13750
+    licence: "not stated here: cited, not copied"
+    read: "2026-10-31, table 1, by eye from its image as game run sources fetches it (the table above), F_nu0 for W1 to W4; first by an earlier session for nilgai, from a saved copy. the authors are recalled, not read"
+
+  - key: bodhaine-1999
+    title: "On Rayleigh Optical Depth Calculations"
+    by: "Barry A. Bodhaine, Norman B. Wood, Ellsworth G. Dutton and James R. Slusser"
+    year: 1999
+    in: "Journal of Atmospheric and Oceanic Technology 16, from page 1854 (notes and correspondence, november 1999)"
+    from: https://reef.atmos.colostate.edu/~odell/at721/resources/rayleighOpticalDepth.pdf
+    sha256: e81ff2a075595a094f34e651d879c71a4aa63eac55969a009aaee88a65a4e835
+    size: 96772
+    licence: "not stated here: cited, not copied"
+    read: "2026-10-31, from a course site's copy at colorado state (no publisher's open copy found): table 1, equations 5, 6, 10, 11, 17, 18, 19, 22, 23 and 26, and table 3"
+
+  - key: peck-reeder-1972
+    title: "Dispersion of Air"
+    by: "Peck and Reeder"
+    year: 1972
+    licence: "not stated here: cited, not copied"
+    read: "not yet; its range, 0.23 to 1.69 microns, carried from slayer's atmosphere, which cited it to bodhaine, whose paper does not hold it. title, journal and year are recalled, not read"
+
+  - key: iugg-mean-radius
+    title: "Geodetic Reference System 1980"
+    by: "H. Moritz; the system adopted at the XVII general assembly of the IUGG, Canberra, December 1979, resolution no. 7"
+    from: https://web.archive.org/web/20160220054607/https://geodesy.geology.ohio-state.edu/course/refpapers/00740128.pdf
+    sha256: 363e142319679af7a7cf8436179a3ac18618edcf8834bcff0fd2dbc442f8dc80
+    size: 257661
+    licence: "not stated here: cited, not copied"
+    read: "2026-10-31, its derived geometric constants, from an archived copy of a course's reference paper at ohio state; its first page is numbered 128, and the journal is not printed in it"
+
+  - key: usno-circular-179
+    title: "The IAU Resolutions on Astronomical Reference Systems, Time Scales, and Earth Rotation Models: Explanation and Implementation"
+    by: "George H. Kaplan, United States Naval Observatory, Circular No. 179"
+    year: 2005
+    from: https://arxiv.org/pdf/astro-ph/0602086
+    sha256: 112b1664402a6d72b746303e87e5f340bd0984930cddf34236b42cfb1f414885
+    size: 1074572
+    licence: "public: a work of the us government (the naval observatory)"
+    read: "2026-10-31, equation 2.6, from the circular's arXiv copy, dated 2005 Oct 20 on its title page"
+
+  - key: ame-2020
+    title: "The AME 2020 atomic mass evaluation (II). Tables, graphs and references"
+    by: "Meng Wang, W.J. Huang, F.G. Kondev, G. Audi, S. Naimi"
+    year: 2021
+    in: "Chinese Physics C 45 (3), 030003"
+    from: https://amdc.impcas.ac.cn/masstables/Ame2020/Wang_2021_Chinese_Phys._C_45_030003.pdf
+    doi: https://doi.org/10.1088/1674-1137/abddaf
+    sha256: b1c2c0a2e3fc5e6cf4806f23e0e08a35bf66025c9e4a018c632f14a1a3b8df8b
+    size: 2702490
+    licence: "not stated here: cited, not copied"
+    read: "2026-10-31, table I, from the pdf the atomic mass data centre serves; the title, authors and journal as iop's article page gives them"
+
+  - key: planck-2018-vi
+    title: "Planck 2018 results. VI. Cosmological parameters"
+    by: "Planck Collaboration"
+    year: 2020
+    from: https://arxiv.org/pdf/1807.06209
+    doi: https://doi.org/10.1051/0004-6361/201833910
+    sha256: 8e172730faf07c9f4ff3fdcc7043f76ed67df6f76066d47df30d693025b6ce77
+    size: 9317371
+    licence: "not stated here: cited, not copied"
+    read: "2026-10-31, table 2, from the arXiv copy, v4 of 9 aug 2021; the doi answers curl with 403 and was not read"

@@ -1,0 +1,304 @@
+{
+  "picked by": "the hole test author, 2026-10-30, from the tests of libholemath, copied into celestial/hole) and from the formulas the package says it implements. A value marked recalled was written from memory of the source and not read against the page.",
+  "holes": {
+    "about": "the holes the tests use. Masses are in M, so a mass of one is the unit; spins are in M too. Picked by the test author.",
+    "still": {"mass": 1, "spin": 0},
+    "half": {"mass": 1, "spin": 0.5},
+    "kerr": {"mass": 1, "spin": 0.6},
+    "spinning": {"mass": 1, "spin": 0.7},
+    "fast": {"mass": 1, "spin": 0.9},
+    "nearly extremal": {"mass": 1, "spin": 0.999999},
+    "heavy": {"mass": 2.5, "spin": 2},
+    "flat": {"mass": 1e-9, "spin": 0}
+  },
+  "refused": {
+    "about": "a mass and a spin no black hole has, each with why. NewHole must return nil for every one.",
+    "cases": [
+      {"why": "no mass", "mass": 0, "spin": 0},
+      {"why": "mass below nought", "mass": -1, "spin": 0},
+      {"why": "spin at the mass", "mass": 1, "spin": 1},
+      {"why": "spin above the mass", "mass": 1, "spin": 1.2},
+      {"why": "spin below nought", "mass": 1, "spin": -0.5},
+      {"why": "spin and no mass", "mass": 0, "spin": 0.5},
+      {"why": "spin a hair above a mass of two", "mass": 2, "spin": 2.0000001}
+    ]
+  },
+  "radii": {
+    "about": "the radii of a hole, in M. A still hole's are the textbook's: horizon 2M, photon sphere 3M, shadow root 27 M, innermost stable orbit 6M. Three of them were read on 2026-10-31 in kerrgeodesic_gw's documentation (sagemanifolds.obspm.fr/kerrgeodesic_gw/reference/kerr_spacetime.html), as a program apart from celestial prints them for KerrBH(0, m): \"The horizon radius of the Schwarzschild black hole\" 2*m, \"Photon orbit in Schwarzschild spacetime\" 3*m and \"ISCO in Schwarzschild spacetime\" 6*m. None of the four is a measurement: each follows from the schwarzschild metric. The shadow's is the photon sphere's impact parameter, b = r / sqrt(1 - 2M/r) at r = 3M, which is 3 sqrt(3) M = sqrt(27) M, so it is worked, not read. A hole of no spin is the limit the formulas are held at, not a body expected in the sky. A nearly extremal hole's are the limits of the formulas of Bardeen, Press and Teukolsky (1972, ApJ 178, 347), read on 2026-10-31 by eye from the ads scan: horizon M by their equation 2.6, r+ = M + (M^2 - a^2)^1/2; and in their own words on p. 351, \"for a = M, r_ph = M (direct) or 4M (retrograde)\" and \"for a = M, r_ms = M (direct) or 9M (retrograde)\", the same page giving 3M and 6M for a = 0; each is held to the tolerance named, since a spin of 0.999999 is not quite one. The half-spin horizon is M (1 + sqrt(1 - 0.25)) worked by hand: 1.8660254037844386. All are the values libholemath's TestTheExactRadii held.",
+    "still": {
+      "horizon": {"want": 2, "tolerance": 1e-12},
+      "photon sphere": {"want": 3, "tolerance": 1e-12},
+      "photon prograde": {"want": 3, "tolerance": 1e-12},
+      "photon retrograde": {"want": 3, "tolerance": 1e-12},
+      "shadow": {"want": 5.196152422706632, "tolerance": 1e-12},
+      "isco prograde": {"want": 6, "tolerance": 1e-9},
+      "isco retrograde": {"want": 6, "tolerance": 1e-9}
+    },
+    "half": {
+      "horizon": {"want": 1.8660254037844386, "tolerance": 1e-12}
+    },
+    "nearly extremal": {
+      "horizon": {"want": 1, "tolerance": 0.002},
+      "photon prograde": {"want": 1, "tolerance": 0.01},
+      "photon retrograde": {"want": 4, "tolerance": 0.001},
+      "isco prograde": {"want": 1, "tolerance": 0.02},
+      "isco retrograde": {"want": 9, "tolerance": 0.01}
+    }
+  },
+  "places": {
+    "about": "points in space, in M, picked by the test author. The first three are libholemath's TestTheInverseIsTheInverse points; the rest are named for where they lie.",
+    "skew": {"x": 5, "y": 2, "z": 1},
+    "slant": {"x": 3, "y": -4, "z": 0.5},
+    "tilt": {"x": -2, "y": 1, "z": 6},
+    "equator": {"x": 4, "y": 0, "z": 0},
+    "pole": {"x": 0, "y": 0, "z": 7},
+    "far": {"x": 1e6, "y": 0, "z": 0},
+    "origin": {"x": 0, "y": 0, "z": 0},
+    "near": {"x": 3, "y": 0, "z": 0},
+    "eye": {"x": 20, "y": 0, "z": 0}
+  },
+  "metric": {
+    "about": "how close the metric's parts are held: to the identity when it is multiplied by its inverse, and to the flat metric a million M out.",
+    "identity tolerance": 1e-9,
+    "far tolerance": 1e-5,
+    "round trip tolerance": 1e-8
+  },
+  "frame": {
+    "about": "numbers for observers, frames and the shift. Picked by the test author unless said. Tolerances are absolute. The ergosphere point is on the x axis at a kerr-schild radius of 1.8, so x = sqrt(1.8^2 + 0.9^2) = 2.012461179749811: inside the ergosurface (radius 2 in the equator) of a hole of spin 0.9 and outside its prograde photon orbit (1.558). The inside-horizon point is inside a still hole's horizon of 2. The circle is at 8 M. The shares are how far just inside and just outside an orbit to look. The speed 0.4 is libholemath's TestTheArrivingRay. The photon momentum has unit energy and no spatial part; toward and away are libholemath's TestRedshiftRunsTheRightWay momenta, going along plus and minus y.",
+    "tolerance": 1e-9,
+    "property tolerance": 1e-7,
+    "doppler tolerance": 1e-6,
+    "inside horizon": {"x": 1.5, "y": 0, "z": 0},
+    "ergosphere": {"x": 2.012461179749811, "y": 0, "z": 0},
+    "emitter": {"x": 4, "y": 0, "z": 0},
+    "aim": {"x": -1, "y": 0.3, "z": 0},
+    "outward": {"x": 1, "y": 0, "z": 0},
+    "circle radius": 8,
+    "inside share": 0.999,
+    "outside share": 1.001,
+    "stretch": 3,
+    "speed": 0.4,
+    "far observer": {"time": 1, "x": 0, "y": 0, "z": 0},
+    "photon": {"time": -1, "x": 0, "y": 0, "z": 0},
+    "toward": {"time": -1, "x": 0, "y": 1, "z": 0},
+    "away": {"time": -1, "x": 0, "y": -1, "z": 0}
+  },
+  "geodesic": {
+    "about": "a ray of position (0, 3, 4, 5) and momentum (-2, 7, 11, 13), picked by the test author. Worked by hand: the energy is minus the time momentum, 2; the angular momentum about z is x p_y - y p_x = 3 * 11 - 4 * 7 = 33 - 28 = 5. The two changed momenta keep the parts the quantity reads and change the others. The step is 0.1 M, a fine step; the flat tolerance allows for the 1e-9 mass of the flat hole; the halving tolerance is for a step of 0.1 at a start 30 M out. Start and aim are a point 30 M out and a direction across the hole's way.",
+    "position": {"time": 0, "x": 3, "y": 4, "z": 5},
+    "momentum": {"time": -2, "x": 7, "y": 11, "z": 13},
+    "space changed": {"time": -2, "x": -1, "y": 2, "z": -3},
+    "time changed": {"time": 9, "x": 7, "y": 11, "z": 100},
+    "energy": 2,
+    "lz": 5,
+    "step": 0.1,
+    "flat tolerance": 1e-6,
+    "halving tolerance": 1e-6,
+    "start": {"x": -30, "y": 6, "z": 2},
+    "aim": {"x": 1, "y": 0, "z": 0}
+  },
+  "keeps": {
+    "about": "what a marched ray keeps. A ray from 30 M out is marched to 60 M in at most 20000 steps; H is held to 1e-10 at the start and 1e-6 at the end, and the rest to a relative 1e-6 (or absolute, if smaller than one). These are libholemath's TestAGeodesicKeepsWhatItShould tolerances. The big step of 5 M, taken next to the hole, must break the end tolerance.",
+    "far radius": 60,
+    "steps": 20000,
+    "start h": 1e-10,
+    "end h": 1e-6,
+    "relative": 1e-6,
+    "big step": 5
+  },
+  "march": {
+    "about": "numbers for the fates of marched rays, picked by the test author from libholemath's TestMarchOfAnArrivingRayAtTheShadow. The eye looks toward the hole along minus x and away along plus x. From 6 M the shadow's edge, seen from a still eye, is at 45 degrees off the hole: a ray 17 degrees off (cos 0.9563047559630354, sin 0.292371704722737, worked from the angle) is inside it; a ray 60 degrees off (cos 0.5, sin 0.8660254037844386) is outside.",
+    "far": 1000,
+    "steps": 20000,
+    "eye radii": [2.5, 6, 40],
+    "toward the hole": {"x": -1, "y": 0, "z": 0},
+    "away from the hole": {"x": 1, "y": 0, "z": 0},
+    "edge eye": 6,
+    "inside": {"x": -0.9563047559630354, "y": 0.292371704722737, "z": 0},
+    "outside": {"x": -0.5, "y": 0.8660254037844386, "z": 0},
+    "just outside": {"x": 2.01, "y": 0, "z": 0},
+    "fall eye": {"x": 0, "y": -40, "z": 0},
+    "fall aim": {"x": 0, "y": 1, "z": 0},
+    "fall graze": {"x": 0.1, "y": 1, "z": 0},
+    "hover steps": 1000,
+    "hover share": 1.02,
+    "hover h": 1e-2,
+    "pace share": 0.03,
+    "pace tolerance": 1e-3,
+    "edge steps": 300,
+    "shrinks": 0.1
+  },
+  "fall": {
+    "about": "numbers for bodies let go from rest, picked by the test author from libholemath's TestACameraFallsIn, TestAdvanceStopsWhereTheChartEnds and TestTheFallTakesTheTimeItShould. A body of unit mass has H of minus a half (H = -mu^2 / 2, so -0.5). From ten M the fall to the singularity of a still hole takes pi / 2 * sqrt(1000 / 2) = 35.12 of proper time; a tenth short of that the body is between 0.2 and 0.6 M out, and a tenth past it has stopped within 0.02 M, twice the package's margin of 0.01. After 30 it has not reached the horizon and is beyond 4 M. A body is carried 60 of proper time a second at a time at most. The starts are on the equator, off it, over the pole and askew; the times are 60 and 400. The margin point is 0.005 M out, inside the margin.",
+    "radius": 10,
+    "tolerance": 1e-9,
+    "body h": -0.5,
+    "off": {"x": 8, "y": 3, "z": 0.5},
+    "seconds": 60,
+    "second": 1,
+    "early": 30,
+    "early radius": 4,
+    "near": 0.1,
+    "before low": 0.2,
+    "before high": 0.6,
+    "stop radius": 0.02,
+    "starts": [
+      {"x": 10, "y": 0, "z": 0}, {"x": 6, "y": 0, "z": 5},
+      {"x": 0, "y": 0, "z": 10}, {"x": 8, "y": 3, "z": 0.5}
+    ],
+    "times": [60, 400],
+    "drift": 1e-4,
+    "at the margin": {"x": 0.005, "y": 0, "z": 0}
+  },
+  "gpu": {
+    "about": "numbers for the GPU hole, picked by the test author from libholemath's gpu tests. A ray is stepped 40 times by 0.2 M and must reach 14 M or nearer from a camera at 20 M; a batch has 3 rays. The layout is the shader's struct as ShaderParams documents it: five float32 (mass, spin, horizon, photon sphere, shadow) at bytes 0, 4, 8, 12 and 16; the camera's position as a packed three float32 at byte 20; the frame as a four by four float32, a row to a vector, at byte 32 (20 + 12 = 32); 32 + 64 = 96 bytes in all. A float32 is 4 bytes (IEEE 754).",
+    "step": 0.2,
+    "steps": 40,
+    "reached": 14,
+    "count": 3,
+    "layout": {
+      "size": 96, "float": 4,
+      "mass": 0, "spin": 4, "horizon": 8, "photon sphere": 12, "shadow": 16,
+      "camera": 20, "frame": 32
+    }
+  },
+  "approach": {
+    "about": "numbers for impact parameters and nearest approaches, picked by the test author from libholemath's TestImpactParameterInAnyPlane, TestImpactParameterWithSpin and TestClosestApproach. A ray at impact parameter 20 M passes a hole of mass 1 at the large root of r^3 - b^2 r + 2 M b^2 = 0, which is where dr/dlambda is nought for a null geodesic of the Schwarzschild metric: 1/b^2 = (1 - 2M/r)/r^2. For b = 20 that is r^3 - 400 r + 800 = 0, and Newton's method from 19 gives 18.9129854785 (worked with awk on 2026-10-30). The march samples radii a step apart, so the least it stands at is over the true one by up to half a part in ten thousand: held to 2e-3. A ray falling in from 25 M is given up inside the photon sphere of 3 M and outside 2.7 M. The disc step is on the disc of a spin of 0.7: the point (0.1, 0.2) is inside the ring, the momentum has no z part, and a step of 1e-6 stays on the disc.",
+    "impact": 20,
+    "from": -1000,
+    "steps": 5000,
+    "turning": 18.9129854785,
+    "tolerance": 2e-3,
+    "exact tolerance": 1e-9,
+    "out from": {"x": 20, "y": 0, "z": 0},
+    "in from": {"x": 25, "y": 0, "z": 0},
+    "given up": 2.7,
+    "axis from": {"x": 0, "y": 0, "z": -10000},
+    "axis aim": {"x": 0, "y": 0, "z": 1},
+    "axis tolerance": 1e-6,
+    "across": 10,
+    "impact tolerance": 1e-3,
+    "disc": {
+      "position": {"time": 0, "x": 0.1, "y": 0.2, "z": 0},
+      "momentum": {"time": -2, "x": 7, "y": 11, "z": 0},
+      "step": 1e-6,
+      "tolerance": 1e-12
+    }
+  },
+  "class": {
+    "about": "rays from 100 M out for ClassifyRay: aimed at the hole, away from it, and ten degrees off it (cos 0.984807753012208, sin 0.1736481776669303, worked from the angle, an impact parameter of 17 M, past the shadow's 5.2). Matter on a circle at 10 M, which is outside the innermost stable orbit of 6 M.",
+    "from": {"x": 100, "y": 0, "z": 0},
+    "at the hole": {"x": -1, "y": 0, "z": 0},
+    "away": {"x": 1, "y": 0, "z": 0},
+    "missing": {"x": -0.984807753012208, "y": 0.1736481776669303, "z": 0},
+    "circle radius": 10
+  },
+  "sun": {
+    "about": "a ray grazing the sun bends by 1.75 seconds of arc: Einstein's 1915 value, 4 G M / (c^2 R) = 1.7516 arc seconds for the sun's mass and radius, held to 0.02. The sun's radius is 696000 km and its mass in length G M / c^2 is 1.477 km, as libholemath's test took them. A ray is sent from the larger of 2000 M and 20 impact parameters out, and marched to 1.2 times that. The shadow's edge for a hole with no spin is at root 27 = 5.196 M: a ray at 5.15 M is captured and one at 5.25 M escapes.",
+    "radius km": 696000,
+    "mass km": 1.477,
+    "distance": 2000,
+    "reach": 20,
+    "beyond": 1.2,
+    "steps": 200000,
+    "arcseconds": 1.75,
+    "tolerance": 0.02,
+    "just inside": 5.15,
+    "just outside": 5.25
+  },
+  "weak": {
+    "about": "the weak-field bending at an impact parameter of 100 M, from 10000 M out, marched to 100000 M in at most 2000 steps. The three planes are the xy plane (the ray passes at y), the xz plane (at z) and a tilted one (0.6 in y and 0.8 in z, whose squares sum to one). The bending must be the weak field's to 0.3 percent, and the planes agree to 1e-6 rad. Picked by the test author from libholemath's TestDeflectionInAnyPlane.",
+    "impact": 100,
+    "start": -10000,
+    "far": 100000,
+    "steps": 2000,
+    "relative": 0.003,
+    "planes agree": 1e-6,
+    "xy": {"x": 0, "y": 1, "z": 0},
+    "xz": {"x": 0, "y": 0, "z": 1},
+    "tilted": {"x": 0, "y": 0.6, "z": 0.8}
+  },
+  "straight": {
+    "about": "rays from 100 M out, along the x axis, outward and inward, marched to 1000 M. Picked by the test author from libholemath's TestDeflectionOfRaysThatAreNotBent.",
+    "from": {"x": 100, "y": 0, "z": 0},
+    "outward": {"x": 1, "y": 0, "z": 0},
+    "inward": {"x": -1, "y": 0, "z": 0},
+    "far": 1000,
+    "steps": 2000,
+    "tolerance": 1e-9
+  },
+  "hair": {
+    "about": "a hole and a point that rapid found on 2026-10-30, with the radius coming out not a number: the point is a hair from the disc, where the difference of two numbers that agree to all their digits rounded below nought.",
+    "hole": {"mass": 1, "spin": 8.636168555094445e-78},
+    "place": {"x": 1.0542197943230523e-81, "y": 0, "z": 0}
+  },
+  "dot": {
+    "about": "the dot of a covector and a vector is the sum of the products of their parts. Worked by hand: 1*5 + 2*6 + 3*7 + 4*8 = 5 + 12 + 21 + 32 = 70. The other two are square: a time part alone against a space part alone is nought.",
+    "covector": {"time": 1, "x": 2, "y": 3, "z": 4},
+    "vector": {"time": 5, "x": 6, "y": 7, "z": 8},
+    "want": 70,
+    "time only": {"time": 1, "x": 0, "y": 0, "z": 0},
+    "space only": {"time": 0, "x": 1, "y": 2, "z": 3}
+  },
+  "draws": {
+    "about": "the ranges rapid draws from, picked by the test author. A hole's mass is drawn in M from the low to the high; its spin is drawn as a part of its mass, from the low to the high, which stays under one; a point's coordinates are drawn from the low to the high in M.",
+    "mass low": 0.1,
+    "mass high": 10,
+    "spin low": 0,
+    "spin high": 0.99,
+    "coordinate low": -30,
+    "coordinate high": 30,
+    "orbit tolerance": 1e-9,
+    "aim floor": 1e-3
+  },
+  "anti": {
+    "about": "numbers for the anti-tests added on 2026-10-31, picked by the first hole anti-test pass.The momentum scale is three, a factor no test above uses. A short proper time is 0.05, under the 0.1 that a body's first step from ten M would be (0.02 * 10 * 0.5 by choices.json), so Advance has to stop short of its own pace. The roomy slice has 2 reports more than there are rays. A march of one step is the least that is not none. A far radius of 30 M is further out than the eye at 20 M, so a ray sent from the eye has not got there in one step. The spin bend sends a ray along x from 2000 M out, across the hole at 10 M either side, and marches it to 20000 M in at most 20000 steps. It was run once before it was written: a still hole bent it 0.590395789 rad on both sides, and a hole of spin 0.9 bent it 0.5046 rad passing on the prograde side (y = -10, where the ray's angular momentum about z is above nought) and 0.7205 passing on the retrograde side. The gap is held to a tenth of a radian and the still hole's two sides to 1e-9.",
+    "momentum scale": 3,
+    "short proper time": 0.05,
+    "spare reports": 2,
+    "one step": 1,
+    "not yet far": 30,
+    "positions agree": 1e-9,
+    "spin bend": {
+      "start": -2000,
+      "far": 20000,
+      "steps": 20000,
+      "impact": 10,
+      "gap": 0.1,
+      "sides agree": 1e-9
+    },
+    "capture sweep": {
+      "about": "impact parameters, in M, for rays sent along x past the hole of spin 0.9 at either side, to find the ones March takes for captured early and the stepper below does not. Picked by the second hole anti-test pass, 2026-10-31: they run from 2 to 9 in half-steps. With the spin's sign wrong in the radius a ray cannot come back from, March took the rays at 3 to 4.5 on the side the hole turns with (y below nought) for captured when they fall out. The ray starts and ends where the spin bend does.",
+      "impacts": [2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9]
+    },
+    "large bend": {
+      "about": "a ray sent along x past the hole with no spin at an impact parameter of 5.4 M, which is outside the shadow's 5.2 and near enough to it that the hole turns the ray by more than a right angle (6.5 M turned it 1.35 rad, which is not enough, and the test stops if the ray is under a right angle). Picked by the second hole anti-test pass, 2026-10-31. The ray starts and ends where the spin bend does. The angle is held to the arccosine of the cosine between the ray's two ways, a second way to the same angle that loses its digits only at small ones, to 1e-9.",
+      "impact": 5.4,
+      "agree": 1e-9
+    },
+    "body carter": {
+      "about": "a body of unit mass round the hole of spin 0.6, to show the carter constant has the body's mass in it. Picked by the second hole anti-test pass, 2026-10-31: it starts at (6, 0, 5) with a velocity of (0.1, 0.05, 0.2) in space per unit of time, so that it moves in the polar angle, which the mass term of the constant depends on, and is carried 10 of proper time, which leaves it outside the horizon. The constant is held to a relative 1e-6, the tolerance the light's is held to in keeps.",
+      "position": {"x": 6, "y": 0, "z": 5},
+      "velocity": {"x": 0.1, "y": 0.05, "z": 0.2},
+      "proper time": 10,
+      "relative": 1e-6
+    }
+  },
+  "weak spin bend": {
+    "about": "far out, how much more a hole bends light passing against its turning than with it, held to the published series: m. sereno and f. de luca, phys. rev. d 74, 123009 (2006), arXiv:astro-ph/0609435, eq. 38, read on 2026-10-31 in cited-sources/sereno-de-luca-2006.pdf. With r_Sch = 2m, eq. 38 gives the gap as 8 a m / b^2 + 20 pi a m^2 / b^3 through third order (worked from eq. 38 for this test). The ray is sent along x from 30000 M out, at 300 M either side, and marched to 300000 M in at most 20000 steps; the start, the end and the steps are picked; five times the steps changed nothing printed to nine figures, and twice the start and end moved a bend by about 1e-10 rad, a part in a million of the gap. The gap is held to half a percent: the series drops its fourth order, which this code's run put near a part in two thousand of the gap at 300 M, and a spin effect wrong by a factor of two is off by half.",
+    "impact": 300,
+    "start": -30000,
+    "far": 300000,
+    "steps": 20000,
+    "share": 0.005
+  },
+  "isco mid spins": {
+    "about": "the innermost stable circular orbit, prograde, round a hole of unit mass at spins between nought and one, where the tests above hold only 0 and nearly 1. No paper read on 2026-10-31 tabulates it (read, and without a table: jefremov, tsupko and bisnovatyi-kogan, arXiv:1503.07060; isoyama and others, arXiv:1404.6133; shafee and others, arXiv:astro-ph/0508302; arXiv:2404.04501); these are the documented outputs of kerrgeodesic_gw, a SageMath package by e. gourgoulhon and others that computes it apart from celestial, read at sagemanifolds.obspm.fr/kerrgeodesic_gw/reference/kerr_spacetime.html (cited-sources/kerrgeodesic-gw-kerr-spacetime.html), each held there to 1e-13. They are another program's results, not a measurement and not a paper's table. Held here to 1e-12 M.",
+    "radii": [
+      {"spin": 0.5, "radius": 4.23300252953083},
+      {"spin": 0.9, "radius": 2.32088304176189},
+      {"spin": 0.98, "radius": 1.61402966763547}
+    ],
+    "tolerance": 1e-12
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "about": "the choices hole's march is made of: how far a step goes, when a ray is given up, how near the singularity a falling body stops, and how far and how long a ray is marched to class it. picked, not derived and not measured: each was in libholemath at 7678944 and came into celestial with it, as it was. lengths are in M, the hole's mass. they are hole's own file, not celestial's research data, so that hole keeps to the standard library and can leave",
+  "choices": [
+    {"name": "pace share", "value": 0.02, "says": "a step of the march in the affine parameter, as a share of the radius it is taken at", "by": "libholemath's march (7678944), carried as it was"},
+    {"name": "time share", "value": 0.03, "says": "the time a step of the march spans, as a share of the radius it is taken at; at this, libholemath's own comment says, a march costs about what its earlier step of a fiftieth of the radius in the affine parameter did, and its worst ray lands several times nearer", "by": "libholemath's march (7678944), carried as it was, comment and all"},
+    {"name": "hover ratio", "value": 1000, "says": "how many times its energy an arriving ray's time velocity is when the march gives it up as come from the horizon's edge", "by": "libholemath's march (7678944), carried as it was"},
+    {"name": "turned back share", "value": 1e-3, "says": "how far above its least radius a ray has risen, as a share of it, when its closest approach takes it to be on its way out", "by": "libholemath's march (7678944), carried as it was"},
+    {"name": "singularity margin", "value": 0.01, "says": "how near the singularity, in M, a falling body is advanced before it stops; the pace goes to nought there", "by": "libholemath's fall (7678944), carried as it was"},
+    {"name": "advance share", "value": 0.5, "says": "the share of the pace a falling body is advanced by in a step of its proper time", "by": "libholemath's fall (7678944), carried as it was"},
+    {"name": "far factor", "value": 4, "says": "how many times its starting radius out a ray has got when it is classed as escaping", "by": "libholemath's classifier (7678944), carried as it was"},
+    {"name": "far floor", "value": 40, "says": "the least radius, in M, that counts as far for a ray classed as escaping that starts close in", "by": "libholemath's classifier (7678944), carried as it was"},
+    {"name": "classify steps", "value": 5000, "says": "how many steps a ray is marched to class it; light from a hundred M falls in in about a hundred and thirty, and matter on a circle at ten M goes round seven times in this many", "by": "libholemath's classifier (7678944), carried as it was"}
+  ]
+}

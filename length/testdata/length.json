@@ -1,0 +1,16 @@
+{
+  "about": "lengths in metres as published: the IAU's for the AU (2012 B2) and parsec (2015 B2), read on 2026-10-31 in the IAU's 2015 resolutions as juliaastro's docs serve them (iau.org's own address loops to a 404): B2's footnote 4 defines the parsec as exactly (648 000/pi) au, 3.085 677 581 ... x 10^16 m, and B3's endnote 4 restates 2012 B2's au, 149 597 870 700 m exactly; the light-year by its convention, c times a julian year of 365.25 days of 86400 s, both exact, so 9 460 730 472 580 800 m exactly, nothing measured to read; the SI Brochure's for the angstrom, read on 2026-10-31 in its 9th edition (bipm, 2019), section 4, table 8, 1 Å = 0.1 nm = 10^-10 m; CODATA 2018's for the Planck length, 1.616 255(18) x 10^-35 m, read on 2026-10-31 in tiesinga and others, \"CODATA recommended values of the fundamental physical constants: 2018\" (reviews of modern physics 93, 025010, 2021), table XXXI, as nist serves it; its relative standard uncertainty there is 1.1 x 10^-5. tolerances: the parsec is irrational, so it is held to a part in a hundred million, and the Planck length to a part in a hundred thousand, as libtheme-css's test held it, about its uncertainty. follows is picked, 2026-10-31: how near the Planck length squared, times c cubed over hbar, must come back to G, a few roundings, which a figure typed to seven digits misses by a hundred million times",
+  "follows tolerance": 1e-14,
+  "exact": {
+    "metre": 1,
+    "angstrom": 1e-10,
+    "au": 149597870700,
+    "light-year": 9460730472580800
+  },
+  "parsec": 3.0856775814913673e16,
+  "planck length": 1.616255e-35,
+  "planck tolerance": 1e-5,
+  "tolerance": 1e-8,
+  "micron": 1e-6,
+  "kiloparsecs in parsecs": 1000
+}

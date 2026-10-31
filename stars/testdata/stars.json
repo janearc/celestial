@@ -1,0 +1,35 @@
+{
+  "about": "numbers stars' tests use. the sun's 5772 K is the IAU's nominal (2015 B3, read on 2026-10-31 in its copy at arXiv:1510.07674);the rest are picked to stand well inside or outside what a star of the main sequence does, carried from slayer's stars tests: a red dwarf below 3500 K and a hundredth of the sun, ten suns above 20000 K and ended by a hundred million years, the sun ending between nine and eleven billion",
+  "refused": [
+    {"why": "no mass", "suns": 0, "years": 1e9},
+    {"why": "a mass below nought", "suns": -1, "years": 1e9},
+    {"why": "a brown dwarf", "suns": 0.05, "years": 1e9},
+    {"why": "past the table", "suns": 100, "years": 1e6},
+    {"why": "past what can hold", "suns": 400, "years": 1e6},
+    {"why": "an age below nought", "suns": 1, "years": -1},
+    {"why": "older than the cosmos", "suns": 1, "years": 2e10}
+  ],
+  "sun": {"suns": 1, "years": 4.6e9, "kelvin": 5772, "kelvin tolerance": 0.01, "light tolerance": 0.05},
+  "sun burning": {"suns": 1, "years": 9e9},
+  "sun ended": {"suns": 1, "years": 11e9},
+  "red dwarf": {"suns": 0.2, "years": 1e9, "hottest kelvin": 3500, "brightest suns": 0.01},
+  "young giant": {"suns": 10, "years": 1e7, "coolest kelvin": 20000},
+  "old giant": {"suns": 10, "years": 1e8},
+  "ends": [
+    {"suns": 1, "years": 13e9, "stage": "ended"},
+    {"suns": 3, "years": 1e9, "stage": "ended"},
+    {"suns": 40, "years": 1e8, "stage": "ended"},
+    {"suns": 0.5, "years": 13.7e9, "stage": "burning"}
+  ],
+  "dark": {"suns": 12, "years": 1e8},
+  "masses": {"least": 0.08, "most": 59},
+  "ends of the sequence about": "the table's own ends, mainsequence.txt's lightest row, L2V at 0.075 suns, and its heaviest, O3V at 59; past is picked, 2026-10-31: masses drawn past each end by at least a part in a billion, so no rounding brings one back onto the end, and at most half as light or twice as heavy",
+  "ends of the sequence": {"lightest": 0.075, "heaviest": 59, "least share past": 1e-9, "most share past": 0.5},
+  "between rows about": "two neighbouring rows of mainsequence.txt once sorted by mass, G9V at 0.90 suns and G8V at 0.94, as the file holds them from mamajek's table; and a mass between, 0.92, picked 2026-10-31. A star there is strictly between the two rows' stars in light and in size; a main sequence that took the row below, or the row above, gives one equal to a row",
+  "between rows": {"lighter": 0.90, "heavier": 0.94, "between": 0.92},
+  "out of order about": "where mamajek's masses are not in the order of the types: from A9V at 1.75 suns to A2V at 1.98, as mainsequence.txt holds them. his masses rise at A3V to A4V and at A7V to A8V, so sorted by mass the table dims twice, from 1.77 suns to 1.81 (log L 1.00 to 0.96) and from 1.86 to 1.88 (1.23 to 1.09). heavier is brighter is not held for two masses both in here. it still holds when one is outside: the window's dimmest point is its lightest row and its brightest its heaviest. decided 2026-10-31, after rapid's seed 440741639469501265 drew 1.78125 and 1.8125 suns; the rows stay as published, so the test gives way. to be reviewed: a smoothed main sequence would let the claim cover the whole table",
+  "out of order": {"lightest": 1.75, "heaviest": 1.98},
+  "rows": 90,
+  "fusion yield": 0.0071185,
+  "fusion tolerance": 1e-4
+}

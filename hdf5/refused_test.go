@@ -1,0 +1,277 @@
+package hdf5_test
+
+import (
+	"bytes"
+	"errors"
+	"io"
+	"strings"
+	"testing"
+
+	"github.com/janearc/celestial/hdf5"
+	"pgregory.net/rapid"
+)
+
+// halved is how much of the file a truncated copy keeps. Defined: half.
+const halved = 2
+
+// opening is what NewFile makes of some bytes, whole.
+func opening(raw []byte) (*hdf5.File, error) {
+	size := int64(len(raw))
+	return hdf5.NewFile(bytes.NewReader(raw), size)
+}
+
+// causes is the refusal each mutation's cause names.
+var causes = map[string]error{"unsupported": hdf5.ErrUnsupported(),
+	"corrupt": hdf5.ErrCorrupt()}
+
+// mutated is the strain file with a mutation's bytes written over it.
+func mutated(test *testing.T, want mutation) []byte {
+	test.Helper()
+	raw := bytes.Clone(fileBytes(test))
+	for _, write := range want.Changes {
+		copy(raw[write.At:], write.Bytes)
+	}
+	return raw
+}
+
+// refusal is what reading a mutated file the way the mutation says gives:
+// whether it gave a file, members or values, and its error.
+func refusal(test *testing.T, want mutation) (bool, error) {
+	test.Helper()
+	raw := mutated(test, want)
+	if want.Through == "open" {
+		file, err := opening(raw)
+		return file != nil, err
+	}
+	file := opened(test, raw)
+	if want.Through == "members" {
+		names, err := file.Members(want.Path)
+		return names != nil, err
+	}
+	values, err := file.Read(want.Path)
+	return values != nil, err
+}
+
+// The anti-test: each field of the real file changed to a value the
+// reader does not read, or that contradicts the file, is refused where
+// the reader meets it, for the cause the expectations name, in words
+// that name the specification's section; and gives nothing.
+func TestAChangedFileIsRefused(test *testing.T) {
+	for _, want := range expectations(test).Mutations {
+		gave, err := refusal(test, want)
+		if gave || !errors.Is(err, causes[want.Cause]) ||
+			!strings.Contains(err.Error(), want.Section) {
+			test.Errorf("%s: gave %v, %v", want.Why, gave, err)
+		}
+	}
+}
+
+// The property: the real file with any one byte changed opens or is
+// refused, and every read of it gives what it reads or refuses and gives
+// nothing; none panics.
+func TestAnyByteOfTheFileChangedNeverPanics(test *testing.T) {
+	want := expectations(test)
+	rapid.Check(test, changing{raw: fileBytes(test), strain: want.Strain,
+		reads: want.EveryRead}.check)
+}
+
+// changing changes a drawn byte of the real file and reads it.
+type changing struct {
+	raw    []byte
+	strain string
+	reads  reads
+}
+
+// check draws the byte and its new value, then reads all it can.
+func (changes changing) check(test *rapid.T) {
+	raw := bytes.Clone(changes.raw)
+	at := rapid.IntRange(firstValue, len(raw)-one).Draw(test, "at")
+	raw[at] = rapid.Byte().Draw(test, "byte")
+	file, err := opening(raw)
+	if (file == nil) == (err == nil) {
+		test.Fatalf("opened: %v, %v", file, err)
+	}
+	if err != nil {
+		return
+	}
+	for _, path := range changes.reads.Members {
+		names, err := file.Members(path)
+		either(test, path, names, err)
+	}
+	for _, path := range changes.reads.Datasets {
+		values, err := file.Read(path)
+		readEvery(test, path, values, err)
+	}
+	for _, name := range changes.reads.Attributes {
+		values, err := file.Attribute(changes.strain, name)
+		readEvery(test, name, values, err)
+	}
+}
+
+// readEvery holds a read to giving values or refusing, and its values,
+// read as every kind, to the same.
+func readEvery(test *rapid.T, what string, values *hdf5.Values,
+	err error) {
+	if (values == nil) == (err == nil) {
+		test.Fatalf("%s: %v, %v", what, values, err)
+	}
+	if err != nil {
+		return
+	}
+	floats, err := values.Floats()
+	either(test, what+" as floats", floats, err)
+	integers, err := values.Integers()
+	either(test, what+" as integers", integers, err)
+	texts, err := values.Texts()
+	either(test, what+" as texts", texts, err)
+}
+
+// either fails a draw whose read gave both a result and an error, or
+// neither.
+func either[Element any](test *rapid.T, what string, got []Element,
+	err error) {
+	if (got == nil) == (err == nil) {
+		test.Fatalf("%s: gave %v and %v", what, got, err)
+	}
+}
+
+// stingy is a reader that gives no bytes and says nothing of why.
+type stingy struct{}
+
+// ReadAt gives nothing, and no error.
+func (stingy) ReadAt([]byte, int64) (int, error) { return noneRead, nil }
+
+// broken is a reader that fails.
+type broken struct{}
+
+// ReadAt gives nothing, and its failure.
+func (broken) ReadAt([]byte, int64) (int, error) {
+	return noneRead, errBroken
+}
+
+// noneRead is the bytes a reader that gives nothing gives. Defined.
+const noneRead = 0
+
+// errBroken is a reader's own failure.
+var errBroken = errors.New("the reader is broken")
+
+// The anti-test: a reader that gives fewer bytes than are asked for is
+// its own error, the file cut short, and one that fails is its failure;
+// neither is a refusal of the file, and neither gives a file.
+func TestAFailingReaderIsItsOwnError(test *testing.T) {
+	raw := fileBytes(test)
+	size := int64(len(raw))
+	if file, err := hdf5.NewFile(stingy{}, size); file != nil ||
+		!errors.Is(err, io.ErrUnexpectedEOF) ||
+		errors.Is(err, hdf5.ErrCorrupt()) {
+		test.Errorf("a stingy reader: %v, %v", file, err)
+	}
+	if file, err := hdf5.NewFile(broken{}, size); file != nil ||
+		!errors.Is(err, errBroken) {
+		test.Errorf("a broken reader: %v, %v", file, err)
+	}
+}
+
+// The anti-test: bytes that are no hdf5 file, a file cut in half and a
+// size below nothing are refused, and give no file.
+func TestWhatIsNoFileIsRefused(test *testing.T) {
+	want := expectations(test)
+	words := []byte(want.NotHDF5)
+	if file, err := opening(words); !errors.Is(err, hdf5.ErrNotHDF5()) ||
+		file != nil {
+		test.Errorf("words read as a file: %v, %v", file, err)
+	}
+	short := []byte(want.TooShort)
+	if file, err := opening(short); !errors.Is(err, hdf5.ErrNotHDF5()) ||
+		file != nil {
+		test.Errorf("%q read as a file: %v, %v", short, file, err)
+	}
+	raw := fileBytes(test)
+	half := raw[:len(raw)/halved]
+	if file, err := opening(half); !errors.Is(err, hdf5.ErrCorrupt()) ||
+		file != nil {
+		test.Errorf("half a file read as one: %v, %v", file, err)
+	}
+	signed := raw[:want.Signature]
+	if file, err := opening(signed); !errors.Is(err, hdf5.ErrCorrupt()) ||
+		file != nil {
+		test.Errorf("a signature alone read as a file: %v, %v", file, err)
+	}
+	if file, err := hdf5.NewFile(bytes.NewReader(raw),
+		-int64(one)); err == nil || file != nil {
+		test.Errorf("a file of less than no bytes read: %v", file)
+	}
+}
+
+// The anti-test: a byte changed inside the strain's last chunk, a
+// hundred bytes from the file's end, is found by the chunk's checksum or
+// by its inflation; the strain is refused as damaged, and gives no
+// values. The rest of the file still reads.
+func TestADamagedChunkIsRefused(test *testing.T) {
+	want := expectations(test)
+	raw := bytes.Clone(fileBytes(test))
+	raw[len(raw)-want.FlippedFrom] ^= flipped
+	file := opened(test, raw)
+	if values, err := file.Read(want.Strain); !errors.Is(err,
+		hdf5.ErrCorrupt()) || values != nil {
+		test.Errorf("the damaged strain read: %v, %v", values, err)
+	}
+	read(test, file, "meta/Detector")
+}
+
+// flipped is every bit of a byte, turned. Defined.
+const flipped = 0xff
+
+// The anti-test: a path or an attribute the file does not have is not
+// found, and gives no values.
+func TestWhatIsNotThereIsNotFound(test *testing.T) {
+	want := expectations(test)
+	file := opened(test, fileBytes(test))
+	for _, path := range want.NotPaths {
+		if values, err := file.Read(path); !errors.Is(err,
+			hdf5.ErrNotFound()) || values != nil {
+			test.Errorf("%q read: %v, %v", path, values, err)
+		}
+		if names, err := file.Members(path); err == nil || names != nil {
+			test.Errorf("%q has members: %v", path, names)
+		}
+		if values, err := file.Attribute(path, "Xstart"); err == nil ||
+			values != nil {
+			test.Errorf("%q has an Xstart: %v", path, values)
+		}
+	}
+	for _, name := range want.NotAttrs {
+		if values, err := file.Attribute(want.Strain, name); !errors.Is(err,
+			hdf5.ErrNotFound()) || values != nil {
+			test.Errorf("the strain's %q read: %v, %v", name, values, err)
+		}
+	}
+}
+
+// The anti-test: values read as a kind they are not are refused, and a
+// group is no dataset, nor a dataset a group.
+func TestTheWrongKindIsRefused(test *testing.T) {
+	want := expectations(test)
+	file := opened(test, fileBytes(test))
+	names := read(test, file, "quality/simple/DQShortnames")
+	if got, err := names.Floats(); !errors.Is(err, hdf5.ErrWrongType()) ||
+		got != nil {
+		test.Errorf("names read as floats: %v", got)
+	}
+	strain := read(test, file, want.Strain)
+	if got, err := strain.Texts(); !errors.Is(err, hdf5.ErrWrongType()) ||
+		got != nil {
+		test.Errorf("the strain read as text: %v", got)
+	}
+	if got, err := strain.Integers(); !errors.Is(err,
+		hdf5.ErrWrongType()) || got != nil {
+		test.Errorf("the strain read as integers: %v", got)
+	}
+	if values, err := file.Read("meta"); !errors.Is(err,
+		hdf5.ErrWrongType()) || values != nil {
+		test.Errorf("a group read as a dataset: %v, %v", values, err)
+	}
+	if got, err := file.Members(want.Strain); err == nil || got != nil {
+		test.Errorf("the strain has members: %v", got)
+	}
+}

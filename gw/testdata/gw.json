@@ -1,0 +1,49 @@
+{
+  "about": "what gw's tests expect of GW150914-v3.json, GWOSC's event api json for GW150914, fetched 2026-10-30 from https://gwosc.org/eventapi/json/event/GW150914/v3 (sha256 1ce014e3277cc6ef491daa48250465eefda026f2b974d2a15bb8c6ea5596e37e), 13,903 bytes. its licence is recalled as cc by 4.0, the open science centre's, and not read. each value is as that file gives it, in GWOSC's units; the tests turn celestial's si back into those units to compare. the utc time is that file's gps 1126259462.4 as utc, 09:50:45.4 on 2015-09-14; LIGO's discovery paper (Abbott et al. 2016, PRL 116, 061102, read 2026-10-31 from arXiv:1602.03837) gives 09:50:45 utc, to the second, so the tenth is gwosc's, not the paper's",
+  "file": "testdata/GW150914-v3.json",
+  "name": "GW150914-v3",
+  "catalog": "GWTC-1-confident",
+  "gps": 1126259462.4,
+  "utc": {"year": 2015, "month": 9, "day": 14, "hour": 9, "minute": 50, "second": 45.4},
+  "second tolerance": 1e-3,
+  "suns": {
+    "mass_1_source": {"value": 35.6, "lowest": 32.5, "highest": 40.3},
+    "mass_2_source": {"value": 30.6, "lowest": 26.2, "highest": 33.6},
+    "final_mass_source": {"value": 63.1, "lowest": 60.1, "highest": 66.5}
+  },
+  "megaparsecs": {
+    "luminosity_distance": {"value": 440, "lowest": 270, "highest": 590}
+  },
+  "pure": {
+    "a_final": {"value": 0.69, "lowest": 0.65, "highest": 0.74},
+    "redshift": {"value": 0.09, "lowest": 0.06, "highest": 0.12}
+  },
+  "unbounded": "network_matched_filter_snr",
+  "unbounded value": 25.2,
+  "unbounded written": "25.2",
+  "bounded written": "0.69 -0.04 +0.05",
+  "absent": ["total_mass_source", "chirp_mass", "no_such_parameter"],
+  "peak luminosity watts": 3.6e49,
+  "per year": 1e-7,
+  "tolerance": 1e-9,
+  "drawn about": "picked for the property, 2026-10-31: values from 10^-10 to 10^10 of the centre's unit, written over the file's own for a mass or a distance, and units of one to eight small letters, which the centre's table has none of",
+  "drawn": {"lowest power": -10, "highest power": 10},
+  "units about": "each unit the centre writes, in si, typed from its definition and not worked out by celestial's measure: a solar mass as the iau's nominal 1.98841e30 kg, measure's own test's figure, to a part in a million; a megaparsec as a million parsecs of 648000/pi au of 149597870700 m, the iau's definitions; a solar mass times c squared as 1.98841e30 kg times 299792458 m/s squared, multiplied out by hand; and a square degree as (pi/180)^2 steradians. each parameter is one the file gives in that unit, at the value the file gives",
+  "units": [
+    {"parameter": "mass_1_source", "written": 35.6, "unit": "M_sun", "si unit": "kg", "per": 1.98841e30, "tolerance": 1e-6},
+    {"parameter": "luminosity_distance", "written": 440.0, "unit": "Mpc", "si unit": "m", "per": 3.0856775814913673e22, "tolerance": 1e-12},
+    {"parameter": "E_rad", "written": 3.1, "unit": "M_sun c^2", "si unit": "J", "per": 1.787093784952075e47, "tolerance": 1e-6},
+    {"parameter": "sky_area", "written": 182.0, "unit": "deg^2", "si unit": "sr", "per": 3.046174197867086e-4, "tolerance": 1e-12}
+  ],
+  "near misses about": "picked, 2026-10-31: units a hand or another catalogue might write for the centre's, each one character or one power off, written over a top-level parameter of the file, which gw must refuse: it converts only what the centre writes",
+  "near misses": [
+    {"parameter": "mass_1_source", "unit": "M_Sun"},
+    {"parameter": "mass_1_source", "unit": "Msun"},
+    {"parameter": "mass_1_source", "unit": "M_sun "},
+    {"parameter": "mass_1_source", "unit": "M_sun c^3"},
+    {"parameter": "luminosity_distance", "unit": "mpc"},
+    {"parameter": "luminosity_distance", "unit": "MPC"},
+    {"parameter": "luminosity_distance", "unit": "kpc"},
+    {"parameter": "luminosity_distance", "unit": "deg2"}
+  ]
+}

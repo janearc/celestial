@@ -1,0 +1,66 @@
+package gw
+
+import (
+	"errors"
+	"fmt"
+	"math"
+
+	"github.com/janearc/celestial/length"
+	"github.com/janearc/celestial/measure"
+	"github.com/janearc/celestial/si"
+)
+
+// conversion is how a unit the centre writes becomes si: the si unit, and
+// what one of the centre's is in it.
+type conversion struct {
+	unit   string
+	factor float64
+}
+
+// errUnit is a unit the centre wrote that gw has no conversion for.
+var errUnit = errors.New("gw: no such unit")
+
+// ErrUnit is a unit string the centre wrote that is not in gw's table, so the
+// value cannot be put in si.
+func ErrUnit() error { return errUnit }
+
+// The numbers the units below are built from, each defined.
+const (
+	// one is one of a unit. Defined by counting.
+	one = 1.0
+	// ergInJoules is the cgs erg in joules. Defined by cgs: 1e-7 J.
+	ergInJoules = 1e-7
+	// peakScale is the power of ten the centre writes its peak luminosity's
+	// unit with. Defined by that unit, 10^56 erg s^-1.
+	peakScale = 1e56
+)
+
+// toSI is the conversion for a unit as the centre writes it. It refuses
+// a unit it does not have, and then gives none.
+func toSI(written string) (*conversion, error) {
+	sun := measure.SolarMasses(one).InKilograms()
+	into := conversion{factor: one}
+	switch written {
+	case "":
+	case "M_sun":
+		into = conversion{unit: "kg", factor: sun}
+	case "M_sun c^2":
+		into = conversion{unit: "J", factor: sun * si.Speed * si.Speed}
+	case "Mpc":
+		into = conversion{unit: "m", factor: si.Mega(length.Parsec)}
+	case "yr^-1":
+		year := measure.Years(one).InSeconds()
+		into = conversion{unit: "s^-1", factor: one / year}
+	case "10^56 erg s^-1":
+		into = conversion{unit: "W", factor: peakScale * ergInJoules}
+	case "deg^2":
+		degree := measure.Degrees(one).InRadians()
+		into = conversion{unit: "sr", factor: math.Pow(degree, squared)}
+	default:
+		return nil, fmt.Errorf("%w: %q", errUnit, written)
+	}
+	return &into, nil
+}
+
+// squared is the power of a square degree. Defined by the unit.
+const squared = 2

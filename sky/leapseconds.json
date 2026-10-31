@@ -1,0 +1,20 @@
+{
+  "about": "tai less utc since utc took whole seconds in 1972, from the first of the month each value began, read on 2026-10-31 against the iers earth orientation centre's UTC-TAI.history (hpiers.obspm.fr/iers/bul/bulc/UTC-TAI.history), every step of which this holds, 10 s from 1972 january 1 to 37 s from 2017 january 1. bulletin c 72 (paris, 06 july 2026) says \"NO leap second will be introduced at the end of December 2026\" and UTC-TAI = -37 s from 2017 january 1 until further notice. the next day that could end in one is 2027 june 30, and only bulletin c 73 would say, so that day and after are not known here. game run extract checks the steps and the bulletin",
+  "until": {"year": 2027, "month": 6, "day": 30},
+  "leaps": [
+    {"year": 1972, "month": 1, "ahead": 10}, {"year": 1972, "month": 7, "ahead": 11},
+    {"year": 1973, "month": 1, "ahead": 12}, {"year": 1974, "month": 1, "ahead": 13},
+    {"year": 1975, "month": 1, "ahead": 14}, {"year": 1976, "month": 1, "ahead": 15},
+    {"year": 1977, "month": 1, "ahead": 16}, {"year": 1978, "month": 1, "ahead": 17},
+    {"year": 1979, "month": 1, "ahead": 18}, {"year": 1980, "month": 1, "ahead": 19},
+    {"year": 1981, "month": 7, "ahead": 20}, {"year": 1982, "month": 7, "ahead": 21},
+    {"year": 1983, "month": 7, "ahead": 22}, {"year": 1985, "month": 7, "ahead": 23},
+    {"year": 1988, "month": 1, "ahead": 24}, {"year": 1990, "month": 1, "ahead": 25},
+    {"year": 1991, "month": 1, "ahead": 26}, {"year": 1992, "month": 7, "ahead": 27},
+    {"year": 1993, "month": 7, "ahead": 28}, {"year": 1994, "month": 7, "ahead": 29},
+    {"year": 1996, "month": 1, "ahead": 30}, {"year": 1997, "month": 7, "ahead": 31},
+    {"year": 1999, "month": 1, "ahead": 32}, {"year": 2006, "month": 1, "ahead": 33},
+    {"year": 2009, "month": 1, "ahead": 34}, {"year": 2012, "month": 7, "ahead": 35},
+    {"year": 2015, "month": 7, "ahead": 36}, {"year": 2017, "month": 1, "ahead": 37}
+  ]
+}

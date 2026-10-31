@@ -1,0 +1,483 @@
+# research-derived-data.yml: every measured number celestial uses, each read
+# from its published source each names its source by its key in sources.yaml,
+# beside this file, where in it, and the text printed there.
+#
+# a number carried over from slayer, libtheme-css or libholemath came
+# with the citation its comment gave. those not yet read against the
+# page say so in the comment above them, and their source's read in
+# sources.yaml begins "not yet"; for them the text is the number as the
+# code it was carried from typed it, not the page's own print. the
+# research tests hold every such number to the ledger in
+# testdata/unread.json, so none goes unlisted.
+
+numbers:
+  # codata's newtonian constant of gravitation, read on 2026-10-30
+  # from the page itself, which says "Source: 2022
+  # CODATA". its concise form there is "6.674 30(15) x 10-11 m3 kg-1
+  # s-2", a relative standard uncertainty of 2.2e-5.
+
+  - name: gravitation
+    value: 6.67430e-11
+    unit: m^3 kg^-1 s^-2
+    says: the newtonian constant of gravitation, G
+    kind: measured
+    source:
+      key: codata-2022-g
+      where: numerical value
+      text: "6.674 30 x 10-11 m3 kg-1 s-2"
+
+  # codata 2022's values for the electron, the proton and the atomic
+  # mass constant, each as an energy, and the fine-structure constant,
+  # read on 2026-10-31 from nist's pages for each, all of which say
+  # "Source: 2022 CODATA". slayer's measure carried the 2018 values.
+
+  - name: fine-structure
+    value: 7.2973525643e-3
+    unit: ""
+    says: the fine-structure constant, alpha, how strongly light and charge couple
+    kind: measured
+    source:
+      key: codata-2022-alpha
+      where: numerical value
+      text: "7.297 352 5643 x 10-3"
+
+  - name: electron-mev
+    value: 0.51099895069
+    unit: MeV
+    says: the electron's mass, as the energy it is at rest
+    kind: measured
+    source:
+      key: codata-2022-electron-mev
+      where: numerical value
+      text: "0.510 998 950 69 MeV"
+
+  - name: proton-mev
+    value: 938.27208943
+    unit: MeV
+    says: the proton's mass, as the energy it is at rest
+    kind: measured
+    source:
+      key: codata-2022-proton-mev
+      where: numerical value
+      text: "938.272 089 43 MeV"
+
+  - name: dalton-mev
+    value: 931.49410372
+    unit: MeV
+    says: the atomic mass constant, a twelfth of a carbon 12 atom, as the energy it is at rest
+    kind: measured
+    source:
+      key: codata-2022-dalton-mev
+      where: numerical value
+      text: "931.494 103 72 MeV"
+
+  # the atomic masses of hydrogen 1 and helium 4, from the atomic mass
+  # evaluation of 2020, table I, which gives each atomic mass in micro-u,
+  # read on 2026-10-31 from the paper as the atomic mass data centre
+  # serves it. slayer's measure carried 1.00782503223 for hydrogen 1,
+  # which is not the table's: the table prints 1 007825.03190, plus or
+  # minus 0.00001, and that is the value here now. helium 4 was as the
+  # table has it.
+
+  - name: hydrogen-1-daltons
+    value: 1.00782503190
+    unit: Da
+    says: the mass of a hydrogen 1 atom, its electron and all
+    kind: measured
+    source:
+      key: ame-2020
+      where: table I, 1 H, atomic mass in micro-u
+      text: "1 007825.03190"
+
+  - name: helium-4-daltons
+    value: 4.00260325413
+    unit: Da
+    says: the mass of a helium 4 atom, its electrons and all
+    kind: measured
+    source:
+      key: ame-2020
+      where: table I, 4 He, atomic mass in micro-u
+      text: "4 002603.25413"
+
+  # the universe's age, from planck 2018 results vi, table 2, read on
+  # 2026-10-31 from the paper's arXiv copy (v4): its last column,
+  # TT,TE,EE+lowE+lensing+BAO, gives age [Gyr] 13.787 +- 0.020, as here.
+  # table 1, planck alone, gives 13.797 +- 0.023; the entry below
+  # follows table 2's combined column, as slayer's citation said.
+
+  # the flux density of a vega magnitude of zero in each of wise's four
+  # bands: the wise all-sky release explanatory supplement, section
+  # iv.4.h, table 1, column F_nu0. carried from nilgai's
+  # read/data/wise-zero-points.json, whose note says all four were read
+  # from a saved copy of the table, which is an image, and none recalled.
+
+  - name: wise-w1-zero-jy
+    value: 309.540
+    unit: Jy
+    says: the flux density of a vega magnitude of zero in wise's W1 band, 3.4 microns
+    kind: measured
+    source:
+      key: wise-allsky-expsup-iv4h
+      where: table 1, W1, F_nu0
+      text: "309.540"
+
+  - name: wise-w2-zero-jy
+    value: 171.787
+    unit: Jy
+    says: the flux density of a vega magnitude of zero in wise's W2 band, 4.6 microns
+    kind: measured
+    source:
+      key: wise-allsky-expsup-iv4h
+      where: table 1, W2, F_nu0
+      text: "171.787"
+
+  - name: wise-w3-zero-jy
+    value: 31.674
+    unit: Jy
+    says: the flux density of a vega magnitude of zero in wise's W3 band, 12 microns
+    kind: measured
+    source:
+      key: wise-allsky-expsup-iv4h
+      where: table 1, W3, F_nu0
+      text: "31.674"
+
+  - name: wise-w4-zero-jy
+    value: 8.363
+    unit: Jy
+    says: the flux density of a vega magnitude of zero in wise's W4 band, 22 microns
+    kind: measured
+    source:
+      key: wise-allsky-expsup-iv4h
+      where: table 1, W4, F_nu0
+      text: "8.363"
+
+  # the share of a star's mass that becomes helium on the main
+  # sequence: picked, not measured, carried from slayer's stars.
+
+  - name: burned-share
+    value: 0.1
+    unit: ""
+    says: the share of a star's mass that becomes helium while it burns hydrogen on the main sequence, about a tenth in stellar models
+    kind: picked
+    by: "slayer's stars (2026-10), after carroll and ostlie's introduction to modern astrophysics; too small past about twenty suns"
+
+  # how many bands bands cuts each octave of wavelength into: picked,
+  # not derived, on colour evidence, carried from libtheme-css.
+
+  - name: bands-per-octave
+    value: 24
+    unit: ""
+    says: how many bands of light there are for every doubling of wavelength
+    kind: picked
+    by: "libtheme-css's bands (2026-10), chosen against colours drawn whole; its FUDGE.md, under bands, holds the steps tried"
+
+  - name: cosmos-years
+    value: 13.787e9
+    unit: yr
+    says: the age of the universe
+    kind: measured
+    source:
+      key: planck-2018-vi
+      where: table 2, age [Gyr], TT,TE,EE+lowE+lensing+BAO 68% limits
+      text: "13.787 ± 0.020"
+
+  # bodhaine, wood, dutton and slusser, "on rayleigh optical depth
+  # calculations" (1999), the numbers their equations use, carried from
+  # slayer's atmosphere and read on 2026-10-31 against the paper: each
+  # number below that cites it is printed there as here, its digits
+  # grouped in threes as the journal prints them. reading moved three
+  # wheres: list's sea-level terms are its equation 11 and his height
+  # terms its equation 10 (slayer had them the other way round); n_s is
+  # printed beside equation 22, which equation 24 computes; and the
+  # molar mass is printed after equation 17. peck and reeder's range,
+  # 0.23 to 1.69 microns, is not in this paper; it is cited to theirs.
+
+  - name: rayleigh-molecules-cm3
+    value: 2.546899e19
+    unit: cm^-3
+    says: molecules of air in a cubic centimetre at 288.15 K and 1013.25 mb
+    kind: measured
+    source: {key: bodhaine-1999, where: "the text beside equation 22, n_s, which equation 24 computes", text: "2.546899e19"}
+
+  - name: peck-reeder-constant
+    value: 8060.51
+    unit: ""
+    says: the constant term of peck and reeder's refractive index of air at 300 ppm of co2, (n - 1) x 10^8
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 18, text: "8060.51"}
+
+  - name: peck-reeder-first
+    value: 2480990
+    unit: um^-2
+    says: the numerator of the first resonance in peck and reeder's refractive index
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 18, text: "2480990"}
+
+  - name: peck-reeder-first-pole
+    value: 132.274
+    unit: um^-2
+    says: where the first resonance in peck and reeder's refractive index lies, in inverse microns squared
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 18, text: "132.274"}
+
+  - name: peck-reeder-second
+    value: 17455.7
+    unit: um^-2
+    says: the numerator of the second resonance in peck and reeder's refractive index
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 18, text: "17455.7"}
+
+  - name: peck-reeder-second-pole
+    value: 39.32957
+    unit: um^-2
+    says: where the second resonance in peck and reeder's refractive index lies, in inverse microns squared
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 18, text: "39.32957"}
+
+  - name: peck-reeder-shortest-um
+    value: 0.23
+    unit: um
+    says: the shortest wavelength peck and reeder's refractive index holds over
+    kind: measured
+    source: {key: peck-reeder-1972, where: "the range their index holds over, as slayer's atmosphere cites it; not in bodhaine's paper", text: "0.23"}
+
+  - name: peck-reeder-longest-um
+    value: 1.69
+    unit: um
+    says: the longest wavelength peck and reeder's refractive index holds over
+    kind: measured
+    source: {key: peck-reeder-1972, where: "the range their index holds over, as slayer's atmosphere cites it; not in bodhaine's paper", text: "1.69"}
+
+  - name: co2-refraction-scale
+    value: 0.54
+    unit: ""
+    says: how much the refractive index's departure from one grows with co2, per unit of co2's share by volume above 300 ppm
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 19, text: "0.54"}
+
+  - name: king-nitrogen-constant
+    value: 1.034
+    unit: ""
+    says: the constant term of bates's king factor for nitrogen
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 5, text: "1.034"}
+
+  - name: king-nitrogen-slope
+    value: 3.17e-4
+    unit: um^2
+    says: the inverse square wavelength term of bates's king factor for nitrogen
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 5, text: "3.17e-4"}
+
+  - name: king-oxygen-constant
+    value: 1.096
+    unit: ""
+    says: the constant term of bates's king factor for oxygen
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 6, text: "1.096"}
+
+  - name: king-oxygen-slope
+    value: 1.385e-3
+    unit: um^2
+    says: the inverse square wavelength term of bates's king factor for oxygen
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 6, text: "1.385e-3"}
+
+  - name: king-oxygen-curve
+    value: 1.448e-4
+    unit: um^4
+    says: the inverse fourth power wavelength term of bates's king factor for oxygen
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 6, text: "1.448e-4"}
+
+  - name: king-argon
+    value: 1.00
+    unit: ""
+    says: the king factor of argon
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 23, text: "1.00"}
+
+  - name: king-co2
+    value: 1.15
+    unit: ""
+    says: the king factor of carbon dioxide
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 23, text: "1.15"}
+
+  - name: nitrogen-percent
+    value: 78.084
+    unit: "%"
+    says: nitrogen's share of dry air by volume
+    kind: measured
+    source: {key: bodhaine-1999, where: table 1, text: "78.084"}
+
+  - name: oxygen-percent
+    value: 20.946
+    unit: "%"
+    says: oxygen's share of dry air by volume
+    kind: measured
+    source: {key: bodhaine-1999, where: table 1, text: "20.946"}
+
+  - name: argon-percent
+    value: 0.934
+    unit: "%"
+    says: argon's share of dry air by volume
+    kind: measured
+    source: {key: bodhaine-1999, where: table 1, text: "0.934"}
+
+  - name: molar-mass-dry-air
+    value: 28.9595
+    unit: g mol^-1
+    says: the molar mass of dry air with no co2
+    kind: measured
+    source: {key: bodhaine-1999, where: "the text after equation 17: m_a = 15.0556(co2) + 28.9595 gm mol-1", text: "28.9595"}
+
+  - name: molar-mass-co2-slope
+    value: 15.0556
+    unit: g mol^-1
+    says: how much the molar mass of dry air grows with co2, per unit of co2's share by volume
+    kind: measured
+    source: {key: bodhaine-1999, where: "the text after equation 17: m_a = 15.0556(co2) + 28.9595 gm mol-1", text: "15.0556"}
+
+  - name: column-height-slope
+    value: 0.73737
+    unit: ""
+    says: the mass-weighted height of the air above a place, per metre of the place's height
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 26, text: "0.73737"}
+
+  - name: column-height-offset
+    value: 5517.56
+    unit: m
+    says: the mass-weighted height of the air above sea level
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 26, text: "5517.56"}
+
+  - name: list-gravity-sea
+    value: 980.6160
+    unit: cm s^-2
+    says: gravity at sea level on the equator, in list's formula
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 11, text: "980.6160"}
+
+  - name: list-gravity-latitude
+    value: 0.0026373
+    unit: ""
+    says: the cosine of twice the latitude's term in list's sea-level gravity
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 11, text: "0.0026373"}
+
+  - name: list-gravity-latitude-squared
+    value: 0.0000059
+    unit: ""
+    says: the square of the cosine of twice the latitude's term in list's sea-level gravity
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 11, text: "0.0000059"}
+
+  - name: list-height
+    value: 3.085462e-4
+    unit: cm s^-2 m^-1
+    says: how fast gravity falls off with height, in list's formula
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 10, text: "3.085462e-4"}
+
+  - name: list-height-latitude
+    value: 2.27e-7
+    unit: cm s^-2 m^-1
+    says: the latitude's share of how fast gravity falls off with height
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 10, text: "2.27e-7"}
+
+  - name: list-height-squared
+    value: 7.254e-11
+    unit: cm s^-2 m^-2
+    says: the square of height's term in list's gravity
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 10, text: "7.254e-11"}
+
+  - name: list-height-squared-latitude
+    value: 1.0e-13
+    unit: cm s^-2 m^-2
+    says: the latitude's share of the square of height's term
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 10, text: "1.0e-13"}
+
+  - name: list-height-cubed
+    value: 1.517e-17
+    unit: cm s^-2 m^-3
+    says: the cube of height's term in list's gravity
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 10, text: "1.517e-17"}
+
+  - name: list-height-cubed-latitude
+    value: 6e-20
+    unit: cm s^-2 m^-3
+    says: the latitude's share of the cube of height's term
+    kind: measured
+    source: {key: bodhaine-1999, where: equation 10, text: "6e-20"}
+
+  # tdb less tt by all seven terms of kaplan, usno circular 179 (2005),
+  # equation 2.6, good to about 10 microseconds from 1600 to 2200 as the
+  # circular says: six periodic, each an amplitude in seconds, a rate in
+  # radians a julian century from j2000 and a phase in radians, and a
+  # seventh whose amplitude grows by the century. read on 2026-10-31
+  # against the circular's copy at arXiv:astro-ph/0602086: each of the
+  # twenty-one is printed there as here.
+
+  - {name: tdb-first-amplitude, value: 0.001657, unit: s, says: "the first term of tdb less tt: its amplitude", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.001657"}}
+  - {name: tdb-first-rate, value: 628.3076, unit: rad cy^-1, says: "the first term of tdb less tt: its rate", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "628.3076"}}
+  - {name: tdb-first-phase, value: 6.2401, unit: rad, says: "the first term of tdb less tt: its phase", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "6.2401"}}
+  - {name: tdb-second-amplitude, value: 0.000022, unit: s, says: "the second term of tdb less tt: its amplitude", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.000022"}}
+  - {name: tdb-second-rate, value: 575.3385, unit: rad cy^-1, says: "the second term of tdb less tt: its rate", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "575.3385"}}
+  - {name: tdb-second-phase, value: 4.2970, unit: rad, says: "the second term of tdb less tt: its phase", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "4.2970"}}
+  - {name: tdb-third-amplitude, value: 0.000014, unit: s, says: "the third term of tdb less tt: its amplitude", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.000014"}}
+  - {name: tdb-third-rate, value: 1256.6152, unit: rad cy^-1, says: "the third term of tdb less tt: its rate", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "1256.6152"}}
+  - {name: tdb-third-phase, value: 6.1969, unit: rad, says: "the third term of tdb less tt: its phase", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "6.1969"}}
+  - {name: tdb-fourth-amplitude, value: 0.000005, unit: s, says: "the fourth term of tdb less tt: its amplitude", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.000005"}}
+  - {name: tdb-fourth-rate, value: 606.9777, unit: rad cy^-1, says: "the fourth term of tdb less tt: its rate", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "606.9777"}}
+  - {name: tdb-fourth-phase, value: 4.0212, unit: rad, says: "the fourth term of tdb less tt: its phase", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "4.0212"}}
+  - {name: tdb-fifth-amplitude, value: 0.000005, unit: s, says: "the fifth term of tdb less tt: its amplitude", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.000005"}}
+  - {name: tdb-fifth-rate, value: 52.9691, unit: rad cy^-1, says: "the fifth term of tdb less tt: its rate", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "52.9691"}}
+  - {name: tdb-fifth-phase, value: 0.4444, unit: rad, says: "the fifth term of tdb less tt: its phase", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.4444"}}
+  - {name: tdb-sixth-amplitude, value: 0.000002, unit: s, says: "the sixth term of tdb less tt: its amplitude", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.000002"}}
+  - {name: tdb-sixth-rate, value: 21.3299, unit: rad cy^-1, says: "the sixth term of tdb less tt: its rate", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "21.3299"}}
+  - {name: tdb-sixth-phase, value: 5.5431, unit: rad, says: "the sixth term of tdb less tt: its phase", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "5.5431"}}
+  - {name: tdb-secular-amplitude, value: 0.000010, unit: s cy^-1, says: "the seventh term of tdb less tt, which grows by the century: its amplitude a julian century from j2000", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "0.000010 T"}}
+  - {name: tdb-secular-rate, value: 628.3076, unit: rad cy^-1, says: "the seventh term of tdb less tt: its rate", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "628.3076"}}
+  - {name: tdb-secular-phase, value: 4.2490, unit: rad, says: "the seventh term of tdb less tt: its phase", kind: measured, source: {key: usno-circular-179, where: equation 2.6, text: "4.2490"}}
+
+  # how finely atmosphere sums a way through the air and a look at the
+  # sky: picked, not measured, carried from slayer's atmosphere.
+
+  - name: path-pieces
+    value: 4000
+    unit: ""
+    says: how many pieces a way through the air is summed in by simpson's rule; even, as the rule needs
+    kind: picked
+    by: "slayer's atmosphere (2026-10)"
+
+  - name: sky-steps
+    value: 200
+    unit: ""
+    says: how many steps a look at the sky is summed in, each at its middle
+    kind: picked
+    by: "slayer's atmosphere (2026-10)"
+
+  - name: sky-sun-pieces
+    value: 400
+    unit: ""
+    says: how many pieces the sunlight's way down to each step of a look is summed in
+    kind: picked
+    by: "slayer's atmosphere (2026-10)"
+
+  # the earth's mean radius, R1 of the geodetic reference system 1980,
+  # which the iugg adopted in 1979, read on 2026-10-31 from moritz's
+  # account of it. slayer's atmosphere carried 6371 km, rounded to the
+  # kilometre for no reason given; the system's own figure is here.
+
+  - name: earth-mean-radius-m
+    value: 6371008.7714
+    unit: m
+    says: the earth's mean radius, the round earth a way through the air is drawn over
+    kind: measured
+    source: {key: iugg-mean-radius, where: "derived geometric constants: R1 = (2a+b)/3, mean radius", text: "6 371 008.7714 m"}

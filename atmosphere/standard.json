@@ -1,0 +1,12 @@
+{
+  "about": "the 1976 standard atmosphere's seven layers up to 86 km: where each starts, in geopotential metres, and how its temperature changes with height there, in K/m. us standard atmosphere, 1976, defines them in its table 4 (page 3), read by eye on 2026-10-31 from nasa's scanned copy (ntrs 19770009539, whose text layer is noise, so game run extract cannot check it): bases 0, 11, 20, 32, 47, 51 and 71 km', gradients -6.5, 0.0, +1.0, +2.8, 0.0, -2.8 and -2.0 K/km', each as here",
+  "layers": [
+    {"base": 0, "gradient": -0.0065},
+    {"base": 11000, "gradient": 0},
+    {"base": 20000, "gradient": 0.001},
+    {"base": 32000, "gradient": 0.0028},
+    {"base": 47000, "gradient": 0},
+    {"base": 51000, "gradient": -0.0028},
+    {"base": 71000, "gradient": -0.002}
+  ]
+}

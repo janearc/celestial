@@ -1,0 +1,21 @@
+{
+  "about": "documents gw must refuse, each a small json written for the test, and why",
+  "documents": [
+    {"why": "not json", "json": "this is not json"},
+    {"why": "no events", "json": "{\"events\": {}}"},
+    {"why": "events not an object", "json": "{\"events\": 3}"},
+    {"why": "no name", "json": "{\"events\": {\"X\": {\"GPS\": 1126259462.4}}}"},
+    {"why": "no gps time", "json": "{\"events\": {\"X\": {\"commonName\": \"X\"}}}"},
+    {"why": "a gps time past any calendar", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1e300}}}"},
+    {"why": "a gps time that is no number", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": \"soon\"}}}"},
+    {"why": "a unit gw has no conversion for", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"mass\": 1, \"mass_unit\": \"stone\"}}}"},
+    {"why": "a value with no unit", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"mass\": 1, \"mass_unit\": null}}}"},
+    {"why": "a lower bound above the value", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"mass\": 1, \"mass_lower\": 0.5, \"mass_upper\": 1, \"mass_unit\": \"M_sun\"}}}"},
+    {"why": "an upper bound below the value", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"mass\": 1, \"mass_lower\": -0.5, \"mass_upper\": -1, \"mass_unit\": \"M_sun\"}}}"},
+    {"why": "a value that is no number", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"mass\": \"heavy\", \"mass_unit\": \"M_sun\"}}}"},
+    {"why": "parameters not an object", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"parameters\": 3}}}"},
+    {"why": "a pipeline type that is no string", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"parameters\": {\"p\": {\"pipeline_type\": 3}}}}}"},
+    {"why": "a preference that is no truth", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"parameters\": {\"p\": {\"pipeline_type\": \"pe\", \"is_preferred\": \"yes\"}}}}}"},
+    {"why": "a bad estimate in the preferred estimation", "json": "{\"events\": {\"X\": {\"commonName\": \"X\", \"GPS\": 1, \"parameters\": {\"p\": {\"pipeline_type\": \"pe\", \"is_preferred\": true, \"spin\": 1, \"spin_unit\": \"furlongs\"}}}}}"}
+  ]
+}

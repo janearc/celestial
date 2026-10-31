@@ -1,0 +1,139 @@
+{
+  "about": "numbers sky's tests hold it to, carried from slayer's celestial tests with their sources: meeus, astronomical algorithms (2nd ed., 1998), examples 7.a to 7.c, table 7.a, 12.b and 13.b, a book not read here. four of its dates were read on 2026-10-31 in his earlier astronomical formulae for calculators (monografieen over astronomie en astrofysica vol. 4, third printing, october 1980), each as here: its examples 3.a to 3.c, 1957 october 4.81 = jd 2436 116.31, 333 january 27.5 = jd 1842 713.0 and back, and 2000 january 1.5 = jd 2451 545.0; and its reform, the day after 1582 october 4 being october 15. every date, 12.b and 13.b were read the same day as sonia keys transcribes them from the book in her go implementation of it (github.com/soniakeys/meeus, mit licence, copyright 2012 and 2013 sonia keys, commit bfbd9ac, v3/julian/julian_test.go, v3/sidereal/sidereal_test.go and v3/coord/coord_test.go), with meeus's pages: 7.a and 7.b p. 61, the table p. 62, 7.c p. 64, 12.b p. 89 (8h 34m 57.0896s) and 13.b p. 95 (venus at 23h 09m 16.641s, -6 43' 11.61\", from 38 55' 17\" north, 77 03' 56\" west, at azimuth 68.0337 from the south, 248.034 from the north, and altitude 15.1249), each as here. a transcription, not the book: sky's sidereal constants, meeus's equation 12.4, are not in it (her code uses his 12.2); they were read the same day at their source, aoki and others 1982, equation 14 (sky/sidereal.go says how); iers's bulletin c for tai less utc; IS-GPS-200 (revision M, section 3.3.4, read 2026-10-31) for the gps epoch and its taking no leap seconds, and the bipm's circular t 22 (1989, read the same day) for gps being 19 s behind tai; the open science centre's event record for GW150914's gps time, and LIGO's discovery paper, read the same day, for its 09:50:45 utc to the second. tolerances and the days, steps and ranges drawn are picked",
+  "sexagesimal": {"minutes a degree": 60, "seconds a degree": 3600, "degrees an hour": 15},
+  "sidereal": {
+    "at": {"year": 1987, "month": 4, "day": 10, "hour": 19, "minute": 21, "second": 0},
+    "time": {"hours": 8, "minutes": 34, "seconds": 57.0896},
+    "seconds a degree of time": 240,
+    "tolerance seconds": 1e-4
+  },
+  "dut1": {"seconds": 0.3, "too much": 1, "tolerance": 1e-6},
+  "washington": {"latitude": {"degrees": 38, "minutes": 55, "seconds": 17},
+                 "longitude": {"degrees": -77, "minutes": 3, "seconds": 56}},
+  "venus": {
+    "ascension": {"hours": 23, "minutes": 9, "seconds": 16.641},
+    "declination": {"degrees": -6, "minutes": 43, "seconds": 11.61},
+    "azimuth": 248.034, "altitude": 15.125, "tolerance": 0.002
+  },
+  "pole hours": [0, 5.5, 13, 23.9],
+  "pole declination": 90,
+  "pole tolerance": 1e-9,
+  "not places": [{"latitude": 91, "longitude": 0}, {"latitude": -91, "longitude": 0}, {"latitude": 0, "longitude": 181}],
+  "not declinations": [-90.5, 90.5],
+  "meeus dates": [
+    {"year": 1957, "month": 10, "day": 4.81, "julian": 2436116.31},
+    {"year": 333, "month": 1, "day": 27.5, "julian": 1842713.0},
+    {"year": 2000, "month": 1, "day": 1.5, "julian": 2451545.0},
+    {"year": 1987, "month": 6, "day": 19.5, "julian": 2446966.0},
+    {"year": 1600, "month": 1, "day": 1.0, "julian": 2305447.5},
+    {"year": 837, "month": 4, "day": 10.3, "julian": 2026871.8},
+    {"year": -1000, "month": 7, "day": 12.5, "julian": 1356001.0},
+    {"year": -4712, "month": 1, "day": 1.5, "julian": 0.0}
+  ],
+  "date tolerance": 1e-6,
+  "not dates": [
+    {"year": 1582, "month": 10, "day": 10}, {"year": 2000, "month": 13, "day": 1},
+    {"year": 2001, "month": 2, "day": 29}, {"year": 1900, "month": 2, "day": 29},
+    {"year": 2000, "month": 0, "day": 1}, {"year": 2000, "month": 1, "day": 32}
+  ],
+  "leap day": {"year": 2000, "month": 2, "day": 29},
+  "julian leap day": {"year": 1500, "month": 2, "day": 29},
+  "washington height": 0,
+  "not times": [{"hour": 24, "minute": 0, "second": 0}, {"hour": 0, "minute": 60, "second": 0},
+                {"hour": 0, "minute": 0, "second": 60}, {"hour": -1, "minute": 0, "second": 0}],
+  "noon": 12,
+  "tai less utc": [
+    {"year": 1972, "month": 1, "day": 1, "ahead": 10}, {"year": 1999, "month": 1, "day": 1, "ahead": 32},
+    {"year": 2016, "month": 12, "day": 31, "ahead": 36}, {"year": 2017, "month": 1, "day": 1, "ahead": 37},
+    {"year": 2026, "month": 10, "day": 14, "ahead": 37}
+  ],
+  "seconds tolerance": 1e-6,
+  "leap second": {"at": {"year": 2016, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 60},
+                  "on tai": {"year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 36}},
+  "no leap second": {"year": 2015, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 60},
+  "tt": {"at": {"year": 2026, "month": 10, "day": 14, "hour": 3, "minute": 0, "second": 0}, "ahead": 32.184},
+  "tdb": {"from": {"year": 2026, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0}, "days": 365, "every": 7, "most seconds": 0.002},
+  "too early": {"year": 1960, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+  "too late": {"year": 2031, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+  "ut1 day": {"year": 2026, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+  "across the leap": [
+    {"year": 2016, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 58},
+    {"year": 2016, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 59},
+    {"year": 2016, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 59.5},
+    {"year": 2016, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 60},
+    {"year": 2016, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 60.5},
+    {"year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+    {"year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0.5},
+    {"year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 1}
+  ],
+  "gps": {
+    "wall": {"year": 2015, "month": 9, "day": 14, "hour": 9, "minute": 51, "second": 21.4},
+    "behind tai": 19,
+    "epoch": {"year": 1980, "month": 1, "day": 6, "hour": 0, "minute": 0, "second": 0},
+    "gw150914": 1126259462.4,
+    "gw150914 utc": {"year": 2015, "month": 9, "day": 14, "hour": 9, "minute": 50, "second": 45.4},
+    "gw150914 tolerance": 1e-3,
+    "drawn seconds": {"least": -9.5e8, "most": 3e9},
+    "not seconds": [1e300, -1e300]
+  },
+  "not julian dates": [1e300, -1e300],
+  "anti about": "numbers the boundary and near-miss tests hold sky to. the table edges are the first day of tai less utc (iers, 1972 january 1) and the last day before leapseconds.json's own until, 2027 june 30 since bulletin c 72; the near-miss days each side of a leap are from bulletin c; scales without leap seconds are tried at dates picked outside the table; the tdb peak of a millisecond is picked under the first term of kaplan, usno circular 179, whose amplitude is 1.657 ms; day lengths and gaps across the 2016 leap second are defined by the leap itself; the reform days, 1582 october 4 then 15, are defined by the gregorian reform and are meeus's chapter 7 pair, the other consecutive days by the julian and gregorian leap rules; the hair before midnight is picked; the south pole is the mirror of the pole above",
+  "table edges": {
+    "before the first": {"year": 1971, "month": 12, "day": 31, "hour": 12, "minute": 0, "second": 0},
+    "first": {"year": 1972, "month": 1, "day": 1, "hour": 12, "minute": 0, "second": 0, "ahead": 10},
+    "last": {"year": 2027, "month": 6, "day": 29, "hour": 12, "minute": 0, "second": 0, "ahead": 37},
+    "until": {"year": 2027, "month": 6, "day": 30, "hour": 12, "minute": 0, "second": 0}
+  },
+  "either side of a leap": [
+    {"year": 1998, "month": 12, "day": 31, "hour": 12, "minute": 0, "second": 0, "ahead": 31},
+    {"year": 1999, "month": 1, "day": 1, "hour": 12, "minute": 0, "second": 0, "ahead": 32},
+    {"year": 2015, "month": 6, "day": 30, "hour": 12, "minute": 0, "second": 0, "ahead": 35},
+    {"year": 2015, "month": 7, "day": 1, "hour": 12, "minute": 0, "second": 0, "ahead": 36}
+  ],
+  "no leap table needed": [
+    {"year": 1900, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+    {"year": 1960, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+    {"year": 2031, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+    {"year": 2100, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0}
+  ],
+  "tdb peak seconds": 0.001,
+  "across the leap gaps": [1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+  "day lengths": [
+    {"from": {"year": 2016, "month": 12, "day": 31, "hour": 0, "minute": 0, "second": 0},
+     "to": {"year": 2017, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0}, "seconds": 86401},
+    {"from": {"year": 2015, "month": 12, "day": 31, "hour": 0, "minute": 0, "second": 0},
+     "to": {"year": 2016, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0}, "seconds": 86400}
+  ],
+  "consecutive days": [
+    {"day": {"year": 1582, "month": 10, "day": 3}, "next": {"year": 1582, "month": 10, "day": 4}},
+    {"day": {"year": 1582, "month": 10, "day": 4}, "next": {"year": 1582, "month": 10, "day": 15}},
+    {"day": {"year": 1582, "month": 10, "day": 15}, "next": {"year": 1582, "month": 10, "day": 16}},
+    {"day": {"year": 1582, "month": 12, "day": 31}, "next": {"year": 1583, "month": 1, "day": 1}},
+    {"day": {"year": 1500, "month": 2, "day": 28}, "next": {"year": 1500, "month": 2, "day": 29}},
+    {"day": {"year": 1500, "month": 2, "day": 29}, "next": {"year": 1500, "month": 3, "day": 1}},
+    {"day": {"year": 1700, "month": 2, "day": 28}, "next": {"year": 1700, "month": 3, "day": 1}},
+    {"day": {"year": 1900, "month": 2, "day": 28}, "next": {"year": 1900, "month": 3, "day": 1}},
+    {"day": {"year": 2000, "month": 2, "day": 29}, "next": {"year": 2000, "month": 3, "day": 1}}
+  ],
+  "hair before midnight": {"julian": 2451544.5, "less": 1e-9, "earliest second": 59.99,
+                           "midnight": {"year": 2000, "month": 1, "day": 1, "hour": 0, "minute": 0, "second": 0},
+                           "day before": {"year": 1999, "month": 12, "day": 31, "hour": 23, "minute": 59, "second": 59.99}},
+  "south pole declination": -90,
+  "due south degrees": 180,
+  "kaplan 2.6 about": "kaplan, usno circular 179 (2005), equation 2.6, read 2026-10-31 from its arXiv copy (astro-ph/0602086, pdf p. 29), its seven terms typed here a second time, apart from research's, so the test works the equation from the paper's own coefficients: six periodic, each amplitude s, rate rad cy^-1 and phase rad, and a seventh whose amplitude is times the julian centuries from j2000.0 (jd 2451545.0, centuries of 36525 days). the julian dates are picked, 2026-10-31: j2000 itself, the day, and 1600 and 2200 january 1, the ends of the span the circular gives its 10 microseconds for, where the seventh term is largest. held to a nanosecond, far under any term",
+  "kaplan 2.6": {
+    "periodic": [
+      {"amplitude": 0.001657, "rate": 628.3076, "phase": 6.2401},
+      {"amplitude": 0.000022, "rate": 575.3385, "phase": 4.2970},
+      {"amplitude": 0.000014, "rate": 1256.6152, "phase": 6.1969},
+      {"amplitude": 0.000005, "rate": 606.9777, "phase": 4.0212},
+      {"amplitude": 0.000005, "rate": 52.9691, "phase": 0.4444},
+      {"amplitude": 0.000002, "rate": 21.3299, "phase": 5.5431}
+    ],
+    "secular": {"amplitude": 0.000010, "rate": 628.3076, "phase": 4.2490},
+    "j2000": 2451545.0,
+    "century days": 36525,
+    "julian dates": [2451545.0, 2461344.5, 2305447.5, 2524593.5],
+    "tolerance": 1e-9
+  }
+}
