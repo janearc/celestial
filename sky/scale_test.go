@@ -1,7 +1,6 @@
 package sky_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -51,8 +50,8 @@ func TestALeapSecondIsAnInstant(test *testing.T) {
 	}
 	none := numbers.NoLeapSecond
 	if moment, err := sky.Calendar(none.Year, none.Month, none.Day,
-		none.Hour, none.Minute, none.Second, sky.UTC()); !errors.Is(err,
-		sky.ErrDate()) || moment != nil {
+		none.Hour, none.Minute, none.Second, sky.UTC()); err == nil ||
+		moment != nil {
 		test.Errorf("a leap second where there was none is taken: %v", err)
 	}
 }
@@ -122,7 +121,7 @@ func TestWhatIsNotKnownIsRefused(test *testing.T) {
 		{at(test, numbers.TooLate, sky.TAI()), sky.UTC()},
 	} {
 		moment, err := asked.from.On(asked.scale)
-		if !errors.Is(err, sky.ErrScale()) || moment != nil {
+		if err == nil || moment != nil {
 			test.Errorf("%v went to %v: %v", asked.from.Scale(),
 				asked.scale, err)
 		}

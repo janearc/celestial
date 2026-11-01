@@ -35,7 +35,7 @@ func (object fields) read(key string, into any) error {
 		return nil
 	}
 	if err := json.Unmarshal(written, into); err != nil {
-		return fmt.Errorf("%w: %s: %w", errEvents, key, err)
+		return fmt.Errorf("gw: %s: %w", key, err)
 	}
 	return nil
 }
@@ -54,12 +54,11 @@ func readEvent(key string, object fields) (*Event, error) {
 		}
 	}
 	if event.name == "" || seconds == nil {
-		return nil, fmt.Errorf("%w: %s has no name or gps time",
-			errEvents, key)
+		return nil, fmt.Errorf("gw: %s has no name or gps time", key)
 	}
 	at, err := sky.FromGPS(*seconds)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s: %w", errEvents, key, err)
+		return nil, fmt.Errorf("gw: %s: %w", key, err)
 	}
 	event.at = *at
 	if event.estimates, err = readEstimates(object); err != nil {
@@ -130,9 +129,10 @@ const nothing = 0.0
 // bounds and its unit, or none when the centre left the value blank.
 //
 // The centre writes each bound as how far from the value it lies, the
-// lower one below nothing. readEstimate refuses a value with no unit, a
-// unit it has no conversion for, and a bound on the wrong side, and then
-// gives none.
+// lower one below nothing. returns nil and error for:
+//   - a value with no unit
+//   - a unit gw has no conversion for
+//   - a bound on the wrong side of the value
 func readEstimate(object fields, parameter string) (*Estimate, error) {
 	var value, lower, upper *float64
 	var unit *string
@@ -148,8 +148,8 @@ func readEstimate(object fields, parameter string) (*Estimate, error) {
 		return nil, nil
 	}
 	if unit == nil {
-		return nil, fmt.Errorf("%w: %s has a value and no unit",
-			errEvents, parameter)
+		return nil, fmt.Errorf("gw: %s has a value and no unit",
+			parameter)
 	}
 	conversion, err := toSI(*unit)
 	if err != nil {
@@ -160,12 +160,16 @@ func readEstimate(object fields, parameter string) (*Estimate, error) {
 	if lower == nil || upper == nil {
 		return &estimate, nil
 	}
-	if *lower > nothing || *upper < nothing {
-		return nil, fmt.Errorf("%w: %s has bounds %v and %v", errEvents,
-			parameter, *lower, *upper)
+	// the centre writes each bound as an offset from the value, the lower
+	// one below nothing; a reach is how far the interval runs each way
+	reachBelow, reachAbove := -*lower, *upper
+	if reachBelow < nothing || reachAbove < nothing {
+		return nil, fmt.Errorf("gw: %s reaches %v below and %v above, "+
+			"and neither may be below %v", parameter, reachBelow,
+			reachAbove, nothing)
 	}
-	estimate.below, estimate.above = -*lower*conversion.factor,
-		*upper*conversion.factor
+	estimate.below = reachBelow * conversion.factor
+	estimate.above = reachAbove * conversion.factor
 	estimate.bounded = true
 	return &estimate, nil
 }

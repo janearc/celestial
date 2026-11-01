@@ -24,6 +24,8 @@ func (ray Ray) Momentum() Vec4 { return ray.momentum }
 func (ray Ray) Space() Vec3 { return ray.position.Space() }
 
 // Fate is how a march ended.
+//
+// Fate is moving to slayer with the march; see the package doc.
 type Fate int
 
 // The fates.

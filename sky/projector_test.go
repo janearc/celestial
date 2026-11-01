@@ -59,9 +59,10 @@ func TestACallerPassesOnTheProjectorsRefusal(test *testing.T) {
 	control := gomock.NewController(test)
 	plane := mocks.NewMockProjector(control)
 	behind := toward(test, numbers.Quarter, nought)
-	plane.EXPECT().Onto(behind).Return(nil, sky.ErrBehind()).Times(once)
+	refusal := errors.New("sky: a quarter turn or more from the centre")
+	plane.EXPECT().Onto(behind).Return(nil, refusal).Times(once)
 	_, err := farthestEast(plane, []sky.Equatorial{behind, behind})
-	if !errors.Is(err, sky.ErrBehind()) {
+	if !errors.Is(err, refusal) {
 		test.Errorf("the caller gave %v", err)
 	}
 }

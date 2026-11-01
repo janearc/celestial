@@ -224,6 +224,9 @@ func (hole Hole) ringDistance(position Vec3) float64 {
 // Its steps are choices.json's advance share of the pace: a body's proper
 // time is short beside a ray's parameter near the hole, so its steps are
 // the finer.
+//
+// Advance reads the march's choices, so it is moving to slayer and will
+// change; see the package doc.
 func (hole Hole) Advance(ray Ray, properTime float64) (Ray, bool) {
 	innerHorizon := hole.innerHorizon()
 	remainingProperTime := properTime
@@ -313,6 +316,9 @@ var classOf = [...]RayClassification{
 //
 // A bound body whose orbit reaches past that radius is classed as
 // escaping, and a ray that is not a number as circulating.
+//
+// ClassifyRay marches, so it is moving to slayer and will change; see
+// the package doc.
 func (hole Hole) ClassifyRay(ray Ray) RayClassification {
 	chosen := choices()
 	startRadius := hole.Radius(ray.Space())

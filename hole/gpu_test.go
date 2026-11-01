@@ -8,14 +8,22 @@ import (
 	"github.com/janearc/celestial/hole"
 )
 
+// gpuOf returns the GPU hole of a spec, or stops the test.
+func gpuOf(test stopper, from spec) *hole.GPUBlackHole {
+	test.Helper()
+	gpu, err := hole.NewGPUBlackHole(from.Mass, from.Spin)
+	if err != nil {
+		test.Fatalf("no GPU hole of %v and %v: %v", from.Mass, from.Spin,
+			err)
+	}
+	return gpu
+}
+
 // camera is a GPU hole of a spec with a camera at a place, or the test
 // stops.
 func camera(test stopper, from spec, at place) *hole.GPUBlackHole {
 	test.Helper()
-	gpu := hole.NewGPUBlackHole(from.Mass, from.Spin)
-	if gpu == nil {
-		test.Fatalf("no hole of %v and %v", from.Mass, from.Spin)
-	}
+	gpu := gpuOf(test, from)
 	if err := gpu.SetCamera(vec3(at)); err != nil {
 		test.Fatal(err)
 	}
@@ -27,10 +35,7 @@ func camera(test stopper, from spec, at place) *hole.GPUBlackHole {
 func TestNewGPUBlackHoleMakesTheHoleItWasGiven(t *testing.T) {
 	numbers := pickedNumbers(t)
 	from := numbers.Holes.Fast
-	gpu := hole.NewGPUBlackHole(from.Mass, from.Spin)
-	if gpu == nil {
-		t.Fatalf("no GPU hole of %v and %v", from.Mass, from.Spin)
-	}
+	gpu := gpuOf(t, from)
 	black := gpu.Hole()
 	if black.Mass() != from.Mass || black.Spin() != from.Spin {
 		t.Errorf("the GPU hole has mass %v and spin %v", black.Mass(),
@@ -38,10 +43,15 @@ func TestNewGPUBlackHoleMakesTheHoleItWasGiven(t *testing.T) {
 	}
 }
 
-// The anti-test: a mass and a spin that no hole has make no GPU hole.
+// The anti-test: a mass and a spin that no hole has make no GPU hole:
+// NewGPUBlackHole returns nil and NewHole's error.
 func TestNewGPUBlackHoleRefusesWhatNoHoleIs(t *testing.T) {
 	for _, refused := range pickedNumbers(t).Refused.Cases {
-		if gpu := hole.NewGPUBlackHole(refused.Mass, refused.Spin); gpu != nil {
+		gpu, err := hole.NewGPUBlackHole(refused.Mass, refused.Spin)
+		if err == nil {
+			t.Errorf("%s: not refused: %v", refused.Why, err)
+		}
+		if gpu != nil {
 			t.Errorf("%s: made a GPU hole", refused.Why)
 		}
 	}
@@ -67,8 +77,7 @@ func TestSetCameraRefusesWhereNothingIsStill(t *testing.T) {
 // A camera outside the ergosurface is accepted without a word.
 func TestSetCameraAcceptsWhereSomethingIsStill(t *testing.T) {
 	numbers := pickedNumbers(t)
-	gpu := hole.NewGPUBlackHole(numbers.Holes.Fast.Mass,
-		numbers.Holes.Fast.Spin)
+	gpu := gpuOf(t, numbers.Holes.Fast)
 	if err := gpu.SetCamera(vec3(numbers.Places.Eye)); err != nil {
 		t.Errorf("a camera far out was refused: %v", err)
 	}
@@ -78,8 +87,7 @@ func TestSetCameraAcceptsWhereSomethingIsStill(t *testing.T) {
 // redshift is not a number: not a nought that reads as a shift.
 func TestRedshiftBeforeACameraIsNotANumber(t *testing.T) {
 	numbers := pickedNumbers(t)
-	from := numbers.Holes.Still
-	gpu := hole.NewGPUBlackHole(from.Mass, from.Spin)
+	gpu := gpuOf(t, numbers.Holes.Still)
 	black := gpu.Hole()
 	ray := sent(&black, numbers.Places.Eye, numbers.Frame.Aim)
 	report := gpu.StepRay(&ray, numbers.Geodesic.Step)

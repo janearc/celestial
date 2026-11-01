@@ -12,7 +12,7 @@
     "flat": {"mass": 1e-9, "spin": 0}
   },
   "refused": {
-    "about": "a mass and a spin no black hole has, each with why. NewHole must return nil for every one.",
+    "about": "a mass and a spin no black hole has, or that hole's arithmetic does not hold, each with why. NewHole must return nil and ErrHole for every one. the largest float64, a mass of 1e78 and one of 1e-78 are picked either side of the masses whose fourth power is a normal float64, about 1.2e-77 to 1.2e77; 5e-324 is the least float64, a denormal",
     "cases": [
       {"why": "no mass", "mass": 0, "spin": 0},
       {"why": "mass below nought", "mass": -1, "spin": 0},
@@ -20,8 +20,21 @@
       {"why": "spin above the mass", "mass": 1, "spin": 1.2},
       {"why": "spin below nought", "mass": 1, "spin": -0.5},
       {"why": "spin and no mass", "mass": 0, "spin": 0.5},
-      {"why": "spin a hair above a mass of two", "mass": 2, "spin": 2.0000001}
+      {"why": "spin a hair above a mass of two", "mass": 2, "spin": 2.0000001},
+      {"why": "the largest float64, whose square overflows", "mass": 1.7976931348623157e308, "spin": 0},
+      {"why": "a mass whose fourth power overflows", "mass": 1e78, "spin": 0},
+      {"why": "a mass whose fourth power is below the least normal float64", "mass": 1e-78, "spin": 0},
+      {"why": "the least float64, a denormal", "mass": 5e-324, "spin": 0}
     ]
+  },
+  "limits": {
+    "about": "masses just inside what hole's arithmetic holds, picked: 5e76 under the heaviest, about 5.8e76, and 1e-76 over the lightest, about 1.22e-77. each must be a hole with a horizon of twice its mass, as nought spin's horizon is the mass plus the root of its square, both by Horizon and by Radius at a point on it, held to a part in a million million. the limits themselves are worked from their definition, each number defined: the heaviest is the fourth root of the largest float64 over two, the farthest a horizon lies in masses; the lightest is the fourth root of the least normal float64, 2^-1022. a hole is made at each limit and holds its horizon, and the next float64 past each is refused. a mass of 1e77 is past the heaviest: its horizon is at 2e77, and Radius there overflows to +Inf",
+    "heaviest": 5e76,
+    "lightest": 1e-76,
+    "tolerance": 1e-12,
+    "fourth root": 0.25,
+    "horizon in masses": 2,
+    "least normal": 2.2250738585072014e-308
   },
   "radii": {
     "about": "the radii of a hole, in M. A still hole's are the textbook's: horizon 2M, photon sphere 3M, shadow root 27 M, innermost stable orbit 6M. Three of them were read on 2026-10-31 in kerrgeodesic_gw's documentation (sagemanifolds.obspm.fr/kerrgeodesic_gw/reference/kerr_spacetime.html), as a program apart from celestial prints them for KerrBH(0, m): \"The horizon radius of the Schwarzschild black hole\" 2*m, \"Photon orbit in Schwarzschild spacetime\" 3*m and \"ISCO in Schwarzschild spacetime\" 6*m. None of the four is a measurement: each follows from the schwarzschild metric. The shadow's is the photon sphere's impact parameter, b = r / sqrt(1 - 2M/r) at r = 3M, which is 3 sqrt(3) M = sqrt(27) M, so it is worked, not read. A hole of no spin is the limit the formulas are held at, not a body expected in the sky. A nearly extremal hole's are the limits of the formulas of Bardeen, Press and Teukolsky (1972, ApJ 178, 347), read on 2026-10-31 by eye from the ads scan: horizon M by their equation 2.6, r+ = M + (M^2 - a^2)^1/2; and in their own words on p. 351, \"for a = M, r_ph = M (direct) or 4M (retrograde)\" and \"for a = M, r_ms = M (direct) or 9M (retrograde)\", the same page giving 3M and 6M for a = 0; each is held to the tolerance named, since a spin of 0.999999 is not quite one. The half-spin horizon is M (1 + sqrt(1 - 0.25)) worked by hand: 1.8660254037844386. All are the values libholemath's TestTheExactRadii held.",

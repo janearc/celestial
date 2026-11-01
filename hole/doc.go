@@ -22,6 +22,15 @@
 // The march's tolerances are choices, not physics. They are in
 // choices.json, built in, each with what it says and who picked it.
 //
+// The march is ray tracing, and it is moving to slayer. These will
+// change or leave:
+//   - March, PaceIn, Hovering, ClosestApproach, DeflectionAngle and Fate
+//   - Advance and ClassifyRay, which read the march's choices
+//   - choices.json, and everything in gpu.go
+//
+// What stays is the physics a ray tracer steps with. celestial will add
+// one step of a geodesic, at a size the caller picks.
+//
 // The tests' own numbers are in testdata/hole.json, each with where it
 // came from.
 package hole

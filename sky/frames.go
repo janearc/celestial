@@ -12,14 +12,15 @@ import (
 type Equatorial struct{ ascension, declination measure.Angle }
 
 // NewEquatorial is the direction at a right ascension and declination.
-// It refuses an ascension that is not a finite number and a declination
-// past a pole, and then gives no direction.
+// returns nil and error for an ascension more than a turn either way,
+// or a declination past a pole.
 func NewEquatorial(ascension, declination measure.Angle) (*Equatorial,
 	error) {
 	east, north := ascension.InDegrees(), declination.InDegrees()
-	if !finiteNumber(east) || !(math.Abs(north) <= pole) {
-		return nil, fmt.Errorf("%w: ascension %g, declination %g",
-			errPlace, east, north)
+	if !within(east, -degreesInATurn, degreesInATurn) ||
+		!within(north, -pole, pole) {
+		return nil, fmt.Errorf("sky: ascension %g and declination %g, "+
+			"past a turn or a pole", east, north)
 	}
 	return &Equatorial{ascension: ascension, declination: declination},
 		nil
@@ -62,8 +63,8 @@ func (there Place) Local(at Equatorial,
 	fromSouth := math.Atan2(math.Sin(hour)*math.Cos(up),
 		math.Cos(hour)*math.Cos(up)*math.Sin(north)-
 			math.Sin(up)*math.Cos(north))
-	turn := measure.Degrees(degreesATurn).InRadians()
-	azimuth := math.Mod(fromSouth+math.Pi+turn, turn)
+	turn := measure.Degrees(degreesInATurn).InRadians()
+	azimuth := intoATurn(fromSouth+math.Pi, turn)
 	altitude := math.Asin(math.Sin(north)*math.Sin(up) +
 		math.Cos(north)*math.Cos(up)*math.Cos(hour))
 	return Horizontal{azimuth: measure.Radians(azimuth),

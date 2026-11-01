@@ -91,4 +91,7 @@ func readMarching() marching {
 }
 
 // choices is the march's choices, read once.
+//
+// choices, and this file, is moving to slayer with the march; see the
+// package doc.
 var choices = sync.OnceValue(readMarching)

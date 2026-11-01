@@ -1,7 +1,7 @@
 package sky
 
 import (
-	"errors"
+	"fmt"
 	"math"
 )
 
@@ -12,13 +12,6 @@ const secondsADay = 86400.0
 // mjdZero is the julian date at the start of modified julian day
 // nought: 1858 november 17, 0h. Defined by the modified julian date.
 const mjdZero = 2400000.5
-
-// errDate is a date or a julian date that is no moment.
-var errDate = errors.New("celestial: no such date")
-
-// ErrDate is a date or a julian date that is no moment: no such day in
-// the calendar, a time past the day's end, or a number that is none.
-func ErrDate() error { return errDate }
 
 // Instant is a moment on a scale, held in two parts so none of its
 // resolution is lost: a whole modified julian day, and how far through
@@ -31,15 +24,15 @@ type Instant struct {
 }
 
 // FromJulian is the instant at a julian date given in two parts whose
-// sum is the date; one part may carry it all and the other nought. It
-// refuses no scale, a date that is no finite number, and one so far off
-// its days cannot be counted exactly, and then gives no instant.
+// sum is the date; one part may carry it all and the other nought.
+// returns nil and error for a scale sky does not know, or a part with
+// more days than a float64 counts exactly.
 func FromJulian(whole, fraction float64, scale Scale) (*Instant, error) {
-	sum := whole + fraction
 	days := math.Floor(whole - mjdZero)
-	if !scale.known() || math.IsNaN(sum) || math.IsInf(sum, eitherSign) ||
-		!countable(days) {
-		return nil, errDate
+	if !scale.known() || !countable(days) || !countable(fraction) {
+		return nil, fmt.Errorf("sky: julian date %v + %v on %v, "+
+			"past what can be counted, or on no scale", whole,
+			fraction, scale)
 	}
 	rest := (whole - mjdZero - days) + fraction
 	moment := settled(scale, int64(days), rest)

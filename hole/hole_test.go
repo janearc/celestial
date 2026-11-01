@@ -19,9 +19,10 @@ func TestNewHoleMakesTheHoleItWasGiven(t *testing.T) {
 		holes.Still, holes.Kerr, holes.Heavy, holes.NearlyExtremal,
 		holes.Flat,
 	} {
-		made := hole.NewHole(from.Mass, from.Spin)
-		if made == nil {
-			t.Fatalf("no hole of mass %v and spin %v", from.Mass, from.Spin)
+		made, err := hole.NewHole(from.Mass, from.Spin)
+		if err != nil {
+			t.Fatalf("no hole of mass %v and spin %v: %v", from.Mass,
+				from.Spin, err)
 		}
 		if made.Mass() != from.Mass || made.Spin() != from.Spin {
 			t.Errorf("a hole of %v and %v answers mass %v and spin %v",
@@ -30,42 +31,97 @@ func TestNewHoleMakesTheHoleItWasGiven(t *testing.T) {
 	}
 }
 
-// The largest mass a float holds is still a hole, as is a spin of nought
-// and one just under the mass.
+// The test: the masses just inside hole's limits, and the limits
+// themselves, are holes that hold their own horizon, so nothing
+// overflowed or lost its digits; and a spin just under the mass is a
+// hole.
 func TestNewHoleTakesTheLimits(t *testing.T) {
-	if hole.NewHole(math.MaxFloat64, none) == nil {
-		t.Error("the largest mass was refused")
+	numbers := pickedNumbers(t)
+	limits := numbers.Limits
+	heaviest, lightest := limitsOf(numbers)
+	for _, mass := range []float64{limits.Heaviest, limits.Lightest,
+		heaviest, lightest} {
+		made, err := hole.NewHole(mass, none)
+		if err != nil {
+			t.Errorf("a mass of %v was refused: %v", mass, err)
+			continue
+		}
+		holdsHorizon(t, *made, limits.Tolerance)
 	}
-	mass := pickedNumbers(t).Holes.Still.Mass
-	if hole.NewHole(mass, math.Nextafter(mass, none)) == nil {
-		t.Error("a spin the next number below the mass was refused")
+	mass := numbers.Holes.Still.Mass
+	if _, err := hole.NewHole(mass, math.Nextafter(mass, none)); err != nil {
+		t.Errorf("a spin the next number below the mass was refused: %v",
+			err)
 	}
 }
 
-// The anti-test: NewHole returns nil, and no hole, for a mass and a spin that no black
-// hole has.
+// The anti-test: the next float64 past each of hole's limits is
+// refused.
+func TestNewHoleRefusesJustPastTheLimits(t *testing.T) {
+	heaviest, lightest := limitsOf(pickedNumbers(t))
+	upward := math.Inf(positive)
+	refusedAs(t, "just past the heaviest", math.Nextafter(heaviest, upward),
+		none)
+	refusedAs(t, "just under the lightest", math.Nextafter(lightest, none),
+		none)
+}
+
+// limitsOf is the heaviest and lightest masses hole holds, worked from
+// their definitions in the test data.
+func limitsOf(numbers *picked) (heaviest, lightest float64) {
+	limits := numbers.Limits
+	heaviest = math.Pow(math.MaxFloat64, limits.FourthRoot) /
+		limits.HorizonInMasses
+	lightest = math.Pow(limits.LeastNormal, limits.FourthRoot)
+	return heaviest, lightest
+}
+
+// holdsHorizon fails the test unless a still hole's horizon is twice its
+// mass, both by Horizon and by Radius at a point on it.
+func holdsHorizon(t *testing.T, made hole.Hole, tolerance float64) {
+	t.Helper()
+	mass := made.Mass()
+	twice := mass + mass
+	horizon := made.Horizon()
+	if !(math.Abs(horizon-twice) <= tolerance*twice) {
+		t.Errorf("a mass of %v has a horizon at %v", mass, horizon)
+	}
+	onIt := made.Radius(hole.NewVec3(horizon, none, none))
+	if !(math.Abs(onIt-twice) <= tolerance*twice) {
+		t.Errorf("a mass of %v has Radius %v on its horizon", mass, onIt)
+	}
+}
+
+// The anti-test: NewHole returns nil and an error for a mass and a spin
+// that no black hole has, or that hole's arithmetic does not hold.
 func TestNewHoleRefusesWhatNoHoleIs(t *testing.T) {
 	for _, refused := range pickedNumbers(t).Refused.Cases {
-		if made := hole.NewHole(refused.Mass, refused.Spin); made != nil {
-			t.Errorf("%s: mass %v and spin %v made a hole",
-				refused.Why, refused.Mass, refused.Spin)
-		}
+		refusedAs(t, refused.Why, refused.Mass, refused.Spin)
 	}
 }
 
-// The anti-test: a mass or a spin that is not a number, and an infinite mass, are no
-// hole's.
+// The anti-test: a mass or a spin that is not a number, and an infinite
+// mass or spin, are no hole's.
 func TestNewHoleRefusesWhatIsNotANumber(t *testing.T) {
 	mass := pickedNumbers(t).Holes.Still.Mass
-	notANumber := math.NaN()
-	for name, made := range map[string]*hole.Hole{
-		"a mass that is not a number": hole.NewHole(notANumber, none),
-		"a spin that is not a number": hole.NewHole(mass, notANumber),
-		"an infinite mass":            hole.NewHole(math.Inf(positive), none),
-	} {
-		if made != nil {
-			t.Errorf("%s made a hole", name)
-		}
+	notANumber, infinite := math.NaN(), math.Inf(positive)
+	refusedAs(t, "a mass that is not a number", notANumber, none)
+	refusedAs(t, "a spin that is not a number", mass, notANumber)
+	refusedAs(t, "an infinite mass", infinite, none)
+	refusedAs(t, "an infinite spin", mass, infinite)
+}
+
+// refusedAs fails the test unless NewHole returns nil and an error for a
+// mass and a spin.
+func refusedAs(t *testing.T, why string, mass, spin float64) {
+	t.Helper()
+	made, err := hole.NewHole(mass, spin)
+	if err == nil {
+		t.Errorf("%s: mass %v and spin %v were not refused: %v", why, mass,
+			spin, err)
+	}
+	if made != nil {
+		t.Errorf("%s: mass %v and spin %v made a hole", why, mass, spin)
 	}
 }
 
@@ -83,10 +139,10 @@ func newHoleIsRightExactlyForSpinsUnderTheMass(test *rapid.T) {
 		draws.Draws.MassHigh).Draw(test, "mass")
 	under := rapid.Float64Range(draws.Draws.SpinLow,
 		draws.Draws.SpinHigh).Draw(test, "spin as a part of the mass")
-	if hole.NewHole(mass, mass*under) == nil {
-		test.Fatalf("mass %v, spin %v: refused", mass, mass*under)
+	if _, err := hole.NewHole(mass, mass*under); err != nil {
+		test.Fatalf("mass %v, spin %v: refused: %v", mass, mass*under, err)
 	}
-	if hole.NewHole(mass, mass) != nil {
+	if made, err := hole.NewHole(mass, mass); err == nil || made != nil {
 		test.Fatalf("mass %v, spin at the mass: made a hole", mass)
 	}
 }
@@ -238,9 +294,10 @@ func theRadiiScaleWithTheMass(test *rapid.T) {
 	draws := pickedNumbers(test)
 	black := drawnHole(test, draws)
 	mass := black.Mass()
-	unit := hole.NewHole(unitMass, black.Spin()/mass)
-	if unit == nil {
-		test.Fatalf("no hole of unit mass and spin %v", black.Spin()/mass)
+	unit, err := hole.NewHole(unitMass, black.Spin()/mass)
+	if err != nil {
+		test.Fatalf("no hole of unit mass and spin %v: %v",
+			black.Spin()/mass, err)
 	}
 	allowed := draws.Draws.OrbitTolerance
 	for what, radius := range map[string]radiusPair{

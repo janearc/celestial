@@ -1,7 +1,6 @@
 package sky_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -83,7 +82,7 @@ func TestADateThatIsNoDateIsRefused(test *testing.T) {
 	for _, wrong := range numbers.NotDates {
 		moment, err := sky.Calendar(wrong.Year, wrong.Month, wrong.Day,
 			wrong.Hour, wrong.Minute, wrong.Second, sky.TT())
-		if !errors.Is(err, sky.ErrDate()) || moment != nil {
+		if err == nil || moment != nil {
 			test.Errorf("%+v is a date: %v", wrong, err)
 		}
 	}
@@ -91,7 +90,7 @@ func TestADateThatIsNoDateIsRefused(test *testing.T) {
 	for _, wrong := range numbers.NotTimes {
 		moment, err := sky.Calendar(leap.Year, leap.Month, leap.Day,
 			wrong.Hour, wrong.Minute, wrong.Second, sky.TT())
-		if !errors.Is(err, sky.ErrDate()) || moment != nil {
+		if err == nil || moment != nil {
 			test.Errorf("%+v is a time: %v", wrong, err)
 		}
 	}
@@ -99,12 +98,12 @@ func TestADateThatIsNoDateIsRefused(test *testing.T) {
 	at(test, numbers.JulianLeapDay, sky.TT())
 	var none sky.Scale
 	if moment, err := sky.Calendar(leap.Year, leap.Month, leap.Day,
-		leap.Hour, leap.Minute, leap.Second, none); !errors.Is(err,
-		sky.ErrDate()) || moment != nil {
+		leap.Hour, leap.Minute, leap.Second, none); err == nil ||
+		moment != nil {
 		test.Errorf("a date on no scale is taken: %v", err)
 	}
-	if moment, err := sky.FromJulian(nought, nought, none); !errors.Is(err,
-		sky.ErrDate()) || moment != nil {
+	if moment, err := sky.FromJulian(nought, nought, none); err == nil ||
+		moment != nil {
 		test.Errorf("a julian date on no scale is taken: %v", err)
 	}
 	if name := none.String(); name != "no scale" {

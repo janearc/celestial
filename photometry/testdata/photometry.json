@@ -1,5 +1,5 @@
 {
-  "about": "numbers photometry's tests use. the zero points are wise's (all-sky explanatory supplement iv.4.h table 1), as the research data holds them; the magnitudes and errors are picked: zero, five (a factor of a hundred by definition), a tenth of a magnitude's error, and a magnitude too bright for a float. drawn errors start at a thousandth of a magnitude, as an error of nothing is held on its own and an error near the smallest float underflows",
+  "about": "numbers photometry's tests use. the zero points are wise's (all-sky explanatory supplement iv.4.h table 1), as the research data holds them; the magnitudes and errors are picked: zero, five (a factor of a hundred by definition), a tenth of a magnitude's error, a magnitude too bright for a float, and two too faint: 720, whose flux in W3 is about 3e-313, below the least normal float, and 2000, whose flux underflows to nothing. drawn errors start at a thousandth of a magnitude, as an error of nothing is held on its own and an error near the smallest float underflows",
   "zeros jy": {"W1": 309.540, "W2": 171.787, "W3": 31.674, "W4": 8.363},
   "five": 5,
   "hundred": 100,
@@ -7,6 +7,7 @@
   "error per magnitude": 0.9210340371976183,
   "tolerance": 1e-12,
   "too bright": -800,
+  "too faint": [720, 2000],
   "not bands": ["W5", "w1", "", "J"],
   "not errors": [-0.1],
   "magnitudes": {"least": -20, "most": 30},

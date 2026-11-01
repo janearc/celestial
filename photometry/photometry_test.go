@@ -31,6 +31,7 @@ type picked struct {
 	PerMag     float64            `json:"error per magnitude"`
 	Tolerance  float64            `json:"tolerance"`
 	TooBright  float64            `json:"too bright"`
+	TooFaint   []float64          `json:"too faint"`
 	NotBands   []string           `json:"not bands"`
 	NotErrors  []float64          `json:"not errors"`
 	Magnitudes span               `json:"magnitudes"`
@@ -103,7 +104,7 @@ func TestABandTheSurveyHasNotIsRefused(test *testing.T) {
 	survey := photometry.WISE()
 	for _, band := range pickedNumbers(test).NotBands {
 		flux, err := survey.Flux(band, nothing, nothing)
-		if !errors.Is(err, photometry.ErrBand()) || flux != nil {
+		if err == nil || flux != nil {
 			test.Errorf("%q gave %v, %v", band, flux, err)
 		}
 	}
@@ -175,31 +176,35 @@ func TestWhatIsNotAMagnitudeIsRefused(test *testing.T) {
 	nonsense := []float64{math.NaN(), math.Inf(upward), math.Inf(downward)}
 	for _, magnitude := range nonsense {
 		flux, err := survey.Flux("W2", magnitude, numbers.Tenth)
-		if !errors.Is(err, photometry.ErrMagnitude()) || flux != nil {
+		if err == nil || flux != nil {
 			test.Errorf("magnitude %v gave %v, %v", magnitude, flux, err)
 		}
 	}
 	for _, sigma := range append(numbers.NotErrors, nonsense...) {
 		flux, err := survey.Flux("W2", numbers.Five, sigma)
-		if !errors.Is(err, photometry.ErrMagnitude()) || flux != nil {
+		if err == nil || flux != nil {
 			test.Errorf("an error of %v gave %v, %v", sigma, flux, err)
 		}
 	}
 }
 
-// The anti-test: a magnitude so bright its flux is past a float is
-// refused, not handed back as an endless flux.
-func TestTooBrightForAFloatIsRefused(test *testing.T) {
+// The anti-test: a magnitude so bright its flux is past a float, or so
+// faint its flux is below the least normal float or nothing, is
+// refused, not handed back as an endless flux or one with no digits.
+func TestTooBrightOrTooFaintForAFloatIsRefused(test *testing.T) {
 	numbers := pickedNumbers(test)
-	flux, err := photometry.WISE().Flux("W3", numbers.TooBright, nothing)
-	if !errors.Is(err, photometry.ErrBright()) || flux != nil {
-		test.Errorf("magnitude %v gave %v, %v", numbers.TooBright, flux,
-			err)
+	survey := photometry.WISE()
+	for _, magnitude := range append(numbers.TooFaint, numbers.TooBright) {
+		flux, err := survey.Flux("W3", magnitude, nothing)
+		if err == nil || flux != nil {
+			test.Errorf("magnitude %v gave %v, %v", magnitude, flux, err)
+		}
 	}
 }
 
 // Whatever the magnitude and its error, five fainter is a hundredth of
-// the flux, the error scales with the flux, and janskys and si agree.
+// the flux, the error scales with the flux, and janskys and si agree on
+// both the flux and its error.
 func TestPogsonsScaleHoldsEverywhere(test *testing.T) {
 	rapid.Check(test, pogson{numbers: pickedNumbers(test)}.check)
 }
@@ -234,9 +239,13 @@ func (scale pogson) check(test *rapid.T) {
 		test.Fatalf("errors %v and %v do not scale", hereSigma,
 			fainterSigma)
 	}
-	janskys, _ := here.InJanskys()
+	janskys, janskySigma := here.InJanskys()
 	if !near(janskys, hereSI/janskyInSI, numbers.Tolerance) {
 		test.Fatalf("%v W m-2 Hz-1 is %v Jy", hereSI, janskys)
+	}
+	if !near(janskySigma, hereSigma/janskyInSI, numbers.Tolerance) {
+		test.Fatalf("an error of %v W m-2 Hz-1 is %v Jy", hereSigma,
+			janskySigma)
 	}
 }
 
@@ -276,10 +285,11 @@ func TestAReaderCanStandTheMockIn(test *testing.T) {
 func TestAReaderPassesOnARefusal(test *testing.T) {
 	control := gomock.NewController(test)
 	meter := mocks.NewMockPhotometer(control)
-	meter.EXPECT().Flux("W9", nothing, nothing).
-		Return(nil, photometry.ErrBand()).Times(once)
+	refusal := errors.New(`photometry: "W9" is not a band of wise`)
+	meter.EXPECT().Flux("W9", nothing, nothing).Return(nil, refusal).
+		Times(once)
 	got, err := brightest(meter, "W9", []float64{nothing})
-	if !errors.Is(err, photometry.ErrBand()) || got != nil {
+	if !errors.Is(err, refusal) || got != nil {
 		test.Errorf("the reader gave %v, %v", got, err)
 	}
 }

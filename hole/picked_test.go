@@ -52,6 +52,14 @@ type picked struct {
 			Mass, Spin float64
 		}
 	}
+	Limits struct {
+		Heaviest        float64
+		Lightest        float64
+		Tolerance       float64
+		FourthRoot      float64 `json:"fourth root"`
+		HorizonInMasses float64 `json:"horizon in masses"`
+		LeastNormal     float64 `json:"least normal"`
+	}
 	Radii struct {
 		Still          radiiOf
 		Half           radiiOf
@@ -400,9 +408,10 @@ const (
 // build is the hole of a spec, or the test stops if there is none.
 func build(test stopper, from spec) *hole.Hole {
 	test.Helper()
-	made := hole.NewHole(from.Mass, from.Spin)
-	if made == nil {
-		test.Fatalf("no hole of mass %v and spin %v", from.Mass, from.Spin)
+	made, err := hole.NewHole(from.Mass, from.Spin)
+	if err != nil {
+		test.Fatalf("no hole of mass %v and spin %v: %v", from.Mass,
+			from.Spin, err)
 	}
 	return made
 }
@@ -425,9 +434,10 @@ func drawnHole(test *rapid.T, draws *picked) *hole.Hole {
 		Draw(test, "mass")
 	part := rapid.Float64Range(draws.Draws.SpinLow, draws.Draws.SpinHigh).
 		Draw(test, "spin as a part of the mass")
-	made := hole.NewHole(mass, mass*part)
-	if made == nil {
-		test.Fatalf("no hole of mass %v and spin %v", mass, mass*part)
+	made, err := hole.NewHole(mass, mass*part)
+	if err != nil {
+		test.Fatalf("no hole of mass %v and spin %v: %v", mass, mass*part,
+			err)
 	}
 	return made
 }

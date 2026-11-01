@@ -2,7 +2,6 @@ package sky_test
 
 import (
 	"encoding/json"
-	"errors"
 	"math"
 	"os"
 	"testing"
@@ -139,7 +138,7 @@ func TestWhatIsBehindThePlaneIsRefused(test *testing.T) {
 	for _, away := range numbers.Behind {
 		at := toward(test, away, nought)
 		offset, err := plane.Onto(at)
-		if !errors.Is(err, sky.ErrBehind()) || offset != nil {
+		if err == nil || offset != nil {
 			test.Errorf("%v landed at %v, %v", at, offset, err)
 		}
 	}

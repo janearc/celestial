@@ -119,25 +119,34 @@ func ends(table []dwarf) (lightest, heaviest dwarf) {
 	return slices.MinFunc(table, lighter), slices.MaxFunc(table, lighter)
 }
 
-// along is the main sequence at a mass within the table: brightness and
+// newDwarf returns the main-sequence star at a mass: brightness and
 // radius each found between the two rows either side, in the
-// logarithms, where the main sequence runs nearly straight.
-func along(table []dwarf, mass measure.Mass) dwarf {
+// logarithms, where the main sequence runs nearly straight. returns nil
+// and error for a mass the table does not reach, either way, or NaN.
+func newDwarf(table []dwarf, mass measure.Mass) (*dwarf, error) {
+	lightest, heaviest := ends(table)
+	if !(mass.Over(lightest.mass) >= whole &&
+		mass.Over(heaviest.mass) <= whole) {
+		return nil, refuse("%v suns: the main sequence runs from %v "+
+			"(%s) to %v (%s)", mass.InSolarMasses(),
+			lightest.mass.InSolarMasses(), lightest.kind,
+			heaviest.mass.InSolarMasses(), heaviest.kind)
+	}
 	above, _ := slices.BinarySearchFunc(table, mass, reaches)
 	upper := table[above]
 	if upper.mass.Over(mass) == whole || above == firstRow {
-		return upper
+		return &upper, nil
 	}
 	lower := table[above-oneRow]
 	share := math.Log(mass.Over(lower.mass)) /
 		math.Log(upper.mass.Over(lower.mass))
 	brighter := math.Pow(upper.light.Over(lower.light), share)
 	wider := math.Pow(upper.radius.Over(lower.radius), share)
-	return dwarf{mass: mass, light: lower.light.Times(brighter),
-		radius: lower.radius.Times(wider)}
+	return &dwarf{mass: mass, light: lower.light.Times(brighter),
+		radius: lower.radius.Times(wider)}, nil
 }
 
-// The places along steps between.
+// The places newDwarf steps between.
 const (
 	firstRow = 0 // defined by a slice's order: the first row
 	oneRow   = 1 // defined by a slice's order: one row back

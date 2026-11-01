@@ -1,7 +1,6 @@
 package gw
 
 import (
-	"errors"
 	"fmt"
 	"math"
 
@@ -16,13 +15,6 @@ type conversion struct {
 	unit   string
 	factor float64
 }
-
-// errUnit is a unit the centre wrote that gw has no conversion for.
-var errUnit = errors.New("gw: no such unit")
-
-// ErrUnit is a unit string the centre wrote that is not in gw's table, so the
-// value cannot be put in si.
-func ErrUnit() error { return errUnit }
 
 // The numbers the units below are built from, each defined.
 const (
@@ -57,7 +49,8 @@ func toSI(written string) (*conversion, error) {
 		degree := measure.Degrees(one).InRadians()
 		into = conversion{unit: "sr", factor: math.Pow(degree, squared)}
 	default:
-		return nil, fmt.Errorf("%w: %q", errUnit, written)
+		return nil, fmt.Errorf("gw: no conversion for the unit %q",
+			written)
 	}
 	return &into, nil
 }

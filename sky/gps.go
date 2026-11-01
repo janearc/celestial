@@ -1,6 +1,9 @@
 package sky
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 // gpsEpochDay is the modified julian day of the gps epoch, 1980 january
 // 6, at whose start gps time reads nought. Defined by IS-GPS-200,
@@ -18,7 +21,8 @@ const gpsEpochDay = 44244
 func FromGPS(seconds float64) (*Instant, error) {
 	days := math.Floor(seconds / secondsADay)
 	if !countable(days) {
-		return nil, errDate
+		return nil, fmt.Errorf("sky: gps time %v s, past what can be "+
+			"counted", seconds)
 	}
 	rest := seconds - days*secondsADay
 	moment := settled(GPS(), gpsEpochDay+int64(days), rest/secondsADay)
@@ -34,17 +38,16 @@ const mostDays = 1 << 53
 // count exactly. A NaN fails the comparison, and is not.
 func countable(days float64) bool { return math.Abs(days) < mostDays }
 
-// noSeconds is what GPSSeconds gives beside a refusal. Defined: none.
-const noSeconds = 0.0
-
 // GPSSeconds is the instant as seconds of gps time since the gps epoch,
-// FromGPS undone. It refuses what On refuses: an instant on ut1, or on
-// utc where its leap seconds are not known.
-func (moment Instant) GPSSeconds() (float64, error) {
+// FromGPS undone. returns nil and error for what On refuses: an instant
+// on ut1, or on utc where its leap seconds are not known.
+func (moment Instant) GPSSeconds() (*float64, error) {
 	on, err := moment.On(GPS())
 	if err != nil {
-		return noSeconds, err
+		return nil, err
 	}
-	return float64(on.day-gpsEpochDay)*secondsADay +
-		on.part*secondsADay, nil
+	toTheDay := float64(on.day-gpsEpochDay) * secondsADay
+	intoTheDay := on.part * secondsADay
+	seconds := toTheDay + intoTheDay
+	return &seconds, nil
 }

@@ -10,9 +10,12 @@ import (
 	"github.com/janearc/celestial/sky"
 )
 
-// Event is a merger as a the centre catalogue lists it: its name and version,
-// the catalogue it is in, its gps time, and every estimate the centre gives
-// for it, by the centre's name for the parameter.
+// Event is one merger in one of the centre's catalogues:
+//   - its name and version
+//   - the catalogue it is in
+//   - its gps time
+//   - every estimate the centre gives for it, each under the centre's
+//     own name for the parameter
 type Event struct {
 	name, catalog string
 	version       int
@@ -20,71 +23,63 @@ type Event struct {
 	estimates     map[string]*Estimate
 }
 
-// The errors reading the centre gives.
-var (
-	errEvents = errors.New("gw: not the centre's events")
-	errAbsent = errors.New("gw: no such estimate")
-)
-
-// ErrEvents is a file that is not the centre's event json, or an event in it
-// without its name or its gps time.
-func ErrEvents() error { return errEvents }
-
-// ErrAbsent is a parameter an event has no estimate for: the centre left it
-// blank, or never gave it.
-func ErrAbsent() error { return errAbsent }
-
-// String is the event's name and version, as the centre keys it: GW150914-v3.
+// String is the event's name and version, joined as the centre keys
+// them: GW150914-v3.
 func (event *Event) String() string {
 	return fmt.Sprintf("%s-v%d", event.name, event.version)
 }
 
-// Catalog is the short name of the catalogue the event is in.
+// Catalog is the short name of the event's catalogue, as the centre
+// writes it.
 func (event *Event) Catalog() string { return event.catalog }
 
-// At is the event's gps time, as the centre gives it.
+// At is the event's gps time.
 func (event *Event) At() sky.Instant { return event.at }
 
 // Parameters is the name of every parameter the event has an estimate
-// for, in order.
+// for, sorted.
 func (event *Event) Parameters() []string {
 	return slices.Sorted(maps.Keys(event.estimates))
 }
 
-// Estimator gives an event's estimates, by the centre's name for each
-// parameter: an Event is one. A caller that works from an event's
-// estimates takes an Estimator, so its tests stand a mock in
-// (celestial/mocks) and expect its calls.
+// Estimator gives estimates by the centre's name for each parameter.
+// Event is one. A caller that reads estimates takes an Estimator, so its
+// tests can stand the generated mock in for an event.
 type Estimator interface {
 	Estimate(parameter string) (*Estimate, error)
 }
 
-// An Event is an Estimator; the compiler holds it to that here.
+// Event must stay an Estimator: the build fails here if it stops being
+// one.
 var _ Estimator = &Event{}
 
 // Estimate is the event's estimate of a parameter, by the centre's name
-// for it. It refuses a parameter the event has no estimate for, and then
-// gives none.
+// for it. returns nil and error for a parameter the event has none of,
+// whether the centre left it blank or never gave it.
 func (event *Event) Estimate(parameter string) (*Estimate, error) {
 	if estimate, held := event.estimates[parameter]; held {
 		return estimate, nil
 	}
-	return nil, fmt.Errorf("%w: %q for %s", errAbsent, parameter, event)
+	return nil, fmt.Errorf("gw: %s has no estimate of %q", event,
+		parameter)
 }
 
 // ReadEvents is every event in the centre's event json, as its event api
-// gives it: an object of events, each keyed by its name and version. It
-// refuses a file that is not that, an event without its name or gps
-// time, and a unit gw has no conversion for, and then gives none.
+// serves it: an object of events, each keyed by name and version, read
+// in the order of their keys. returns nil and error for:
+//   - a file that is not that json, or holds no events
+//   - an event without its name or gps time, or a gps time sky refuses
+//   - a value without a unit, or in a unit gw has no conversion for
+//   - a bound on the wrong side of its value
 func ReadEvents(raw []byte) ([]*Event, error) {
 	var file struct {
 		Events map[string]map[string]json.RawMessage `json:"events"`
 	}
 	if err := json.Unmarshal(raw, &file); err != nil {
-		return nil, fmt.Errorf("%w: %w", errEvents, err)
+		return nil, fmt.Errorf("gw: not the centre's events: %w", err)
 	}
 	if len(file.Events) == nothingRead {
-		return nil, fmt.Errorf("%w: no events", errEvents)
+		return nil, errors.New("gw: no events in the centre's json")
 	}
 	var events []*Event
 	for _, key := range slices.Sorted(maps.Keys(file.Events)) {

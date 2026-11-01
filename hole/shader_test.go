@@ -4,8 +4,6 @@ import (
 	"encoding/binary"
 	"math"
 	"testing"
-
-	"github.com/janearc/celestial/hole"
 )
 
 // places is the three of the camera's position. It is defined by space.
@@ -22,7 +20,7 @@ func floatAt(encoded []byte, offset int) float32 {
 func TestShaderParamsBeforeACamera(t *testing.T) {
 	numbers := pickedNumbers(t)
 	from := numbers.Holes.Fast
-	gpu := hole.NewGPUBlackHole(from.Mass, from.Spin)
+	gpu := gpuOf(t, from)
 	params := gpu.ShaderParams()
 	black := gpu.Hole()
 	if params.Mass() != float32(from.Mass) ||
@@ -45,8 +43,7 @@ func TestShaderParamsBeforeACamera(t *testing.T) {
 func TestShaderParamsHoldTheCamera(t *testing.T) {
 	numbers := pickedNumbers(t)
 	gpu := camera(t, numbers.Holes.Fast, numbers.Places.Eye)
-	before := hole.NewGPUBlackHole(numbers.Holes.Fast.Mass,
-		numbers.Holes.Fast.Spin).ShaderParams()
+	before := gpuOf(t, numbers.Holes.Fast).ShaderParams()
 	params := gpu.ShaderParams()
 	eye := numbers.Places.Eye
 	wantAt := [places]float32{
@@ -123,7 +120,7 @@ func TestShaderParamsBytesBeforeACameraAreNought(t *testing.T) {
 	numbers := pickedNumbers(t)
 	layout := numbers.GPU.Layout
 	from := numbers.Holes.Fast
-	gpu := hole.NewGPUBlackHole(from.Mass, from.Spin)
+	gpu := gpuOf(t, from)
 	encoded := gpu.ShaderParams().Bytes()
 	for offset := layout.Camera; offset < layout.Size; offset++ {
 		if encoded[offset] != none {

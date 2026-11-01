@@ -15,6 +15,9 @@ import (
 // There is no GPU in it. It steps one ray at a time on one core, and
 // its batches are loops. SetCamera changes it, so it is not to be
 // shared between goroutines while one of them sets the camera.
+//
+// GPUBlackHole, and everything in this file, is moving to slayer and
+// will change; see the package doc.
 type GPUBlackHole struct {
 	hole      Hole
 	cameraPos Vec3
@@ -137,12 +140,13 @@ var errNothingStill = errors.New("hole: nothing can be held still there")
 // errors.Is finds it in what SetCamera returns.
 func ErrNothingStill() error { return errNothingStill }
 
-// NewGPUBlackHole is a hole of a mass and a spin with no camera yet, or
-// nil if they are no hole's, as NewHole says. SetCamera gives it one.
-func NewGPUBlackHole(mass, spin float64) *GPUBlackHole {
-	hole := NewHole(mass, spin)
-	if hole == nil {
-		return nil
+// NewGPUBlackHole returns a hole of a mass and a spin with no camera yet.
+// SetCamera gives it one. returns nil and NewHole's error for a mass and
+// spin that make no hole.
+func NewGPUBlackHole(mass, spin float64) (*GPUBlackHole, error) {
+	hole, err := NewHole(mass, spin)
+	if err != nil {
+		return nil, err
 	}
 	notANumber := math.NaN()
 	return &GPUBlackHole{
@@ -151,7 +155,7 @@ func NewGPUBlackHole(mass, spin float64) *GPUBlackHole {
 			time: notANumber, x: notANumber,
 			y: notANumber, z: notANumber,
 		},
-	}
+	}, nil
 }
 
 // SetCamera puts a camera held still at a point and works out its

@@ -12,38 +12,33 @@ package research
 import (
 	_ "embed"
 	"fmt"
-	"sync"
 
 	"github.com/janearc/puzzlemouth/numbers"
 )
 
-// fileName is the data's file, as a refusal names it.
-const fileName = "research-derived-data.yml"
-
-// raw is the data as the file holds it.
+// data is research-derived-data.yml, built into celestial.
 //
 //go:embed research-derived-data.yml
-var raw []byte
+var data []byte
 
-// parse reads the data.
-func parse() (numbers.Numbers, error) {
-	return numbers.Read(fileName, raw)
-}
+// loaded is the data, parsed once when the program starts, and loadErr
+// is why it did not parse, if it did not.
+var loaded, loadErr = numbers.Read("research-derived-data.yml", data)
 
-// parsed is the data, read once, the first time it is asked for.
-var parsed = sync.OnceValues(parse)
-
-// Read is the research data, every number by its name, or the refusal
-// puzzlemouth gives for a file it cannot read. A caller reads it to say
-// where a number came from.
+// Read returns every number in the research data, for a caller that
+// wants to say where a number came from. returns nil and error if the
+// data did not parse.
 func Read() (numbers.Numbers, error) {
-	return parsed()
+	if loadErr != nil {
+		return nil, loadErr
+	}
+	return loaded, nil
 }
 
-// Value is a measured number by its name. The data is part of celestial
-// and a name it does not hold is a mistake in celestial's own code,
-// which its tests find, so asking for one stops the program and says
-// which name it was.
+// Value returns a number by its name, measured or picked. the data is
+// built into celestial, so a name it does not hold is a bug in
+// celestial's own code, which its tests find: asking for one panics and
+// names it.
 func Value(name string) float64 {
 	read, err := Read()
 	if err != nil {

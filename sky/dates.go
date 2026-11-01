@@ -103,7 +103,7 @@ func dayNumber(year, month, day int) int64 {
 	if month <= marchFirst {
 		year, month = year-nextYear, month+monthsMoved
 	}
-	shift := noSeconds
+	var shift float64 // meeus's B: none for a julian date
 	if gregorian {
 		century := math.Floor(float64(year) / centuryEvery)
 		leaps := math.Floor(century / leapCentury)

@@ -54,26 +54,18 @@ const ttLessTAI = 32.184
 // section 3.3.4).
 const taiLessGPS = 19.0
 
-// errScale is an instant that cannot be told on the scale asked for.
-var errScale = errors.New("celestial: not known on that scale")
-
-// ErrScale is an instant that cannot be told on the scale asked for: no
-// scale, ut1 without iers's earth orientation, or utc where its leap
-// seconds are not known.
-func ErrScale() error { return errScale }
-
 // On is the same instant on another scale. ut1 needs iers's measurements
 // of the earth's turning, which sky does not hold yet, so it is refused
 // by name. On refuses no scale, and then gives no instant.
 func (moment Instant) On(scale Scale) (*Instant, error) {
 	switch {
 	case !scale.known():
-		return nil, fmt.Errorf("%w: %v", errScale, scale)
+		return nil, fmt.Errorf("sky: an instant on %v", scale)
 	case scale == moment.scale:
 		return &moment, nil
 	case scale == UT1() || moment.scale == UT1():
-		return nil, fmt.Errorf("%w: ut1 needs iers's earth "+
-			"orientation, not held yet", errScale)
+		return nil, errors.New("sky: ut1 needs iers's earth " +
+			"orientation, not held yet")
 	}
 	atomic, err := moment.toTAI()
 	if err != nil {

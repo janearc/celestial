@@ -82,6 +82,9 @@ type clocked struct {
 		Longitude float64 `json:"longitude"`
 	} `json:"not places"`
 	NotDeclinations []float64 `json:"not declinations"`
+	NotAscensions   []float64 `json:"not ascensions"`
+	BelowTheCentre  float64   `json:"below the centre metres"`
+	AboveTheHighest float64   `json:"above the highest metres"`
 	MeeusDates      []dated   `json:"meeus dates"`
 	DateTolerance   float64   `json:"date tolerance"`
 	NotDates        []timed   `json:"not dates"`

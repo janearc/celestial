@@ -1,7 +1,6 @@
 package sky_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -84,8 +83,11 @@ func (trip gpsTrip) check(test *rapid.T) {
 		test.Fatal(err)
 	}
 	back, err := moment.GPSSeconds()
-	if err != nil || !(math.Abs(back-seconds) <= trip.numbers.SecondsTolerance) {
-		test.Fatalf("%v came back %v: %v", seconds, back, err)
+	if err != nil {
+		test.Fatalf("%v came back with %v", seconds, err)
+	}
+	if !(math.Abs(*back-seconds) <= trip.numbers.SecondsTolerance) {
+		test.Fatalf("%v came back %v", seconds, *back)
 	}
 }
 
@@ -96,18 +98,21 @@ func TestNoGPSTimeIsRefused(test *testing.T) {
 	numbers := clockNumbers(test)
 	nonsense := []float64{math.NaN(), math.Inf(upward), math.Inf(-upward)}
 	for _, seconds := range append(numbers.GPS.NotSeconds, nonsense...) {
-		if moment, err := sky.FromGPS(seconds); !errors.Is(err,
-			sky.ErrDate()) || moment != nil {
+		if moment, err := sky.FromGPS(seconds); err == nil ||
+			moment != nil {
 			test.Errorf("gps time %v gave %v", seconds, err)
 		}
 	}
 	for _, julian := range append(numbers.NotJulian, nonsense...) {
-		if moment, err := sky.FromJulian(julian, nought, sky.TT()); !errors.Is(err, sky.ErrDate()) || moment != nil {
+		if moment, err := sky.FromJulian(julian, nought, sky.TT()); err == nil || moment != nil {
 			test.Errorf("julian date %v gave %v", julian, err)
+		}
+		if moment, err := sky.FromJulian(nought, julian, sky.TT()); err == nil || moment != nil {
+			test.Errorf("a julian fraction of %v gave %v", julian, err)
 		}
 	}
 	turning := at(test, numbers.UT1Day, sky.UT1())
-	if _, err := turning.GPSSeconds(); !errors.Is(err, sky.ErrScale()) {
+	if seconds, err := turning.GPSSeconds(); err == nil || seconds != nil {
 		test.Errorf("an instant on ut1 gave gps seconds: %v", err)
 	}
 }

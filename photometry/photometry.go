@@ -1,7 +1,6 @@
 package photometry
 
 import (
-	"errors"
 	"maps"
 	"slices"
 
@@ -34,23 +33,6 @@ type Survey struct {
 	name  string
 	zeros map[string]float64
 }
-
-// The errors a Survey gives.
-var (
-	errBand      = errors.New("photometry: no such band")
-	errMagnitude = errors.New("photometry: not a magnitude")
-	errBright    = errors.New("photometry: too bright for a float")
-)
-
-// ErrBand is a band the survey does not have.
-func ErrBand() error { return errBand }
-
-// ErrMagnitude is a magnitude that is not a finite number, or an error
-// that is below nothing or not finite.
-func ErrMagnitude() error { return errMagnitude }
-
-// ErrBright is a magnitude whose flux is past what a float holds.
-func ErrBright() error { return errBright }
 
 // wiseBands is the name of each of wise's bands, and the name in
 // celestial's research data of its zero point, in janskys.

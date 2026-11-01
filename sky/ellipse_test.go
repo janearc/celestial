@@ -1,7 +1,6 @@
 package sky_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -88,8 +87,9 @@ func TestEveryPointIsOnTheEllipse(test *testing.T) {
 }
 
 // The anti-test: a minor axis longer than the major, an axis below
-// nothing or not a number, and an angle not a number, are refused and
-// give no ellipse.
+// nothing, past the far side of the sky or not a number, and an angle
+// more than a turn from north or not a number, are refused and give no
+// ellipse.
 func TestWhatIsNoEllipseIsRefused(test *testing.T) {
 	given := planeNumbers(test).NotEllipses
 	major := planeNumbers(test).Ellipse.Major
@@ -99,7 +99,7 @@ func TestWhatIsNoEllipseIsRefused(test *testing.T) {
 	for _, shape := range given {
 		made, err := sky.NewEllipse(measure.Arcseconds(shape.Major),
 			measure.Arcseconds(shape.Minor), measure.Degrees(shape.Angle))
-		if !errors.Is(err, sky.ErrEllipse()) || made != nil {
+		if err == nil || made != nil {
 			test.Errorf("%+v made %v, %v", shape, made, err)
 		}
 	}
@@ -115,7 +115,7 @@ func TestTooFewPointsAreRefused(test *testing.T) {
 	around := ellipse(test, shape.Major, shape.Minor, nought)
 	for _, points := range planeNumbers(test).TooFew {
 		offsets, err := around.Outline(points)
-		if !errors.Is(err, sky.ErrEllipse()) || offsets != nil {
+		if err == nil || offsets != nil {
 			test.Errorf("%d points gave %v, %v", points, offsets, err)
 		}
 	}

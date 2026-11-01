@@ -481,3 +481,13 @@ numbers:
     says: the earth's mean radius, the round earth a way through the air is drawn over
     kind: measured
     source: {key: iugg-mean-radius, where: "derived geometric constants: R1 = (2a+b)/3, mean radius", text: "6 371 008.7714 m"}
+
+  # sky: the highest a place on the earth stands, picked as the top of
+  # the 1976 standard atmosphere's tables; above it is orbit.
+
+  - name: highest-place-m
+    value: 1000000
+    unit: m
+    says: the highest a place on the earth stands above sea level
+    kind: picked
+    by: "celestial's sky (2026-10-31): the top of the u.s. standard atmosphere, 1976, whose abstract (p. v) gives its main tables \"to 1000 km\""

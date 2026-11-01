@@ -18,8 +18,8 @@ const mostDUT1 = 0.9
 func (moment Instant) UT1(dut1 measure.Duration) (*Instant, error) {
 	offset := dut1.InSeconds()
 	if moment.scale != UTC() || !(math.Abs(offset) <= mostDUT1) {
-		return nil, fmt.Errorf("%w: ut1 is utc and a dut1 within 0.9 s",
-			errScale)
+		return nil, fmt.Errorf("sky: ut1 is utc and a dut1 within %v "+
+			"s, not %v and %v s", mostDUT1, moment.scale, offset)
 	}
 	seconds := moment.part * dayLength(UTC(), moment.day)
 	turning := settled(UT1(), moment.day, (seconds+offset)/secondsADay)
@@ -48,8 +48,6 @@ const (
 	gmstQuadratic = 0.000387933
 	// gmstCubic is its cubic term's divisor. Defined by the iau 1982.
 	gmstCubic = 38710000.0
-	// degreesATurn is defined by the degree.
-	degreesATurn = 360.0
 )
 
 // MeanSidereal is greenwich mean sidereal time at an instant on ut1: how
@@ -57,16 +55,14 @@ const (
 // 1982. It refuses an instant on another scale, and then gives no angle.
 func (moment Instant) MeanSidereal() (*measure.Angle, error) {
 	if moment.scale != UT1() {
-		return nil, fmt.Errorf("%w: sidereal time is the earth's "+
-			"turning, asked of ut1", errScale)
+		return nil, fmt.Errorf("sky: sidereal time is the earth's "+
+			"turning, asked of ut1, not %v", moment.scale)
 	}
 	whole, fraction := moment.Julian()
 	days := (whole - j2000) + fraction
 	centuries := days / daysACentury
 	degrees := gmstAtJ2000 + gmstPerDay*days +
 		centuries*centuries*(gmstQuadratic-centuries/gmstCubic)
-	within := math.Mod(degrees, degreesATurn)
-	turned := math.Mod(within+degreesATurn, degreesATurn)
-	angle := measure.Degrees(turned)
+	angle := measure.Degrees(intoATurn(degrees, degreesInATurn))
 	return &angle, nil
 }

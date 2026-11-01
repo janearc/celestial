@@ -58,9 +58,11 @@ func TestACallerCanStandTheEstimatorMockIn(test *testing.T) {
 func TestACallerPassesOnAnAbsentEstimate(test *testing.T) {
 	control := gomock.NewController(test)
 	mock := mocks.NewMockEstimator(control)
-	mock.EXPECT().Estimate("mass_1_source").Return(nil, gw.ErrAbsent()).
+	absent := errors.New(`gw: GW150914-v3 has no estimate of ` +
+		`"mass_1_source"`)
+	mock.EXPECT().Estimate("mass_1_source").Return(nil, absent).
 		Times(single)
-	if _, err := massRatio(mock); !errors.Is(err, gw.ErrAbsent()) {
+	if _, err := massRatio(mock); !errors.Is(err, absent) {
 		test.Errorf("the caller gave %v", err)
 	}
 }

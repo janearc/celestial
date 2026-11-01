@@ -27,8 +27,9 @@ const oneJansky = 1
 // nothing is no error at all. Defined by the scale.
 const nothing = 0.0
 
-// eitherSign asks math.IsInf about both infinities. Defined by math.
-const eitherSign = 0
+// leastNormal is the least flux a float64 holds with all its digits.
+// Defined by float64: its least normal number, 2^-1022.
+const leastNormal = 0x1p-1022
 
 // Flux is the flux density a magnitude in one of the survey's bands
 // stands for, and its error: F0 times 100 to the minus m over 5, where
@@ -39,30 +40,40 @@ const eitherSign = 0
 // is for a detection; an error near a magnitude makes a lopsided flux
 // error this does not describe.
 //
-// Flux refuses a band the survey does not have, a magnitude that is not
-// a finite number, an error below nothing or not finite, and a magnitude
-// so bright its flux is past a float, and then gives no flux.
+// Flux refuses, and then gives no flux:
+//   - a band the survey does not have
+//   - an error below nothing
+//   - a magnitude whose flux a float64 cannot hold: too bright, past the
+//     largest, or too faint, below the least normal, where it would lose
+//     its digits
+//   - an error whose flux error a float64 cannot hold
+//
+// A magnitude that is not a number, or is either infinity, gives a flux
+// outside that range, and an error that is not a number is not at least
+// nothing, so they are refused with them.
 func (survey *Survey) Flux(band string, magnitude,
 	magnitudeError float64) (*Flux, error) {
 	zero, held := survey.zeros[band]
 	if !held {
-		return nil, fmt.Errorf("%w: %q in %s", errBand, band,
-			survey.name)
+		return nil, fmt.Errorf("photometry: %q is not a band of %s",
+			band, survey.name)
 	}
-	if math.IsNaN(magnitude) || math.IsInf(magnitude, eitherSign) {
-		return nil, fmt.Errorf("%w: %v", errMagnitude, magnitude)
-	}
-	if !(magnitudeError >= nothing) ||
-		math.IsInf(magnitudeError, eitherSign) {
-		return nil, fmt.Errorf("%w: an error of %v", errMagnitude,
-			magnitudeError)
+	if !(magnitudeError >= nothing) {
+		return nil, fmt.Errorf("photometry: an error of %v "+
+			"magnitudes, below %v", magnitudeError, nothing)
 	}
 	density := zero * math.Pow(pogsonFactor, -magnitude/pogsonStep)
-	if math.IsInf(density, eitherSign) {
-		return nil, fmt.Errorf("%w: %v in %s", errBright, magnitude,
-			band)
+	if !(density >= leastNormal && density <= math.MaxFloat64) {
+		return nil, fmt.Errorf("photometry: magnitude %v in %s is "+
+			"a flux of %v, outside %v to %v", magnitude, band,
+			density, leastNormal, math.MaxFloat64)
 	}
 	slope := math.Log(pogsonFactor) / pogsonStep
-	return &Flux{density: density, sigma: density * slope *
-		magnitudeError}, nil
+	sigma := density * slope * magnitudeError
+	if !(sigma <= math.MaxFloat64) {
+		return nil, fmt.Errorf("photometry: an error of %v "+
+			"magnitudes is a flux error of %v, past %v",
+			magnitudeError, sigma, math.MaxFloat64)
+	}
+	return &Flux{density: density, sigma: sigma}, nil
 }

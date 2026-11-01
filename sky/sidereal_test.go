@@ -1,7 +1,6 @@
 package sky_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -34,8 +33,7 @@ func TestMeanSiderealTimeIsMeeussExample(test *testing.T) {
 func TestSiderealTimeIsAskedOfUT1(test *testing.T) {
 	numbers := clockNumbers(test)
 	civil := at(test, numbers.Sidereal.At, sky.UTC())
-	if angle, err := civil.MeanSidereal(); !errors.Is(err,
-		sky.ErrScale()) || angle != nil {
+	if angle, err := civil.MeanSidereal(); err == nil || angle != nil {
 		test.Errorf("utc gives a sidereal time: %v, %v", angle, err)
 	}
 	turning, err := civil.UT1(measure.Seconds(numbers.DUT1.Seconds))
@@ -48,10 +46,10 @@ func TestSiderealTimeIsAskedOfUT1(test *testing.T) {
 		test.Errorf("ut1 with dut1 %v s is %.6f s from utc",
 			numbers.DUT1.Seconds, got)
 	}
-	if moment, err := civil.UT1(measure.Seconds(numbers.DUT1.TooMuch)); !errors.Is(err, sky.ErrScale()) || moment != nil {
+	if moment, err := civil.UT1(measure.Seconds(numbers.DUT1.TooMuch)); err == nil || moment != nil {
 		test.Errorf("a dut1 of a second is taken: %v", err)
 	}
-	if moment, err := turning.UT1(measure.Seconds(numbers.DUT1.Seconds)); !errors.Is(err, sky.ErrScale()) || moment != nil {
+	if moment, err := turning.UT1(measure.Seconds(numbers.DUT1.Seconds)); err == nil || moment != nil {
 		test.Errorf("an instant already on ut1 is taken: %v", err)
 	}
 }
@@ -120,28 +118,38 @@ func TestThePoleStandsAtTheLatitude(test *testing.T) {
 	}
 }
 
-// The anti-test: a place off the earth, a height that is no number and a
+// The anti-test: a place off the earth, a height that is no number,
+// below the earth's centre or above the highest a place stands, and a
 // direction off the sky are refused, and give nothing.
 func TestWhatIsNoPlaceIsRefused(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, place := range numbers.NotPlaces {
 		there, err := sky.OnEarth(measure.Degrees(place.Latitude),
 			measure.Degrees(place.Longitude), measure.Metres(nought))
-		if !errors.Is(err, sky.ErrPlace()) || there != nil {
+		if err == nil || there != nil {
 			test.Errorf("%+v is a place: %v", place, err)
 		}
 	}
-	noHeight := measure.Metres(math.NaN())
-	if there, err := sky.OnEarth(measure.Degrees(nought),
-		measure.Degrees(nought), noHeight); !errors.Is(err,
-		sky.ErrPlace()) || there != nil {
-		test.Errorf("a height that is no number is a place: %v", err)
+	for _, metres := range []float64{math.NaN(), numbers.BelowTheCentre,
+		numbers.AboveTheHighest} {
+		there, err := sky.OnEarth(measure.Degrees(nought),
+			measure.Degrees(nought), measure.Metres(metres))
+		if err == nil || there != nil {
+			test.Errorf("a height of %v m is a place: %v", metres, err)
+		}
 	}
 	for _, north := range numbers.NotDeclinations {
 		way, err := sky.NewEquatorial(measure.Degrees(nought),
 			measure.Degrees(north))
-		if !errors.Is(err, sky.ErrPlace()) || way != nil {
+		if err == nil || way != nil {
 			test.Errorf("declination %v is a direction: %v", north, err)
+		}
+	}
+	for _, east := range numbers.NotAscensions {
+		way, err := sky.NewEquatorial(measure.Degrees(east),
+			measure.Degrees(nought))
+		if err == nil || way != nil {
+			test.Errorf("ascension %v is a direction: %v", east, err)
 		}
 	}
 }

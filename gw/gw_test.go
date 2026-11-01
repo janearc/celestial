@@ -2,11 +2,12 @@ package gw_test
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"maps"
 	"math"
 	"os"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/janearc/celestial/gw"
@@ -159,8 +160,11 @@ func TestGW150914IsReadWhole(test *testing.T) {
 		test.Errorf("read %s in %s", event, event.Catalog())
 	}
 	seconds, err := event.At().GPSSeconds()
-	if err != nil || !near(seconds, want.GPS, want.Tolerance) {
-		test.Errorf("at gps %v, %v", seconds, err)
+	if err != nil {
+		test.Fatal(err)
+	}
+	if !near(*seconds, want.GPS, want.Tolerance) {
+		test.Errorf("at gps %v", *seconds)
 	}
 	utc, err := event.At().On(sky.UTC())
 	if err != nil {
@@ -263,7 +267,7 @@ func TestABlankParameterIsAbsent(test *testing.T) {
 	event := gw150914(test)
 	for _, name := range pickedNumbers(test).Absent {
 		found, err := event.Estimate(name)
-		if !errors.Is(err, gw.ErrAbsent()) || found != nil {
+		if err == nil || found != nil {
 			test.Errorf("%s gave %v, %v", name, found, err)
 		}
 	}
@@ -292,9 +296,6 @@ func TestWhatIsNotTheCentresIsRefused(test *testing.T) {
 		events, err := gw.ReadEvents([]byte(document.JSON))
 		if err == nil || events != nil {
 			test.Errorf("%s: read %v", document.Why, events)
-		}
-		if !errors.Is(err, gw.ErrEvents()) && !errors.Is(err, gw.ErrUnit()) {
-			test.Errorf("%s: refused with %v", document.Why, err)
 		}
 	}
 }
@@ -367,9 +368,17 @@ func (rewrite rewriting) check(test *rapid.T) {
 	unit := rapid.StringMatching(smallLetters).Draw(test, "unit")
 	unwritten := rewrite.written(test, name+unitSuffix, unit)
 	if events, err := gw.ReadEvents(unwritten); events != nil ||
-		!errors.Is(err, gw.ErrUnit()) {
+		!namesUnit(err, unit) {
 		test.Fatalf("%s in %q: %v, %v", name, unit, events, err)
 	}
+}
+
+// namesUnit is whether a refusal names a unit as the one gw has no
+// conversion for, so a test knows it was the unit, and not something
+// else in the file, that was refused.
+func namesUnit(err error, unit string) bool {
+	return err != nil && strings.Contains(err.Error(),
+		fmt.Sprintf("no conversion for the unit %q", unit))
 }
 
 // written is the file with one of its event's fields written over.
@@ -424,9 +433,43 @@ func TestANearlyRightUnitIsRefused(test *testing.T) {
 		changed := writtenOver(test, raw, want.Name,
 			miss.Parameter+unitSuffix, miss.Unit)
 		if events, err := gw.ReadEvents(changed); events != nil ||
-			!errors.Is(err, gw.ErrUnit()) {
+			!namesUnit(err, miss.Unit) {
 			test.Errorf("%s in %q: %v, %v", miss.Parameter, miss.Unit,
 				events, err)
 		}
 	}
 }
+
+// The test: a bound written as nothing sits right on the value, and is
+// still a bound: the interval is known, and reaches no way from the
+// value.
+func TestABoundOfNothingIsKnown(test *testing.T) {
+	numbers := pickedNumbers(test)
+	raw, err := os.ReadFile(numbers.File)
+	if err != nil {
+		test.Fatal(err)
+	}
+	name := slices.Sorted(maps.Keys(numbers.Suns))[firstParameter]
+	for _, bound := range []string{lowerSuffix, upperSuffix} {
+		raw = writtenOver(test, raw, numbers.Name, name+bound, onTheValue)
+	}
+	events, err := gw.ReadEvents(raw)
+	if err != nil || len(events) != single {
+		test.Fatalf("%s bounded by nothing: %v, %v", name, events, err)
+	}
+	found := estimate(test, events[firstEvent], name)
+	lowest, highest, known := found.Interval()
+	if !known || lowest != found.Value() || highest != found.Value() {
+		test.Errorf("%s bounded by nothing runs %v to %v, known %v",
+			name, lowest, highest, known)
+	}
+}
+
+// The bounds that test writes, and where it finds a parameter to write
+// them for.
+const (
+	lowerSuffix    = "_lower"
+	upperSuffix    = "_upper"
+	onTheValue     = 0.0 // defined: a bound no way from the value
+	firstParameter = 0   // defined by a slice's order
+)

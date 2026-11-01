@@ -1,6 +1,9 @@
 package hole
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 // Hole is a black hole: its mass M and its spin A, the angular momentum
 // per unit mass, from nought for schwarzschild up to just under M. The
@@ -10,21 +13,58 @@ import "math"
 // right for.
 type Hole struct{ mass, spin float64 }
 
-// NewHole is the hole of a mass and a spin, or nil if they are no hole's:
-// a finite mass above nought, and a spin from nought to just under it.
+// the masses hole's arithmetic holds. radius and kernel take the fourth
+// power of a point's distance, and a hole must hold the points of its
+// own horizon, which lies between the mass and twice it.
 //
-// A spin at or above the mass is no black hole, since it has no horizon.
-// A spin below nought is the same hole seen from below: turn z about
-// instead, since ISCO and Circular take the spin's sense to be the one
-// above.
+// So the fourth power of twice the mass must not pass the largest
+// float64, and the fourth power of the mass must not fall below the
+// least normal one, where it would lose its digits.
+var (
+	heaviest = math.Pow(math.MaxFloat64, fourthRoot) / horizonInMasses
+	lightest = math.Pow(leastNormal, fourthRoot)
+)
+
+// The numbers the masses above come from.
+const (
+	fourthRoot  = 0.25      // defined: a fourth root is the power a quarter
+	leastNormal = 0x1p-1022 // defined by float64: its least normal number
+	// horizonInMasses is the farthest a horizon lies, in masses. Defined
+	// by kerr's metric: the horizon is M + root(M² - a²), and 2M at a = 0.
+	horizonInMasses = 2
+)
+
+// NewHole returns a kerr hole of the given mass and spin, both lengths
+// in units where G = c = 1: spin is a = J/M, the angular momentum per
+// unit mass, so a spin and a mass compare directly. returns nil and error
+// for:
+//   - a mass outside what hole's arithmetic holds, about 1.2e-77 to
+//     5.8e76 in the caller's unit of length: past those, the hole could
+//     not place the points of its own horizon; see heaviest and lightest
+//   - a spin below zero: a hole turning the other way is this one seen
+//     from below, so turn z about instead
+//   - a spin at or past the mass: at a = M the inner and outer horizons
+//     meet, and past it there is no horizon and no black hole
 //
-// A mass or a spin that is not a number is refused, as is an infinite
-// mass.
-func NewHole(mass, spin float64) *Hole {
-	if spin >= nothing && spin < mass && mass <= math.MaxFloat64 {
-		return &Hole{mass: mass, spin: spin}
+// NaN, either infinity, and a mass of zero or below fall outside these
+// ranges, so they are refused with them.
+//
+// a spin of zero is a hole: no real one stands still, but it is the
+// limit the textbook's closed forms are checked against.
+//
+// a point farther than about 1.2e77 from the hole overflows radius,
+// whatever the hole, since radius takes the fourth power of its
+// distance. NewHole cannot guard that; the caller's units can.
+func NewHole(mass, spin float64) (*Hole, error) {
+	if !(mass >= lightest && mass <= heaviest) {
+		return nil, fmt.Errorf("hole: a mass of %v, outside %v to %v",
+			mass, lightest, heaviest)
 	}
-	return nil
+	if !(spin >= nothing && spin < mass) {
+		return nil, fmt.Errorf("hole: a spin of %v, outside %v to "+
+			"below %v", spin, nothing, mass)
+	}
+	return &Hole{mass: mass, spin: spin}, nil
 }
 
 // Mass is the hole's mass M, which is also its unit of length.

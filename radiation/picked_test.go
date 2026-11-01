@@ -57,6 +57,11 @@ type picked struct {
 		Lowest    float64 `json:"lowest jy"`
 		Highest   float64 `json:"highest jy"`
 	}
+	NamedUnits struct {
+		Wavelengths map[string]float64 `json:"wavelengths"`
+		Tolerance   float64            `json:"tolerance"`
+		BelowZero   float64            `json:"below zero"`
+	} `json:"named units"`
 	Planck planckNumbers `json:"planck"`
 	Fermi  struct {
 		Highest   float64 `json:"highest ev"`

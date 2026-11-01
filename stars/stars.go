@@ -5,7 +5,7 @@
 // constants and the units; celestial's research data what stars takes
 // on trust besides, each with its source; mainsequence.txt a table.
 //
-// A star's life is a run of stages, each a state that lasts a while and
+// A star's life is a run of parts, each a state that lasts a while and
 // hands on to the next. Two are built: burning, and ended. What an ended
 // star leaves comes with the published tables that say which and how.
 package stars
@@ -16,22 +16,22 @@ import (
 	"github.com/janearc/celestial/measure"
 )
 
-// Stage is a step in a star's life.
-type Stage struct{ name string }
+// Life is the part of its life a star is in: Burning or Ended.
+type Life struct{ name string }
 
-// String is the stage's name.
-func (stage Stage) String() string { return stage.name }
+// String returns the name of the part of life.
+func (life Life) String() string { return life.name }
 
 // Burning is a star on the main sequence, burning hydrogen.
-func Burning() Stage { return Stage{"burning"} }
+func Burning() Life { return Life{"burning"} }
 
 // Ended is a star whose burning is over. Until the remnants come, it
 // gives no light here.
-func Ended() Stage { return Stage{"ended"} }
+func Ended() Life { return Life{"ended"} }
 
 // Star is a star at an age: what it is, and what it gives off.
 type Star struct {
-	stage      Stage
+	life       Life
 	heat       measure.Temperature
 	luminosity measure.Power
 	radius     measure.Length
@@ -54,27 +54,23 @@ func NewStar(mass measure.Mass, age measure.Duration) (*Star, error) {
 	if err != nil {
 		return nil, err
 	}
-	lightest, heaviest := ends(table)
-	if !(mass.Over(lightest.mass) >= whole &&
-		mass.Over(heaviest.mass) <= whole) {
-		return nil, refuse("%v suns: the main sequence runs from %v "+
-			"(%s) to %v (%s)", mass.InSolarMasses(),
-			lightest.mass.InSolarMasses(), lightest.kind,
-			heaviest.mass.InSolarMasses(), heaviest.kind)
+	born, err := newDwarf(table, mass)
+	if err != nil {
+		return nil, err
 	}
 	cosmos := measure.Cosmos()
 	if lived := age.Over(cosmos); !(lived >= nothing && lived <= whole) {
 		return nil, refuse("a star %v years old: the universe is %v",
 			age.InYears(), cosmos.InYears())
 	}
-	star := newStar(along(table, mass), age)
+	star := newStar(*born, age)
 	return &star, nil
 }
 
-// newStar walks a star's stages from its birth until its age runs out
-// inside one, and is the star as that stage has it.
+// newStar walks the steps of a star's life from its birth until its age
+// runs out inside one, and is the star as that step has it.
 func newStar(born dwarf, age measure.Duration) Star {
-	at, left := life(), age
+	at, left := newSteps(), age
 	for at.next != nil {
 		span := at.lasts(born)
 		if left.Over(span) < whole {
@@ -86,29 +82,30 @@ func newStar(born dwarf, age measure.Duration) Star {
 	return at.is(born)
 }
 
-// step is a stage as a state: how long it lasts for a star, what the
-// star is during it, and the step after. The last lasts for ever.
+// step is one part of a star's life as a state: how long it lasts for a
+// star, what the star is during it, and the step after. The last lasts
+// for ever.
 type step struct {
 	lasts func(dwarf) measure.Duration
 	is    func(dwarf) Star
 	next  *step
 }
 
-// life is a star's stages, first to last.
-func life() *step {
+// newSteps returns the steps of a star's life, first to last.
+func newSteps() *step {
 	ended := &step{is: over}
 	return &step{lasts: lifetime, is: shining, next: ended}
 }
 
 // over is a star whose burning has ended: it gives no light here.
-func over(dwarf) Star { return Star{stage: Ended()} }
+func over(dwarf) Star { return Star{life: Ended()} }
 
 // shining is a star burning on the main sequence: its brightness and
 // radius from the table, and its temperature what those two make.
 func shining(born dwarf) Star {
 	surface := measure.Sphere(born.radius)
 	heat := measure.SurfaceTemperature(born.light, surface)
-	return Star{stage: Burning(), luminosity: born.light,
+	return Star{life: Burning(), luminosity: born.light,
 		radius: born.radius, heat: heat}
 }
 
@@ -119,8 +116,8 @@ func lifetime(born dwarf) measure.Duration {
 	return born.light.Spending(fuel)
 }
 
-// Stage is what the star is at its age.
-func (star Star) Stage() Stage { return star.stage }
+// Life returns the part of its life the star is in at its age.
+func (star Star) Life() Life { return star.life }
 
 // Temperature is the star's surface temperature; an ended star's is
 // nought here.

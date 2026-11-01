@@ -16,10 +16,10 @@
   "young giant": {"suns": 10, "years": 1e7, "coolest kelvin": 20000},
   "old giant": {"suns": 10, "years": 1e8},
   "ends": [
-    {"suns": 1, "years": 13e9, "stage": "ended"},
-    {"suns": 3, "years": 1e9, "stage": "ended"},
-    {"suns": 40, "years": 1e8, "stage": "ended"},
-    {"suns": 0.5, "years": 13.7e9, "stage": "burning"}
+    {"suns": 1, "years": 13e9, "life": "ended"},
+    {"suns": 3, "years": 1e9, "life": "ended"},
+    {"suns": 40, "years": 1e8, "life": "ended"},
+    {"suns": 0.5, "years": 13.7e9, "life": "burning"}
   ],
   "dark": {"suns": 12, "years": 1e8},
   "masses": {"least": 0.08, "most": 59},

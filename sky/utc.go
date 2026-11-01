@@ -8,7 +8,7 @@ func (moment Instant) utcToTAI() (*Instant, error) {
 		return nil, err
 	}
 	seconds := moment.part * dayLength(UTC(), moment.day)
-	atomic := settled(TAI(), moment.day, (seconds+ahead)/secondsADay)
+	atomic := settled(TAI(), moment.day, (seconds+*ahead)/secondsADay)
 	return &atomic, nil
 }
 

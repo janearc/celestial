@@ -1,12 +1,9 @@
-// Package grav is bodies, and the gravity between them: the gravBody
-// of the engineering guide. doc/grav.md is its contract.
+// Package grav is bodies under gravity, and the gravity between them.
+// doc/grav.md is the plan for what comes next.
 //
-// Every value grav takes in was made by a constructor that refused what
-// it couldn't be, and every value it hands back is reached only through
-// its methods.
-//
-// This is the floor: a body known only by its mass, which is all an
-// orbit needs. The full door, NewBody, comes with the tables it needs.
+// For now a body is known only by its mass, which is all an orbit needs.
+// A body with matter, an age and a spin waits for the published tables
+// that give its size.
 package grav
 
 import (
@@ -15,14 +12,14 @@ import (
 	"github.com/janearc/celestial/measure"
 )
 
-// Body is a body under gravity
+// Body is a body under gravity.
 type Body struct {
 	mass measure.Mass
 	gm   measure.Length
 }
 
-// Point is a body known only by its mass, the way an orbit sees it. It
-// refuses a mass not above nought, or not finite, and then gives no body.
+// Point returns a body known only by its mass, the way an orbit sees it.
+// returns nil and error for a mass that is not finite and above zero.
 func Point(mass measure.Mass) (*Body, error) {
 	if !mass.Positive() {
 		return nil, refuse("a body of %v suns", mass.InSolarMasses())
@@ -30,20 +27,20 @@ func Point(mass measure.Mass) (*Body, error) {
 	return newBody(mass), nil
 }
 
-// newBody builds a body that has passed the door, working out its GM
-// once
+// newBody returns a body of a mass already checked, with its GM worked
+// out once.
 func newBody(mass measure.Mass) *Body {
 	return &Body{mass: mass, gm: measure.GM(mass)}
 }
 
-// Mass is the body's mass
+// Mass returns the body's mass.
 func (body Body) Mass() measure.Mass { return body.mass }
 
-// GM is the body's mass times G: in natural units a length, half the
-// horizon radius of a hole of that mass
+// GM returns the body's mass times G. In natural units that's a length:
+// half the horizon radius of a still hole of that mass.
 func (body Body) GM() measure.Length { return body.gm }
 
-// refuse is a constructor's error, saying what it would not make
+// refuse returns an error for something a constructor won't make.
 func refuse(format string, about ...any) error {
 	return fmt.Errorf("grav: "+format, about...)
 }

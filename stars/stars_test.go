@@ -18,7 +18,7 @@ type birth struct {
 	Why   string  `json:"why"`
 	Suns  float64 `json:"suns"`
 	Years float64 `json:"years"`
-	Stage string  `json:"stage"`
+	Life  string  `json:"life"`
 }
 
 // picked is the numbers these tests use, from testdata/stars.json.
@@ -129,8 +129,8 @@ func TestAStarRefusesWhatIsNotAStar(test *testing.T) {
 func TestTheSunIsTheSun(test *testing.T) {
 	want := pickedNumbers(test).Sun
 	sun := born(test, want.birth)
-	if sun.Stage() != stars.Burning() {
-		test.Fatalf("the sun is %v, not burning", sun.Stage())
+	if sun.Life() != stars.Burning() {
+		test.Fatalf("the sun is %v, not burning", sun.Life())
 	}
 	if kelvin := sun.Temperature().InKelvin(); !near(kelvin, want.Kelvin,
 		want.KelvinTol) {
@@ -150,15 +150,15 @@ func TestTheSunIsTheSun(test *testing.T) {
 // eleven.
 func TestTheSunBurnsForAboutTenBillionYears(test *testing.T) {
 	numbers := pickedNumbers(test)
-	if stage := born(test, numbers.SunBurning).Stage(); stage !=
+	if life := born(test, numbers.SunBurning).Life(); life !=
 		stars.Burning() {
 		test.Errorf("the sun at %v years is %v", numbers.SunBurning.Years,
-			stage)
+			life)
 	}
-	if stage := born(test, numbers.SunEnded).Stage(); stage !=
+	if life := born(test, numbers.SunEnded).Life(); life !=
 		stars.Ended() {
 		test.Errorf("the sun at %v years is %v", numbers.SunEnded.Years,
-			stage)
+			life)
 	}
 }
 
@@ -180,14 +180,14 @@ func TestABigStarIsHotAndDiesYoung(test *testing.T) {
 	numbers := pickedNumbers(test)
 	young := born(test, numbers.YoungGiant.birth)
 	kelvin := young.Temperature().InKelvin()
-	if young.Stage() != stars.Burning() ||
+	if young.Life() != stars.Burning() ||
 		!(kelvin >= numbers.YoungGiant.Coolest) {
 		test.Errorf("ten suns at ten million years is %v at %v kelvin",
-			young.Stage(), kelvin)
+			young.Life(), kelvin)
 	}
-	if old := born(test, numbers.OldGiant); old.Stage() != stars.Ended() {
+	if old := born(test, numbers.OldGiant); old.Life() != stars.Ended() {
 		test.Errorf("ten suns at a hundred million years is %v",
-			old.Stage())
+			old.Life())
 	}
 }
 
@@ -195,9 +195,9 @@ func TestABigStarIsHotAndDiesYoung(test *testing.T) {
 func TestAStarEndsWhenItsMassSays(test *testing.T) {
 	for _, given := range pickedNumbers(test).Ends {
 		made := born(test, given)
-		if made.Stage().String() != given.Stage {
+		if made.Life().String() != given.Life {
 			test.Errorf("%v suns at %v years is %v, not %v", given.Suns,
-				given.Years, made.Stage(), given.Stage)
+				given.Years, made.Life(), given.Life)
 		}
 	}
 }
@@ -206,9 +206,9 @@ func TestAStarEndsWhenItsMassSays(test *testing.T) {
 // here.
 func TestTheEndedGiveNoLight(test *testing.T) {
 	ended := born(test, pickedNumbers(test).Dark)
-	if ended.Stage() != stars.Ended() {
+	if ended.Life() != stars.Ended() {
 		test.Fatalf("twelve suns at a hundred million years is %v",
-			ended.Stage())
+			ended.Life())
 	}
 	if light := ended.Luminosity().InWatts(); light != nothing {
 		test.Errorf("an ended star shines %v W", light)
@@ -260,10 +260,10 @@ func (along sequence) check(test *rapid.T) {
 	heavy := rapid.Float64Range(light, masses.Most).Draw(test, "heavier")
 	lighter := born(test, birth{Suns: light})
 	heavier := born(test, birth{Suns: heavy})
-	if lighter.Stage() != stars.Burning() ||
-		heavier.Stage() != stars.Burning() {
+	if lighter.Life() != stars.Burning() ||
+		heavier.Life() != stars.Burning() {
 		test.Fatalf("newly born, %v suns is %v and %v is %v", light,
-			lighter.Stage(), heavy, heavier.Stage())
+			lighter.Life(), heavy, heavier.Life())
 	}
 	if !along.bothOutOfOrder(light, heavy) &&
 		!(heavier.Luminosity().Over(lighter.Luminosity()) >= whole) {
@@ -317,15 +317,15 @@ func TestAStarBetweenTwoRowsIsBetweenThem(test *testing.T) {
 	}
 }
 
-// The anti-test: age moves only a star's stage. While it burns, its
-// light, size and heat are its birth's: the sun newly born and the sun
-// at its own age shine alike here, so age cannot have crept into how a
-// star shines.
-func TestAgeMovesOnlyTheStage(test *testing.T) {
+// The anti-test: age moves a star only from one part of its life to the
+// next. While it burns, its light, size and heat are its birth's: the
+// sun newly born and the sun at its own age shine alike here, so age
+// cannot have crept into how a star shines.
+func TestAgeMovesOnlyThePartOfLife(test *testing.T) {
 	numbers := pickedNumbers(test)
 	newborn := born(test, birth{Suns: numbers.Sun.Suns})
 	grown := born(test, numbers.Sun.birth)
-	if newborn.Stage() != grown.Stage() ||
+	if newborn.Life() != grown.Life() ||
 		newborn.Luminosity() != grown.Luminosity() ||
 		newborn.Radius() != grown.Radius() ||
 		newborn.Temperature() != grown.Temperature() {

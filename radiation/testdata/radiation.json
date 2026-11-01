@@ -25,6 +25,20 @@
     "microwave": {"lo": 1e6, "hi": 1.5e7},
     "radio": {"lo": 1e5, "hi": 1e11}
   },
+  "named units": {
+    "about": "one of each unit a named function reads, and its wavelength worked by hand on 2026-10-31 from the si's exact h, c and e: hc = 1239.84198433 eV nm, so a keV is 1.23984198433 nm and each larger prefix a thousandth of the one before; c = 299 792 458 m/s, so a MHz is 299 792 458 000 nm and a GHz a thousandth of it; and a micron is a thousand nm. the hand values are printed to twelve figures, so they are held to 1e-11. the refused values are picked: zero, below zero, NaN and both infinities are added by the test",
+    "wavelengths": {
+      "keV": 1.23984198433,
+      "MeV": 0.00123984198433,
+      "GeV": 1.23984198433e-6,
+      "TeV": 1.23984198433e-9,
+      "MHz": 299792458000,
+      "GHz": 299792458,
+      "um": 1000
+    },
+    "tolerance": 1e-11,
+    "below zero": -1
+  },
   "planck": {
     "about": "the radiation constants are CODATA 2018's, all exact, read on 2026-10-31 in cited-sources/codata-2018.pdf (Tiesinga and others, Rev. Mod. Phys. 93, 025010), table XXXI: the first radiation constant for spectral radiance c1L = 2hc^2 sr^-1 = 1.191 042 972... x 10^-16 W m^2 sr^-1, the second c2 = hc/k = 1.438 776 877... x 10^-2 m K, wien's b = 2.897 771 955... x 10^-3 m K and stefan-boltzmann's sigma = 5.670 374 419... x 10^-8 W m^-2 K^-4. the table prints ten figures, so the law is held to 1e-8. the rest is picked, 2026-10-31: four points from the ultraviolet to the thermal infrared, the sun's nominal 5772 K for wien and stefan, a part in a thousand either side of wien's peak, and stefan's sum from 10 nm to 1 cm in 20000 even steps of log wavelength by simpson's rule, held to a part in a million",
     "c1l": 1.191042972e-16,

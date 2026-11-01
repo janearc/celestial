@@ -30,6 +30,8 @@ func (hole Hole) pace(radius float64) float64 {
 //
 // A ray crossing the horizon the other way, light that fell in, keeps its
 // time in hand and crosses at a full step, as the chart lets.
+//
+// PaceIn is moving to slayer and will change; see the package doc.
 func (hole Hole) PaceIn(ray Ray) float64 {
 	return choices().time * hole.Radius(ray.Space()) /
 		math.Abs(hole.timeVelocity(ray))
@@ -41,6 +43,8 @@ func (hole Hole) PaceIn(ray Ray) float64 {
 //
 // Light leaving the edge outward has its time run as fast forward, and
 // is not hovering: it gets out.
+//
+// Hovering is moving to slayer and will change; see the package doc.
 func (hole Hole) Hovering(ray Ray) bool {
 	return runsAway(hole.timeVelocity(ray), ray.momentum.time)
 }
@@ -87,6 +91,8 @@ func runsAway(timeVelocity, timeMomentum float64) bool {
 // Each step is a runge-kutta step of PaceIn's size, and a step that
 // would cross the far radius is taken anyway, so the ray may end a
 // little past it. A ray that is not a number is stuck at once.
+//
+// March is moving to slayer and will change; see the package doc.
 func (hole Hole) March(ray Ray, farRadius float64, steps int) (Ray, Fate) {
 	point, momentum := ray.position, ray.momentum
 	bounds := hole.limitsOf(point, momentum)
@@ -173,6 +179,9 @@ func (hole Hole) ImpactParameter(ray Ray) float64 {
 // to the square of half a step over twice the radius: half a part in
 // ten thousand. For a ray that is not a number it is not a number, at
 // once.
+//
+// ClosestApproach is moving to slayer and will change; see the package
+// doc.
 func (hole Hole) ClosestApproach(ray Ray, steps int) float64 {
 	point, momentum := ray.position, ray.momentum
 	bounds := hole.limitsOf(point, momentum)
@@ -208,6 +217,9 @@ func (hole Hole) ClosestApproach(ray Ray, steps int) float64 {
 // A ray that goes more than half round reads as the angle between its two
 // ways, not as its turning. A ray that does not escape has no deflection,
 // and the answer is not a number.
+//
+// DeflectionAngle is moving to slayer and will change; see the package
+// doc.
 func (hole Hole) DeflectionAngle(
 	ray Ray, farRadius float64, steps int,
 ) float64 {
