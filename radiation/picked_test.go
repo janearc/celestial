@@ -17,6 +17,12 @@ type edges struct {
 	Hi float64 `json:"hi"`
 }
 
+// point is a wavelength and a temperature to read planck's law at.
+type point struct {
+	NM     float64 `json:"nm"`
+	Kelvin float64 `json:"kelvin"`
+}
+
 // written is a profile as the test data writes it.
 type written struct {
 	Name   string `json:"name"`
@@ -51,7 +57,8 @@ type picked struct {
 		Lowest    float64 `json:"lowest jy"`
 		Highest   float64 `json:"highest jy"`
 	}
-	Fermi struct {
+	Planck planckNumbers `json:"planck"`
+	Fermi  struct {
 		Highest   float64 `json:"highest ev"`
 		Lowest    float64 `json:"lowest ev"`
 		Tolerance float64

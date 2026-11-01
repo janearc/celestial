@@ -152,6 +152,10 @@ run extract . :: grep -n -A1 -E Resolution[[:space:]]B2[[:space:]]of[[:space:]]t
 run extract . :: pdftotext -layout cited-sources/codata-2018.pdf cited-sources/codata-2018.txt
 run extract . :: grep -n -m1 -E TABLE[[:space:]]XXXI[.][[:space:]]+The[[:space:]]CODATA[[:space:]]recommended[[:space:]]values cited-sources/codata-2018.txt
 run extract . :: grep -n -E ^Planck[[:space:]]length.*1[.]616[[:space:]]255 cited-sources/codata-2018.txt
+run extract . :: grep -n -E ^Stefan-Boltzmann[[:space:]]constant.*5[.]670[[:space:]]374[[:space:]]419 cited-sources/codata-2018.txt
+run extract . :: grep -n -E ^first[[:space:]]radiation[[:space:]]constant[[:space:]]for[[:space:]]spectral.*1[.]191[[:space:]]042[[:space:]]972 cited-sources/codata-2018.txt
+run extract . :: grep -n -E ^second[[:space:]]radiation[[:space:]]constant.*1[.]438[[:space:]]776[[:space:]]877 cited-sources/codata-2018.txt
+run extract . :: grep -n -A1 -E ^Wien[[:space:]]displacement[[:space:]]law[[:space:]]constants cited-sources/codata-2018.txt
 run extract . :: pdftotext -layout cited-sources/tobiska-nusinov-2004.pdf cited-sources/tobiska-nusinov-2004.txt
 run extract . :: grep -n -E Status[[:space:]]of[[:space:]]ISO[[:space:]]Draft[[:space:]]International[[:space:]]Standard cited-sources/tobiska-nusinov-2004.txt
 run extract . :: grep -n -E [(]0[.]00001[^0-9]+0[.]001[)][[:space:]]nm cited-sources/tobiska-nusinov-2004.txt
