@@ -5,10 +5,9 @@ import (
 	"strings"
 )
 
-// Estimate is a value the centre publishes for an event, in si units, and its
-// credible interval, as the centre states it: how far below and above the
-// value the interval runs. the centre gives ninety per cent intervals. A bound
-// it leaves blank is unknown.
+// Estimate stores a catalogue value in SI with its reported 90% credible
+// interval. Bounds are offsets below and above the central value; a missing
+// bound leaves the interval unknown.
 type Estimate struct {
 	unit         string
 	value        float64
@@ -16,16 +15,16 @@ type Estimate struct {
 	bounded      bool
 }
 
-// Value is the estimate, in the si unit Unit names.
+// Value returns the estimate in the SI unit named by Unit.
 func (estimate *Estimate) Value() float64 { return estimate.value }
 
-// Unit is the si unit the estimate is in, as written: kg, m, s^-1, J, W,
-// sr, or nothing for a pure number.
+// Unit returns kg, m, s^-1, J, W, sr, or an empty string for a dimensionless
+// value.
 func (estimate *Estimate) Unit() string { return estimate.unit }
 
-// Interval is the lowest and highest the credible interval reaches, and
-// whether the centre gave both its bounds. When it did not, the interval is
-// not known and the two are the value.
+// Interval returns absolute lower and upper limits and whether both bounds were
+// reported. If either is missing, both returned endpoints equal Value and known
+// is false.
 func (estimate *Estimate) Interval() (lowest, highest float64, known bool) {
 	if !estimate.bounded {
 		return estimate.value, estimate.value, false
@@ -34,8 +33,7 @@ func (estimate *Estimate) Interval() (lowest, highest float64, known bool) {
 		true
 }
 
-// String is the estimate as the centre writes it: the value, the interval's
-// reach below and above, and the unit.
+// String formats the central value, lower and upper offsets, and unit.
 func (estimate *Estimate) String() string {
 	written := fmt.Sprintf("%g %s", estimate.value, estimate.unit)
 	if estimate.bounded {

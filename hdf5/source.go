@@ -13,22 +13,21 @@ import (
 // which names it the undefined address.
 const undefinedAddress = math.MaxUint64
 
-// source is the file's bytes behind an io.ReaderAt, with the file's size,
-// so that no read goes past the end and no read is asked for more than
-// the file holds.
+// source bounds io.ReaderAt access by the file’s declared size, preventing
+// reads outside the file or larger than it.
 type source struct {
 	reader io.ReaderAt
 	size   uint64
 }
 
-// read is so many bytes at an address. A range that is not wholly inside
-// the file is a damaged file; a reader that fails is its own error.
+// read fetches a bounded byte range. Out-of-file ranges are corrupt; errors
+// from the underlying reader retain their own cause.
 func (from *source) read(at, count uint64, section string) ([]byte,
 	error) {
 	if at > from.size || count > from.size-at {
-		return nil, refuse(errCorrupt, at, section,
-			"%d bytes wanted, but the file is %d bytes long", count,
-			from.size)
+		return nil, fmt.Errorf("hdf5: file is damaged: %d bytes "+
+			"wanted, but the file is %d bytes long, at address "+
+			"%#x (spec %s)", count, from.size, at, section)
 	}
 	got := make([]byte, count)
 	read, err := from.reader.ReadAt(got, int64(at))
@@ -42,10 +41,8 @@ func (from *source) read(at, count uint64, section string) ([]byte,
 		err)
 }
 
-// cursor walks forward through bytes already read, little-endian, which
-// is the byte order of every field in the specification. A read past the
-// end gives zero and sets short; a caller checks short once, after the
-// structure.
+// cursor decodes previously read little-endian bytes. An overrun returns zero
+// and sets short, which the caller checks after parsing a structure.
 type cursor struct {
 	data  []byte
 	at    int
@@ -63,7 +60,7 @@ const (
 	pastEnd   = 0 // defined: what a field past the end reads as
 )
 
-// take is the next so many bytes, or nothing if fewer remain.
+// take returns the next count bytes, or nothing if too few remain.
 func (walk *cursor) take(count int) []byte {
 	if count < noBytes || count > len(walk.data)-walk.at {
 		walk.short = true
@@ -75,14 +72,13 @@ func (walk *cursor) take(count int) []byte {
 	return got
 }
 
-// opens is whether the next bytes are a signature, the four or eight
-// letters each of the specification's structures starts with.
+// opens checks the next bytes against a structure signature.
 func (walk *cursor) opens(signature []byte) bool {
 	got := walk.take(len(signature))
 	return bytes.Equal(got, signature)
 }
 
-// skip passes over so many bytes.
+// skip advances by a byte count.
 func (walk *cursor) skip(count int) { walk.take(count) }
 
 // u8 is the next byte.
@@ -121,7 +117,7 @@ func (walk *cursor) u64() uint64 {
 	return binary.LittleEndian.Uint64(got)
 }
 
-// align passes over bytes until the position is a multiple of a count.
+// align advances to a multiple of the requested byte alignment.
 func (walk *cursor) align(count int) {
 	if rest := walk.at % count; rest != noBytes {
 		walk.skip(count - rest)

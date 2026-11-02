@@ -1,9 +1,8 @@
-// Package grav is bodies under gravity, and the gravity between them.
-// doc/grav.md is the plan for what comes next.
+// Package grav describes bodies through their gravitational mass. The current
+// Body stores mass and GM, enough for point-mass calculations.
 //
-// For now a body is known only by its mass, which is all an orbit needs.
-// A body with matter, an age and a spin waits for the published tables
-// that give its size.
+// Composition, age, spin, and radii derived from published structural models
+// remain the design in doc/grav.md, not additional implemented constructors.
 package grav
 
 import (
@@ -12,23 +11,24 @@ import (
 	"github.com/janearc/celestial/measure"
 )
 
-// Body is a body under gravity.
+// Body stores a point mass and its gravitational parameter GM.
 type Body struct {
 	mass measure.Mass
 	gm   measure.Length
 }
 
-// Point returns a body known only by its mass, the way an orbit sees it.
-// returns nil and error for a mass that is not finite and above zero.
+// Point constructs a body known only by mass, as a point-mass orbit sees it.
+// The mass must be positive and finite; invalid input returns no body and an
+// error.
 func Point(mass measure.Mass) (*Body, error) {
 	if !mass.Positive() {
-		return nil, refuse("a body of %v suns", mass.InSolarMasses())
+		return nil, fmt.Errorf("grav: a body of %v suns",
+			mass.InSolarMasses())
 	}
 	return newBody(mass), nil
 }
 
-// newBody returns a body of a mass already checked, with its GM worked
-// out once.
+// newBody caches GM for a mass that has already been validated.
 func newBody(mass measure.Mass) *Body {
 	return &Body{mass: mass, gm: measure.GM(mass)}
 }
@@ -36,11 +36,6 @@ func newBody(mass measure.Mass) *Body {
 // Mass returns the body's mass.
 func (body Body) Mass() measure.Mass { return body.mass }
 
-// GM returns the body's mass times G. In natural units that's a length:
-// half the horizon radius of a still hole of that mass.
+// GM returns mass times G as a length in natural units: half the Schwarzschild
+// horizon radius for that mass.
 func (body Body) GM() measure.Length { return body.gm }
-
-// refuse returns an error for something a constructor won't make.
-func refuse(format string, about ...any) error {
-	return fmt.Errorf("grav: "+format, about...)
-}

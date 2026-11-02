@@ -7,13 +7,10 @@ import (
 	"slices"
 )
 
-// Share is the fraction of light passed in each of a run of bands: what a
-// filter lets through, or what a surface sends back. It is not light.
-// Light arriving and a share of it are different things, so they are
-// different types, and Lit is the one way to put them together.
-//
-// Outside its run a share passes nothing, unless it was made Even, which
-// passes the same part in every band. The zero value passes nothing.
+// Share represents transmission or reflectance fractions, not emitted light.
+// Lit applies it to a spectrum. A finite curve passes nothing outside its
+// stored bands; Even applies a fraction everywhere. The zero value transmits
+// nothing.
 type Share struct {
 	first  Band
 	part   []float64
@@ -26,9 +23,8 @@ const (
 	passesAll     = 1.0 // defined: all of it
 )
 
-// fraction is whether a part is a fraction a share can be: nothing to
-// all, and a number. A surface that sends back more than arrives is a
-// lamp.
+// fraction validates a finite value in [0, 1]. A surface returning more light
+// than arrives needs an emission model instead.
 func fraction(part float64) error {
 	if part >= passesNothing && part <= passesAll {
 		return nil
@@ -37,9 +33,8 @@ func fraction(part float64) error {
 		"is not one", part)
 }
 
-// Even is a share that passes the same part of the light in every band:
-// a grey filter, or a perfectly grey surface. It refuses a part that is
-// not a fraction, and then gives no share.
+// Even constructs a wavelength-independent fraction, like a grey filter or
+// neutral surface. Invalid fractions return an error.
 func Even(part float64) (*Share, error) {
 	if err := fraction(part); err != nil {
 		return nil, err
@@ -47,15 +42,13 @@ func Even(part float64) (*Share, error) {
 	return &Share{beyond: part}, nil
 }
 
-// Shares is a share given as the part passed at wavelengths in
-// nanometres, as measured: a reflectance or transmittance curve. It
-// refuses no wavelengths at all, a wavelength not longer than nothing
-// and a part that is not a fraction, and then gives no share.
+// Shares constructs transmission or reflectance from samples at integer
+// nanometres. Empty samples, nonpositive wavelengths, or fractions outside [0,
+// 1] return an error and no share.
 //
-// A band's part is the mean of the wavelengths given in it, since a
-// share is a fraction and fractions do not add. A band inside the run
-// with none given takes the straight line between its neighbours, read
-// at its centre. Outside the run nothing passes.
+// Samples within a band are averaged, not summed. Unsampled bands inside the
+// run interpolate between neighbouring measurements at the band centre. Outside
+// the sampled run, no light passes.
 func Shares(spectrum map[int]float64) (*Share, error) {
 	if len(spectrum) == empty {
 		return nil, errors.New("a share needs at least one " +
@@ -83,8 +76,8 @@ func Shares(spectrum map[int]float64) (*Share, error) {
 	return &share, nil
 }
 
-// partIn is one band's part: the mean of the wavelengths given in it, or
-// the line between its neighbours at its centre when none are.
+// partIn averages measured fractions in a band, or interpolates between
+// neighbouring wavelengths at its centre when none fall inside.
 func partIn(step grid, band Band, order []int,
 	spectrum map[int]float64) float64 {
 	var sum float64
@@ -122,7 +115,7 @@ func past(nm int, centre float64) int {
 	return shortOf
 }
 
-// Part is the fraction the share passes in one band.
+// Part returns the fraction transmitted in a band.
 func (share Share) Part(band Band) float64 {
 	place := int(band - share.first)
 	if place < firstPlace || place >= len(share.part) {
@@ -131,9 +124,9 @@ func (share Share) Part(band Band) float64 {
 	return share.part[place]
 }
 
-// Lit is light after a share of it: in every band, the light's power
-// times the part passed there. No share at all passes nothing, as the
-// zero Share does.
+// Lit returns band power multiplied by the corresponding transmission or
+// reflectance fraction. A nil share, like the zero Share, passes no light. The
+// input spectrum is not modified.
 func Lit(light Light, share *Share) Light {
 	if share == nil {
 		share = &Share{}

@@ -15,8 +15,8 @@ func floatAt(encoded []byte, offset int) float32 {
 	return math.Float32frombits(binary.LittleEndian.Uint32(encoded[offset:]))
 }
 
-// Before a camera is set the camera's part is all nought, and the hole's is
-// the hole's as float32.
+// Before a camera is set the camera's part is all zero, and the hole's is the
+// hole's as float32.
 func TestShaderParamsBeforeACamera(t *testing.T) {
 	numbers := pickedNumbers(t)
 	from := numbers.Holes.Fast
@@ -115,7 +115,7 @@ func TestShaderParamsBytesAreTheShadersLayout(t *testing.T) {
 }
 
 // The layout has no camera in it before one is set: the camera's bytes are
-// nought, and the hole's are not.
+// zero, and the hole's are not.
 func TestShaderParamsBytesBeforeACameraAreNought(t *testing.T) {
 	numbers := pickedNumbers(t)
 	layout := numbers.GPU.Layout

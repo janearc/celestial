@@ -45,5 +45,6 @@
     {"parameter": "luminosity_distance", "unit": "MPC"},
     {"parameter": "luminosity_distance", "unit": "kpc"},
     {"parameter": "luminosity_distance", "unit": "deg2"}
-  ]
+  ],
+  "made up": {"about": "a parameter the tests write into the event, picked by the test author, 2026-11-01: its name is in no file of the centre's, so only what the tests write gives it; its value, its one bound, and the centre's own unit for a mass", "name": "made_up_mass", "value": 30, "lower": -2, "unit": "M_sun", "pipeline": "made_up_pipeline"}
 }

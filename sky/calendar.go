@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-// The gregorian reform: the day after 1582 october 4, the last julian
-// day, was october 15, the first gregorian one.
+// The Gregorian reform: the day after 1582 October 4, the last Julian day, was
+// October 15, the first Gregorian one.
 const (
 	reformYear   = 1582 // defined by the reform
 	reformMonth  = 10   // defined by the reform: october
 	skippedFrom  = 4    // defined by the reform: the last julian day
 	skippedUntil = 15   // defined by the reform: the first gregorian day
-	// gregorianFrom is october 15 as a modified julian day, defined by
-	// the reform.
+	// gregorianFrom is October 15 as a modified Julian day, defined by the
+	// reform.
 	gregorianFrom = -100840
 )
 
@@ -23,7 +23,7 @@ const (
 	monthsAYear  = 12 // defined by the calendar
 	february     = 2  // defined by the calendar
 	leapFebruary = 29 // defined by the calendar: february in a leap year
-	// nonLeapYear is any year with no february 29, which daysIn asks Go's
+	// nonLeapYear is any year with no February 29, which daysIn asks Go's
 	// time package about; defined by the calendar.
 	nonLeapYear     = 2001
 	leapEvery       = 4   // defined by both calendars: a year in four
@@ -44,12 +44,12 @@ const (
 
 // Calendar is the instant at a date and a time of day on a scale.
 //
-// Dates from 1582 october 15 are gregorian, and dates before it are
-// julian. Years are counted as astronomers count them: year nought is
-// the year before year one.
+// Dates from 1582 October 15 are Gregorian, and dates before it are julian.
+// Years are counted as astronomers count them: year zero is the year before
+// year one.
 //
-// A utc day that ends in a leap second has a 60th second in its last
-// minute, and no other day does. returns nil and error for:
+// A UTC day that ends in a leap second has a 60th second in its last
+// minute, and no other day does. Returns an error for:
 //   - a scale sky does not know
 //   - a date neither calendar has, or one of the ten days of 1582
 //     october the reform skipped
@@ -94,25 +94,25 @@ func dated(year, month, day int) error {
 
 // daysIn is how many days a month has, in the calendar its year uses.
 //
-// The two calendars differ only in which years have a february 29, so
-// daysIn decides that, and asks Go's time package for every other month
-// in a year without one.
+// The two calendars differ only in which years have a February 29, so daysIn
+// decides that, and asks Go's time package for every other month in a year
+// without one.
 func daysIn(year, month int) int {
 	if month == february && leapYear(year) {
 		return leapFebruary
 	}
 	next := time.Month(month + firstMonth)
-	// day nought of the next month, which time reads as the last of this
+	// day zero of the next month, which time reads as the last of this
 	lastOfThisMonth := firstDay - nextDay
 	return time.Date(nonLeapYear, next, lastOfThisMonth, noTime, noTime,
 		noTime, noTime, time.UTC).Day()
 }
 
-// leapYear is whether a year has a february 29.
+// leapYear is whether a year has a February 29.
 //
-// To 1582, in the julian calendar, every fourth year is a leap year.
-// After it, in the gregorian, every fourth year is too, except a
-// century, unless it is a fourth century: 1900 is not, and 2000 is.
+// To 1582, in the Julian calendar, every fourth year is a leap year. After it,
+// in the Gregorian, every fourth year is too, except a century, unless it is a
+// fourth century: 1900 is not, and 2000 is.
 func leapYear(year int) bool {
 	fourth := ((year % leapEvery) + leapEvery) % leapEvery
 	if year <= reformYear {

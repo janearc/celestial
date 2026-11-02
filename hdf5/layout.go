@@ -1,7 +1,11 @@
 package hdf5
 
+import
+
 // The Data Layout message read, each defined by IV.A.2.i: version 3, and
 // its classes of storage.
+"fmt"
+
 const (
 	versionThreeLayout = 3 // defined by IV.A.2.i
 	layoutCompact      = 0 // defined by IV.A.2.i
@@ -26,39 +30,43 @@ type layout struct {
 	at uint64
 }
 
-// readLayout parses a Data Layout message for a dataset of a rank and an
-// element size. IV.A.2.i, version 3. It refuses a message too short, a
-// version or class not read, and then gives none.
+// readLayout parses a version 3 Data Layout message for the dataset’s rank
+// and element size (IV.A.2.i). Truncated messages and unsupported versions
+// or storage classes return an error.
 func readLayout(msg message, rank int, elementSize int) (*layout, error) {
 	walk := &cursor{data: msg.data}
 	version, class := walk.u8(), walk.u8()
 	if walk.short {
-		return nil, refuse(errCorrupt, msg.at, "IV.A.2.i",
-			"layout message of %d bytes is shorter than its fixed "+
-				"part", len(msg.data))
+		return nil, fmt.Errorf("hdf5: file is damaged: layout "+
+			"message of %d bytes is shorter than its fixed part, "+
+			"at address %#x (spec "+
+			"IV.A.2.i)", len(msg.data), msg.at)
 	}
 	if version != versionThreeLayout {
-		return nil, refuse(errUnsupported, msg.at, "IV.A.2.i",
-			"data layout version %d, only version 3 is read",
-			version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"data layout version %d, only version 3 is read, at "+
+			"address %#x (spec IV.A.2.i)", version, msg.at)
 	}
 	switch class {
 	case layoutContiguous:
 		found := &layout{address: walk.u64(), size: walk.u64(),
 			at: msg.at}
 		if walk.short {
-			return nil, refuse(errCorrupt, msg.at, "IV.A.2.i",
-				"contiguous layout is cut short")
+			return nil, fmt.Errorf("hdf5: file is damaged: "+
+				"contiguous layout is cut short, at address "+
+				"%#x (spec IV.A.2.i)", msg.at)
 		}
 		return found, nil
 	case layoutChunked:
 		return readChunked(walk, msg.at, rank, elementSize)
 	case layoutCompact:
-		return nil, refuse(errUnsupported, msg.at, "IV.A.2.i",
-			"compact storage, only contiguous and chunked are read")
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"compact storage, only contiguous and chunked are "+
+			"read, at address %#x (spec IV.A.2.i)", msg.at)
 	}
-	return nil, refuse(errCorrupt, msg.at, "IV.A.2.i",
-		"layout class %d is not defined for version 3", class)
+	return nil, fmt.Errorf("hdf5: file is damaged: layout class %d is "+
+		"not defined for version 3, at address %#x (spec "+
+		"IV.A.2.i)", class, msg.at)
 }
 
 // readChunked reads the rest of a chunked layout: the dimensionality,
@@ -70,9 +78,10 @@ func readChunked(walk *cursor, at uint64, rank,
 	dimensionality := int(walk.u8())
 	found := &layout{chunked: true, address: walk.u64(), at: at}
 	if dimensionality != rank+elementDimension {
-		return nil, refuse(errCorrupt, at, "IV.A.2.i",
-			"chunk layout of %d dimensions for a dataset of %d",
-			dimensionality-elementDimension, rank)
+		return nil, fmt.Errorf("hdf5: file is damaged: chunk layout "+
+			"of %d dimensions for a dataset of %d, at address "+
+			"%#x (spec "+
+			"IV.A.2.i)", dimensionality-elementDimension, rank, at)
 	}
 	for range rank {
 		size := uint64(walk.u32())
@@ -80,18 +89,20 @@ func readChunked(walk *cursor, at uint64, rank,
 	}
 	stored := int(walk.u32())
 	if walk.short {
-		return nil, refuse(errCorrupt, at, "IV.A.2.i",
-			"chunked layout is cut short")
+		return nil, fmt.Errorf("hdf5: file is damaged: chunked "+
+			"layout is cut short, at address %#x (spec "+
+			"IV.A.2.i)", at)
 	}
 	if stored != elementSize {
-		return nil, refuse(errCorrupt, at, "IV.A.2.i",
-			"chunk element size %d, the datatype's is %d", stored,
-			elementSize)
+		return nil, fmt.Errorf("hdf5: file is damaged: chunk element "+
+			"size %d, the datatype's is %d, at address %#x (spec "+
+			"IV.A.2.i)", stored, elementSize, at)
 	}
 	for _, size := range found.chunk {
 		if size == noChunk {
-			return nil, refuse(errCorrupt, at, "IV.A.2.i",
-				"a chunk dimension of zero")
+			return nil, fmt.Errorf("hdf5: file is damaged: a "+
+				"chunk dimension of zero, at address %#x "+
+				"(spec IV.A.2.i)", at)
 		}
 	}
 	return found, nil

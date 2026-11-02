@@ -67,14 +67,14 @@ func redshiftRoot(black *hole.Hole, at hole.Vec3) float64 {
 		black.Radius(at))
 }
 
-// The anti-test: a ray with no momentum across the observer's axes is seen from no
-// direction: nought, and not the nought over nought that normalising it
-// would give.
+// The anti-test: a ray with no momentum across the observer's axes is seen from
+// no direction: zero, and not the zero over zero that normalising it would
+// give.
 func TestSeenOfARayWithNoDirection(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Spinning)
 	// on the disc the metric is flat to the last digit, so the ray's
-	// momentum across the axes is nought exactly and not a rounding of it
+	// momentum across the axes is zero exactly and not a rounding of it
 	at := vec3(numbers.Places.Origin)
 	frame := black.FrameOf(at, black.Static(at))
 	ray := black.Null(at, frame, vec3(numbers.Places.Origin))

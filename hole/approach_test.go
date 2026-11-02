@@ -68,8 +68,9 @@ func TestImpactParameterWithSpin(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: light with no energy has no finite impact parameter: the answer is
-// infinite, not the nought that would say it was aimed at the hole.
+// The test and the anti-test: light with no energy has no finite impact
+// parameter: the answer is infinite, not the zero that would say it was aimed
+// at the hole.
 func TestImpactParameterOfARayWithNoEnergy(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)

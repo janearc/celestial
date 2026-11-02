@@ -15,18 +15,17 @@ const (
 	dateLine = 180.0 // defined by the degree
 )
 
-// Place is a place on the earth: its latitude, north above nought; its
-// longitude, east above nought, as the iau counts it; and its height.
+// Place describes a site on Earth. Latitude is positive north and longitude
+// positive east, following the IAU convention; height is measured above sea
+// level.
 type Place struct {
 	latitude, longitude measure.Angle
 	height              measure.Length
 }
 
-// OnEarth is the place at a latitude, a longitude and a height above
-// sea level. returns nil and error for:
-//   - a latitude past a pole, or a longitude past the date line
-//   - a height below the earth's centre, or above the highest a place
-//     on the earth stands, the top of the 1976 standard atmosphere
+// OnEarth constructs a site from latitude, longitude, and height. It rejects
+// coordinates beyond the poles or date line, heights below the centre of Earth,
+// and heights above the chosen 1976-atmosphere limit.
 func OnEarth(latitude, longitude measure.Angle,
 	height measure.Length) (*Place, error) {
 	north, east := latitude.InDegrees(), longitude.InDegrees()
@@ -43,25 +42,23 @@ func OnEarth(latitude, longitude measure.Angle,
 		height: height}, nil
 }
 
-// Latitude is how far north the place is.
+// Latitude returns angular distance north of the equator.
 func (there Place) Latitude() measure.Angle { return there.latitude }
 
-// Longitude is how far east the place is.
+// Longitude returns angular distance east of Greenwich.
 func (there Place) Longitude() measure.Angle { return there.longitude }
 
-// Height is how high the place stands.
+// Height returns elevation above sea level.
 func (there Place) Height() measure.Length { return there.height }
 
-// within is whether a number lies from low to high, both ends
-// included. NaN lies nowhere, since it fails every comparison.
+// within checks the inclusive interval [low, high]. NaN fails the comparisons
+// and is outside the interval.
 func within(x, low, high float64) bool { return low <= x && x <= high }
 
-// earthRadius is the earth's mean radius in metres, as celestial's
-// research data holds it: no place on the earth is farther below sea
-// level than its centre.
+// earthRadius reads Earth’s mean radius in metres from the research data,
+// setting the lower height bound at Earth’s centre.
 func earthRadius() float64 { return research.Value("earth-mean-radius-m") }
 
-// highestPlace is the highest a place on the earth stands, in metres
-// above sea level, as celestial's research data picks it: above it is
-// orbit.
+// highestPlace reads the chosen maximum site height in metres from research
+// data. Higher locations are outside this Earth-site model.
 func highestPlace() float64 { return research.Value("highest-place-m") }

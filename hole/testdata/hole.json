@@ -313,5 +313,100 @@
       {"spin": 0.98, "radius": 1.61402966763547}
     ],
     "tolerance": 1e-12
+  },
+  "edges": {
+    "about": "places where a rule of the fall or the march changes, held at the place itself and a hair to one side. Picked by the test author, 2026-11-01, unless said. A hair is one float64 step. The bodies are given the momentum of the observer normal to the chart's slices there, lowered: a body of unit mass, inside the horizon as outside. The singularity margin, 0.01 M, is read from choices.json, the package's own file. A still hole of mass 2 makes it 0.02 in that hole's units, which is 0.01 doubled to the last bit, so a margin that forgot the mass is seen. The hole of mass 1.25 and spin 1 has its horizons at 1.25 plus and minus the root of 1.5625 less 1, which is 0.75 to the last bit: 2 and 0.5 (worked by hand). On the axis at z = 0.5 its radius is 0.5 to the last bit (worked by hand: on the axis r^2 = z^2, and each sum on the way is exact in binary). A float64 step below 0.5 on the axis the radius still rounds to 0.5, since r^2 is there the difference of 1.25 and 0.75, which do not move with z^2 until it moves by a step of 1.25; just inside is 1e-12 below, where the radius is below 0.5. The still hole of mass 1 has its horizon at 2, and (2, 0, 0) is at radius 2 exactly. The horizon light runs along the horizon of that hole, a generator of it: at (2, 0, 0) the time axis is null, since g_tt = -1 + 2M/r = 0, and lowered it is (0, 1, 0, 0), since g_tx = (2M/r)(x/r) = 1 (worked by hand from the kerr-schild form); as an arriving ray it is negated. The hair is 1e-20 off the disc of the hole of spin 0.7, inside the ring: there 4 A^2 z^2, about 2e-40, is lost beside the square of x^2 + y^2 + z^2 - A^2 = -0.44, and the radius rounds to nought though z does not. 1e-3 off, it does not round to nought. From infinity is the lowered momentum of light of unit energy coming in along minus x, as it is far from the hole, where the metric is flat: (-1, -1, 0, 0). It is for a ray set at infinity on the x axis; json holds no infinity, so the test sets the place.",
+    "singularity margin": 0.01,
+    "double": {"mass": 2, "spin": 0},
+    "two horizons": {"mass": 1.25, "spin": 1},
+    "inner horizon": 0.5,
+    "on the inner horizon": {"x": 0, "y": 0, "z": 0.5},
+    "just inside the inner horizon": {"x": 0, "y": 0, "z": 0.499999999999},
+    "on the horizon": {"x": 2, "y": 0, "z": 0},
+    "horizon light": {
+      "position": {"time": 0, "x": 2, "y": 0, "z": 0},
+      "momentum": {"time": 0, "x": -1, "y": 0, "z": 0}
+    },
+    "hair": {"time": 0, "x": 0.1, "y": 0.2, "z": 1e-20},
+    "off the hair": {"x": 0.1, "y": 0.2, "z": 0.001},
+    "from infinity": {"time": -1, "x": -1, "y": 0, "z": 0}
+  },
+  "moving": {
+    "about": "an observer moving along every axis at once, for frames that are not a still or a normal observer's: a still observer's axes have no part along z but the z axis's, and a normal observer's none along time, and a frame of a moving one has both. Picked by the test author, 2026-11-01. The body is dropped from the fall's off point (8, 3, 0.5) round the hole of spin 0.6 and carried 5 of proper time; it is then outside the ergosurface, so a still observer stands there to compare. Its velocity is scaled to unit length, so that the drift of its march is not held against the frame. The aim (1, -2, 3) has a part along every axis. The circle is at 10 M of the heavy hole (mass 2.5, spin 2), a kerr-schild radius of 25, and matter on it is carried 250 of proper time, about half way round: its period by the clock at infinity is 2 pi (r^1.5 / M^0.5 + A), about 509 (worked by hand from the rate Circular's doc gives). Measured on 2026-11-01: its radius moved 4.2e-10 in that time. Held to 1e-6 of it. Measured the same day with the rate 1.5 per cent fast (the spin's term divided by the root of the mass where it is multiplied): the radius moved 2.1, near a tenth of it. Matter half way round has turned about pi radians; it is held to have turned more than 1.",
+    "proper time": 5,
+    "aim": {"x": 1, "y": -2, "z": 3},
+    "circle radius": 25,
+    "circle time": 250,
+    "circle share": 1e-6,
+    "least turn": 1
+  },
+  "thrown": {
+    "about": "bodies thrown straight out along x from 8 M of a still hole of mass 0.5, by a still observer there, for ClassifyRay's far floor and ClosestApproach's turn. Picked by the test author, 2026-11-01. A body thrown at speed v from radius r0 by a still observer has energy gamma root(1 - 2M/r0), and rises to the radius where its energy squared is 1 - 2M/r (the Schwarzschild metric's radial motion, worked by hand), so v^2 = 1 - (1 - 2M/r0) / (1 - 2M/r_top); the test works the speed from the top. ClassifyRay's far radius for a ray from r0 = 4 is the larger of 4 r0 = 16 and the far floor of 40 M = 20: a body rising to 100 M (50) gets past it, and one rising to 36 M (18) does not, though it passes 16. A floor of 40 over the mass would be 80, past the first body's top. Measured on 2026-11-01: the first rose to 49.99999 and, marched on, was given up at 1.48 after 1335 steps; the second rose to 17.99999. ClosestApproach is given 5000 steps, more than the 1335.",
+    "hole": {"mass": 0.5, "spin": 0},
+    "from": 4,
+    "high top": 50,
+    "low top": 18,
+    "steps": 5000
+  },
+  "pace": {
+    "about": "rays off the equator and moving across it, for PaceIn, and a loudness for Hovering. Picked by the test author, 2026-11-01. The rays are sent by a still observer at the skew and tilt places round the hole of spin 0.9 toward (0.2, -1, 0.7). PaceIn times the size of the time part of Velocity is held to the time share of the radius, 0.03, the march's pace share above, to a relative 1e-9: the two come from the same momentum two ways, the inverse metric and the march's own time velocity, which agree to rounding. A loudness of 100 takes a ray at the eye, whose time velocity is about its energy, past the hover ratio over the loudness, 1000 / 100 = 10, and not past the ratio times it.",
+    "aim": {"x": 0.2, "y": -1, "z": 0.7},
+    "relative": 1e-9,
+    "loud": 100
+  },
+  "unexported": {
+    "about": "numbers for the tests in package hole itself, which reach the names hole does not export. Picked by the test author, 2026-11-01, unless said.",
+    "no return": {
+      "about": "rays whose ratio of Lz to E is that of the spherical photon orbit at a picked radius, for noReturn. The ratio is the one noReturn's own doc gives, Lz/E = -(r^3 - 3 M r^2 + A^2 r + A^2 M) / (A (r - M)), which it says is bardeen's; the test author did not read it in a paper. So this holds noReturn's cubic to the formula its own doc states, worked the other way about: the test makes the ratio from a radius, and noReturn finds the radius from the ratio. The radii are in M. Those in radii lie between each hole's prograde and retrograde photon orbits in the equator (spin 0.6: 2.19 to 3.63 M; spin 0.9: 1.558 to 3.910 M; mass 2.5 and spin 2: 1.81 to 3.82 M, from PhotonOrbit), where a ratio has an orbit. 1.6 M round the spin of 0.9 is near the prograde orbit, where the cubic's linear term is above nought. Those in inside lie inside the prograde orbit, where no orbit has the ratio, and the answer is the prograde orbit itself. The ray is at (3, 4, 1) with energy 2 and momentum 0.3 along x and 0.5 along z, so that no part is nought or one; its y part is worked from the ratio. Measured on 2026-11-01: noReturn gave each radius to the last bit, or one bit under (2.2e-16 at 1.6 M). Held to a relative 1e-12. A Newton's method that reached the same root by other steps meets that too, and is not told apart. The momenta with no energy have Lz of 1.8, -1.2 and nought (3 x 1 - 4 x 0.3, 3 x 0 - 4 x 0.3, and nothing), so Lz over minus nought is minus infinity, infinity and not a number. The momentum with energy is the second of them with an energy of 2.",
+      "holes": [
+        {"mass": 1, "spin": 0.6, "radii": [2.5, 3, 3.5], "inside": [1.6, 2]},
+        {"mass": 1, "spin": 0.9, "radii": [1.6, 2, 2.5, 3, 3.5], "inside": [1.5]},
+        {"mass": 2.5, "spin": 2, "radii": [2, 2.5, 3, 3.5], "inside": [1.6]}
+      ],
+      "position": {"x": 3, "y": 4, "z": 1},
+      "energy": 2,
+      "momentum x": 0.3,
+      "momentum z": 0.5,
+      "relative": 1e-12,
+      "no energy": [
+        {"time": 0, "x": 0.3, "y": 1, "z": 0.5},
+        {"time": 0, "x": 0.3, "y": 0, "z": 0.5},
+        {"time": 0, "x": 0, "y": 0, "z": 0.5}
+      ],
+      "with energy": {"time": -2, "x": 0.3, "y": 0, "z": 0.5}
+    },
+    "inward": {
+      "about": "points and velocities for goingInward, round the hole of spin 0.9. The points are the skew, slant and tilt places, off the equator and off every axis. At each the radius's gradient is worked by central differences of Radius, a step of 1e-6 either way, good to about 1e-10 of itself. A velocity along the sphere of constant radius is the gradient crossed with an axis; one off it by 1e-7 of the gradient's length, outward or inward, goes out or in. 1e-7 is a thousand times the gradient's error, picked as small as that allows, so that a gradient wrong by any angle over about 1e-7 rad turns one of the velocities the wrong way. The round point (3, 4, 0) is on the equator, and the velocity (1, -4, 3, 5) goes round the axis and along it: on the equator that keeps the radius, and the sum goingInward takes is nought to the last bit, since -4 x 3 + 3 x 4 is. Just inward adds 1e-7 of the point, negated: not a hair, which here is one float64 step.",
+      "hole": {"mass": 1, "spin": 0.9},
+      "points": [
+        {"x": 5, "y": 2, "z": 1},
+        {"x": 3, "y": -4, "z": 0.5},
+        {"x": -2, "y": 1, "z": 6}
+      ],
+      "gradient step": 1e-6,
+      "off": 1e-7,
+      "round": {"x": 3, "y": 4, "z": 0},
+      "along": {"time": 1, "x": -4, "y": 3, "z": 5}
+    },
+    "edge": {
+      "about": "a still hole of mass 1, a ray sent toward it along minus x by a still observer on the x axis, where the radius is the x to the last bit, and an energy of 2, for the edges of pacedStep and runsAway. A hair is one float64 step. 2 times the hover ratio is exact.",
+      "still": {"mass": 1, "spin": 0},
+      "toward the hole": {"x": -1, "y": 0, "z": 0},
+      "energy": 2
+    },
+    "cross": {
+      "about": "two directions and their cross product, worked by hand: (2 x 6 - 3 x 5, 3 x 4 - 1 x 6, 1 x 5 - 2 x 4) = (-3, 6, -3). Their dot product is 4 + 10 + 18 = 32 and their lengths the roots of 14 and 77, so the angle between them is the arccosine of 32 over the root of 1078, held to 1e-12 rad: the arccosine there, near 0.2257 rad, loses no digits to speak of.",
+      "first": {"x": 1, "y": 2, "z": 3},
+      "second": {"x": 4, "y": 5, "z": 6},
+      "product": {"x": -3, "y": 6, "z": -3},
+      "dot": 32,
+      "lengths squared": 1078,
+      "tolerance": 1e-12
+    },
+    "choices": {
+      "about": "text read in place of choices.json: one that is not json, cut off after its first bracket, and one that is json and holds no choice.",
+      "broken": "{\"choices\": [",
+      "empty": "{\"choices\": []}"
+    }
   }
 }

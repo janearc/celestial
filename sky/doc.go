@@ -1,10 +1,10 @@
-// Package sky is where things are, seen from places, at instants,
-// in frames: the sun over a hillside, a star through the sun's lens, a
-// merger's waves at two detectors. doc/sky.md is its design.
+// Package sky provides time scales, calendars, observing sites, and sky
+// coordinates. It builds on measure; doc/sky.md describes the wider design.
 //
-// A small field around a source is a Tangent plane, the gnomonic
-// projection, with positions on it as east and north Offsets; a
-// position's error is an Ellipse whose outline lies on that plane.
+// An Instant stores a modified Julian day and its fraction separately to
+// preserve resolution. It supports UTC, TAI, TT, TDB, UT1, and GPS, with
+// UTC leap seconds from the IERS table.
 //
-// Package sky is built on measure.
+// For a small field, Tangent gives a gnomonic projection with east and north
+// Offsets. Ellipse describes positional uncertainty on that plane.
 package sky

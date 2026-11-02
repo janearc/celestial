@@ -12,11 +12,13 @@ import (
 // three-thousand-six-hundredth of a degree.
 const arcsecond = math.Pi / 180 / 3600
 
-// The weak-field deflection of light by a mass M passing at b, to second
-// order: 4 M / b + (15 pi / 4) (M / b)^2. Both terms read on 2026-10-31 in
-// sereno and de luca's eq. 38 (phys. rev. d 74, 123009, 2006), whose first
-// two terms with no spin are 2 r_Sch / b and (15 pi / 16) (r_Sch / b)^2;
-// with r_Sch = 2M they are these. game run extract prints the equation.
+// The weak-field deflection of light by a mass M passing at b, to second order:
+// 4 M / b + (15 pi / 4) (M / b)^2.
+//
+// Both terms read on 2026-10-31 in Sereno and de luca's eq. 38 (phys. rev. d
+// 74, 123009, 2006), whose first two terms with no spin are 2 r_Sch / b and (15
+// pi / 16) (r_Sch / b)^2; with r_Sch = 2M they are these. game run extract
+// prints the equation.
 const (
 	// weakFirst is the 4 of 4 M / b. It is defined by eq. 38's 2 r_Sch / b.
 	weakFirst = 4
@@ -39,7 +41,7 @@ func distanceFor(sun sunOf, impact float64) float64 {
 	return math.Max(sun.Distance, sun.Reach*impact)
 }
 
-// A ray grazing the sun bends by 1.75 seconds of arc, Einstein's value.
+// A ray grazing the Sun bends by 1.75 seconds of arc, Einstein's value.
 func TestTheSunBendsLight(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -55,8 +57,8 @@ func TestTheSunBendsLight(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: a ray at the shadow's edge is just captured, and just escapes a hair
-// further out.
+// The test and the anti-test: a ray at the shadow's edge is just
+// captured, and just escapes a hair further out.
 func TestTheShadowCapturesJustInsideItsEdge(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -109,9 +111,9 @@ func TestDeflectionIsTheWeakFieldsInAnyPlane(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: a ray going straight out is not bent, and a ray that falls in has no
-// deflection at all: the answer is not a number, and not the nought that
-// would say it went straight.
+// The test and the anti-test: a ray going straight out is not bent, and a ray
+// that falls in has no deflection at all: the answer is not a number, and not
+// the zero that would say it went straight.
 func TestDeflectionOfRaysThatAreNotBent(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -128,9 +130,9 @@ func TestDeflectionOfRaysThatAreNotBent(t *testing.T) {
 	}
 }
 
-// The anti-test: a ray that has not escaped for want of steps has no
-// deflection either: the answer is not a number, and not the nought of a ray
-// that has not yet turned.
+// The anti-test: a ray that has not escaped for want of steps has no deflection
+// either: the answer is not a number, and not the zero of a ray that has not
+// yet turned.
 func TestDeflectionOfARayOutOfStepsIsNotANumber(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -163,11 +165,9 @@ func TestSpinBendsLightDifferentlyOnEitherSide(t *testing.T) {
 	}
 }
 
-// The anti-test: the deflection is the whole angle between the ray's two
-// ways, and not only the size of their cross product. A ray bent by more than
-// a right angle reads as more than a right angle, the same as the arccosine of
-// the cosine between its two ways gives. The weak-field tests bend a ray by a
-// hair, where the size of the cross product and the angle are the same.
+// The anti-test: deflection is the full angle between endpoint directions, not
+// just the cross-product magnitude. A turn over 90 degrees must remain over 90
+// degrees. Weak-field cases alone cannot distinguish sin(angle) from angle.
 func TestDeflectionOfARayBentPastARightAngle(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -204,10 +204,11 @@ const rightAngleHalves = 2
 // The sides a ray can pass a hole that turns from x toward y, along x.
 const (
 	// turnedWith is the side of y the hole turns with. It is defined by the
-	// hole's sense: the ray's angular momentum about z is above nought.
+	// hole's sense: the ray's angular momentum about z is above zero.
 	turnedWith = -1
 	// turnedAgainst is the side of y the hole turns against. It is defined
-	// by the hole's sense: the ray's angular momentum about z is below nought.
+	// by the hole's sense: the ray's angular momentum about z is below
+	// zero.
 	turnedAgainst = 1
 )
 
@@ -220,12 +221,12 @@ func bentPassing(black *hole.Hole, numbers *picked, side float64) float64 {
 	return black.DeflectionAngle(ray, bend.Far, bend.Steps)
 }
 
-// Far out, the spin's bend is the published series's. Passing a hole of
-// spin 0.9 at 300 M, light against its turning is bent more than light
-// with it by sereno and de luca's 8 a m / b^2 + 20 pi a m^2 / b^3, to half
-// a percent. TestSpinBendsLightDifferentlyOnEitherSide holds only that
-// the sides differ, and passes a spin effect cut to half (a deceit review
-// of 8de5148 found that); this does not.
+// Far-field spin deflection must match the published series, not merely differ
+// on opposite sides.
+//
+// At spin 0.9 and impact 300M, compare against Sereno and De Luca’s
+// 8am/b² + 20πam²/b³ within half a percent. The qualitative side-difference
+// test would still pass if the spin effect were halved; this test would not.
 func TestFarOutTheSpinsBendIsThePublishedSeries(t *testing.T) {
 	numbers := pickedNumbers(t)
 	weak := numbers.WeakSpinBend
@@ -233,7 +234,7 @@ func TestFarOutTheSpinsBendIsThePublishedSeries(t *testing.T) {
 	fast := build(t, asked)
 	with := bentFarOut(fast, numbers, turnedWith)
 	against := bentFarOut(fast, numbers, turnedAgainst)
-	// the mass and spin asked for, not the hole's own account of them,
+	// The mass and spin asked for, not the hole's own account of them,
 	// which a hole that kept the wrong spin would give back as right
 	mass, spin, impact := asked.Mass, asked.Spin, weak.Impact
 	series := spinFirst*spin*mass/(impact*impact) +
@@ -245,8 +246,8 @@ func TestFarOutTheSpinsBendIsThePublishedSeries(t *testing.T) {
 }
 
 // The series' two terms in the spin, from sereno and de luca's eq. 38
-// with r_Sch = 2m: against the turning less with it is twice each of
-// their 2 a r_Sch / b^2 and (5 pi / 2) a r_Sch^2 / b^3.
+// with r_Sch = 2m: the bend against the turning, less the bend with it,
+// is twice each of their 2 a r_Sch / b^2 and (5 pi / 2) a r_Sch^2 / b^3.
 const (
 	spinFirst  = 8            // defined by eq. 38: twice 2 times r_Sch's 2
 	spinSecond = 20 * math.Pi // defined by eq. 38: twice 5 pi / 2 times 4

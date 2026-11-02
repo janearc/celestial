@@ -61,8 +61,8 @@ var prefixes = map[string]func(float64) float64{
 // unit is one of anything. Defined: a prefix of one unit is its factor.
 const unit = 1
 
-// Each prefix of one unit is the power of ten the brochure gives it, and
-// every prefix si holds is in the test data.
+// Each prefix of one unit is the power of ten the brochure gives it, and every
+// prefix SI holds is in the test data.
 func TestPrefixesAreTheirPowersOfTen(test *testing.T) {
 	powers := pickedNumbers(test).Powers
 	if len(powers) != len(prefixes) {
@@ -176,7 +176,7 @@ func near(got, want, share float64) bool {
 		math.Abs(want))
 }
 
-// fixed is a constant as si holds it and as the brochure fixes it.
+// fixed is a constant as SI holds it and as the brochure fixes it.
 type fixed struct {
 	name          string
 	held, written float64

@@ -7,14 +7,13 @@ import (
 	"github.com/janearc/celestial/measure"
 )
 
-// mostDUT1 is how far iers keeps ut1 from utc, in seconds: within 0.9 s,
-// by leap seconds. Defined by the iers's rule.
+// mostDUT1 is how far IERS keeps UT1 from UTC, in seconds: within 0.9 s, by
+// leap seconds. Defined by the IERS's rule.
 const mostDUT1 = 0.9
 
-// UT1 is a utc instant on ut1, the earth's own turning, given iers's
-// dut1 for the day: ut1 less utc. It refuses an instant not on utc and a
-// dut1 past 0.9 s, which iers never lets it reach, and then gives no
-// instant.
+// UT1 converts a UTC instant using the day’s measured DUT1 = UT1 − UTC in
+// seconds. It requires UTC input and a finite offset within the IERS limit of
+// 0.9 seconds.
 func (moment Instant) UT1(dut1 measure.Duration) (*Instant, error) {
 	offset := dut1.InSeconds()
 	if moment.scale != UTC() || !(math.Abs(offset) <= mostDUT1) {
@@ -26,33 +25,33 @@ func (moment Instant) UT1(dut1 measure.Duration) (*Instant, error) {
 	return &turning, nil
 }
 
-// The iau's 1982 expression for greenwich mean sidereal time, as meeus,
-// astronomical algorithms, equation 12.4, gives it. Each term is defined
-// by that expression, which is what gmst is.
+// The IAU's 1982 expression for Greenwich mean sidereal time, as Meeus,
+// astronomical algorithms, equation 12.4, gives it. Each term is defined by
+// that expression, which is what GMST is.
 //
-// Read on 2026-10-31 at its source, aoki and others, "the new definition
-// of universal time" (astron. astrophys. 105, 359, 1982), equation 14,
-// by eye from the ads scan: 67310.54841 s + (876600 h + 8640184.812866 s)
-// T + 0.093104 s T^2 - 6.2 x 10^-6 s T^3.
+// Read on 2026-10-31 at its source, Aoki and others, "the new definition of
+// universal time" (astron. astrophys. 105, 359, 1982), equation 14, by eye from
+// the ADS scan: 67310.54841 s + (876600 h + 8640184.812866 s) T + 0.093104 s
+// T^2 - 6.2 x 10^-6 s T^3.
 //
 // Over 240 seconds of time a degree and 36525 days a century those are
-// 280.460618375, 360.98564736629, 0.000387933333 and 1 / 38709677.4;
-// these four are meeus's roundings of them, well inside the tests.
+// 280.460618375, 360.98564736629, 0.000387933333 and 1 / 38709677.4; these four
+// are Meeus's roundings of them, well inside the tests.
 const (
-	// gmstAtJ2000 is in degrees. Defined by the iau 1982.
+	// gmstAtJ2000 is in degrees. Defined by the IAU 1982.
 	gmstAtJ2000 = 280.46061837
-	// gmstPerDay is in degrees a day. Defined by the iau 1982.
+	// gmstPerDay is in degrees a day. Defined by the IAU 1982.
 	gmstPerDay = 360.98564736629
-	// gmstQuadratic is in degrees a century squared. Defined by the iau
+	// gmstQuadratic is in degrees a century squared. Defined by the IAU
 	// 1982.
 	gmstQuadratic = 0.000387933
-	// gmstCubic is its cubic term's divisor. Defined by the iau 1982.
+	// gmstCubic is its cubic term's divisor. Defined by the IAU 1982.
 	gmstCubic = 38710000.0
 )
 
-// MeanSidereal is greenwich mean sidereal time at an instant on ut1: how
-// far the earth has turned against the stars, by the iau's expression of
-// 1982. It refuses an instant on another scale, and then gives no angle.
+// MeanSidereal returns Greenwich mean sidereal time from a UT1 instant, using
+// the IAU 1982 expression. An instant on another scale returns an error rather
+// than being treated as UT1.
 func (moment Instant) MeanSidereal() (*measure.Angle, error) {
 	if moment.scale != UT1() {
 		return nil, fmt.Errorf("sky: sidereal time is the earth's "+

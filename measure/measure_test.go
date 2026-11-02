@@ -62,6 +62,13 @@ type picked struct {
 	Deficit        float64 `json:"fusion deficit"`
 	DeficitTol     float64 `json:"fusion tolerance"`
 	SunLifetime    float64 `json:"sun lifetime years"`
+	Arcseconds     float64 `json:"arcseconds a degree"`
+	YearSeconds    float64 `json:"julian year seconds"`
+	Spent          struct {
+		Joules  float64 `json:"joules"`
+		Watts   float64 `json:"watts"`
+		Seconds float64 `json:"seconds"`
+	} `json:"spent"`
 }
 
 // pickedNumbers reads the test numbers, or the test stops.
@@ -217,9 +224,9 @@ func TestAKilogramsGMIsNotG(test *testing.T) {
 	}
 }
 
-// Stefan's constant follows from planck's law alone: a square metre at
-// one kelvin gives off what CODATA says, which is exact, and that glow
-// comes from one kelvin.
+// Stefan's constant follows from Planck's law alone: a square metre at one
+// kelvin gives off what CODATA says, which is exact, and that glow comes from
+// one kelvin.
 func TestStefansConstantIsPiSquaredOverSixty(test *testing.T) {
 	want := pickedNumbers(test)
 	area := measure.SquareMetres(want.OneSquareMetre)

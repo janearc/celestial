@@ -7,10 +7,10 @@ import (
 	"github.com/janearc/celestial/hole"
 )
 
-// In flat space, as near as a hole of next to no mass is, light from gas
-// coming toward the eye at a speed is shifted by one over gamma times one
-// less the speed, the relativistic doppler factor; gas going away is
-// shifted by the other sign.
+// In flat space, as near as a hole of next to no mass is, light from gas coming
+// toward the eye at a speed is shifted by one over gamma times one less the
+// speed, the relativistic Doppler factor; gas going away is shifted by the
+// other sign.
 func TestShiftIsTheDopplerFactorInFlatSpace(t *testing.T) {
 	numbers := pickedNumbers(t)
 	flat := build(t, numbers.Holes.Flat)
@@ -65,11 +65,9 @@ func TestShiftReddensLightFromTheWell(t *testing.T) {
 	}
 }
 
-// The anti-test: the emitter's momentum is its own, and is not the eye's. A
-// photon's energy at the emitter is linear in the momentum there, so the
-// same light with a momentum three times as great at the emitter, and the
-// same at the eye, arrives at a third of the shift. A shift that took the
-// eye's momentum for the emitter's, as the tests above do, would not change.
+// The anti-test: Shift must use momentum at each endpoint. Tripling only the
+// emitter momentum reduces the energy ratio to one third. Reusing the eye
+// momentum would incorrectly leave it unchanged.
 func TestShiftTakesTheMomentumAtTheEmitterFromTheEmitter(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)
@@ -87,8 +85,9 @@ func TestShiftTakesTheMomentumAtTheEmitterFromTheEmitter(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: an observer measures a photon's energy against itself as one, whatever
-// the photon and the observer; against another observer it is not one.
+// The test and the anti-test: an observer measures a photon's energy
+// against itself as one, whatever the photon and the observer; against
+// another observer it is not one.
 func TestShiftOfAnObserverWithItselfIsOne(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)

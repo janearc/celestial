@@ -9,16 +9,16 @@ import (
 	"github.com/janearc/celestial/radiation"
 )
 
-// numbers planck's tests use, each defined.
+// numbers Planck's tests use, each defined.
 const (
 	// hemisphere is the solid angle a flat surface's radiance sums to
 	// over the sky above it, in steradians. Defined by integrating the
 	// cosine over a hemisphere: pi.
 	hemisphere = math.Pi
-	// stefanPower is the power of temperature in stefan's law. Defined
-	// by the law.
+	// stefanPower is the power of temperature in Stefan's law. Defined by
+	// the law.
 	stefanPower = 4
-	// lambdaPower is the power of wavelength in planck's law. Defined by
+	// lambdaPower is the power of wavelength in Planck's law. Defined by
 	// the law.
 	lambdaPower = 5
 	// even, odd and thirds are simpson's rule's weights. Defined by the
@@ -32,9 +32,9 @@ const (
 	whole = 1.0
 )
 
-// The test and the anti-test: at each point, Planck is CODATA's law,
-// c1L / lambda^5 / (exp(c2 / lambda T) - 1), per nanometre. it is not
-// the same law per metre, which is a billion times larger.
+// The test and the anti-test: at each point, Planck is CODATA's law, c1L /
+// lambda^5 / (exp(c2 / lambda T) - 1), per nanometre. It is not the same law
+// per metre, which is a billion times larger.
 func TestPlanckIsCODATAsLaw(test *testing.T) {
 	law := pickedNumbers(test).Planck
 	perNM := radiation.NmToMetres(whole)
@@ -54,8 +54,8 @@ func TestPlanckIsCODATAsLaw(test *testing.T) {
 	}
 }
 
-// a black body is brightest at wien's b / T: a part in a thousand to
-// either side, it is dimmer.
+// A black body is brightest at wien's b / T: a part in a thousand to either
+// side, it is dimmer.
 func TestABlackBodyPeaksWhereWienSays(test *testing.T) {
 	law := pickedNumbers(test).Planck
 	peak := law.WienB / law.Kelvin / radiation.NmToMetres(whole)
@@ -69,8 +69,8 @@ func TestABlackBodyPeaksWhereWienSays(test *testing.T) {
 	}
 }
 
-// pi times planck's radiance, summed over every wavelength, is stefan's
-// sigma T^4.
+// pi times Planck's radiance, summed over every wavelength, is Stefan's sigma
+// T^4.
 func TestStefansLawIsPlancksSum(test *testing.T) {
 	law := pickedNumbers(test).Planck
 	if !(law.Steps > none && law.Steps%twice == none) {
@@ -127,9 +127,8 @@ func TestNoLightAtOrBelowZeroKelvin(test *testing.T) {
 	}
 }
 
-// The anti-test, as a property: a hotter body is brighter at every
-// wavelength. a law with the temperature on the wrong side of the
-// fraction fails it.
+// The anti-test, as a property: a hotter body is brighter at every wavelength.
+// A law with the temperature on the wrong side of the fraction fails it.
 func TestAHotterBodyIsBrighterAtEveryWavelength(test *testing.T) {
 	rapid.Check(test, hotter{law: pickedNumbers(test).Planck}.check)
 }
@@ -137,7 +136,7 @@ func TestAHotterBodyIsBrighterAtEveryWavelength(test *testing.T) {
 // hotter draws two temperatures and a wavelength and compares them.
 type hotter struct{ law planckNumbers }
 
-// planckNumbers is the test data's planck block.
+// planckNumbers is the test data's Planck block.
 type planckNumbers struct {
 	C1L       float64   `json:"c1l"`
 	C2        float64   `json:"c2"`

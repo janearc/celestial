@@ -31,5 +31,8 @@
   "out of order": {"lightest": 1.75, "heaviest": 1.98},
   "rows": 90,
   "fusion yield": 0.0071185,
-  "fusion tolerance": 1e-4
+  "fusion tolerance": 1e-4,
+  "between about": "picked by the test author, 2026-11-01: how near, as a share, a star at the geometric mean of two rows' masses must come to the geometric mean of their light and radius, a few roundings, since the main sequence is found in the logarithms; and how much younger than its burning lasts a star is that still burns",
+  "between tolerance": 1e-12,
+  "a moment younger": 1e-9
 }

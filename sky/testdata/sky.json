@@ -7,7 +7,11 @@
     "seconds a degree of time": 240,
     "tolerance seconds": 1e-4
   },
-  "dut1": {"seconds": 0.3, "too much": 1, "tolerance": 1e-6},
+  "dut1": {"seconds": 0.3, "too much": 1, "tolerance": 1e-6, "most": 0.9},
+  "gmst far about": "greenwich mean sidereal time ten julian centuries from j2000 either way, the iau's 1982 expression as meeus's 12.4 gives it, worked with bc on 2026-11-01 from the terms as the code writes them, into a turn; so it holds the code to its own expression, not the iau's print. there the cubic term is a few hundred-thousandths of a degree; the code's float error is about 3e-8 degrees; the tolerance, picked, is 1e-6",
+  "gmst far": {"at": [{"julian": 2816795, "degrees": 288.19992325938194}, {"julian": 2086295, "degrees": 272.79890008061806}], "tolerance": 1e-6},
+  "counted julian about": "a julian date of two to the 53rd days less a million, defined by float64: its days from the modified julian zero are still counted exactly",
+  "counted julian": 9007199253740992,
   "washington": {"latitude": {"degrees": 38, "minutes": 55, "seconds": 17},
                  "longitude": {"degrees": -77, "minutes": 3, "seconds": 56}},
   "venus": {
@@ -37,8 +41,25 @@
   "not dates": [
     {"year": 1582, "month": 10, "day": 10}, {"year": 2000, "month": 13, "day": 1},
     {"year": 2001, "month": 2, "day": 29}, {"year": 1900, "month": 2, "day": 29},
-    {"year": 2000, "month": 0, "day": 1}, {"year": 2000, "month": 1, "day": 32}
+    {"year": 2000, "month": 0, "day": 1}, {"year": 2000, "month": 1, "day": 32},
+    {"year": 1582, "month": 10, "day": 5}, {"year": 1582, "month": 10, "day": 14},
+    {"year": 2000, "month": 2, "day": 30}, {"year": 1700, "month": 2, "day": 29}
   ],
+  "leap days about": "february 29s each calendar's rule makes, defined by the calendars: a gregorian fourth year, the first gregorian leap year, a gregorian fourth century, and a julian leap year before year one",
+  "leap days": [
+    {"year": 2004, "month": 2, "day": 29}, {"year": 1584, "month": 2, "day": 29},
+    {"year": 1600, "month": 2, "day": 29}, {"year": -4, "month": 2, "day": 29}
+  ],
+  "round trips about": "dates that go to an instant and back, picked by the test author, 2026-11-01: the last julian day and the first gregorian one, a leap day and the day after it, and the end of a february with no leap day",
+  "round trips": [
+    {"year": 1582, "month": 10, "day": 4}, {"year": 1582, "month": 10, "day": 15},
+    {"year": 2000, "month": 2, "day": 29}, {"year": 2000, "month": 3, "day": 1},
+    {"year": 2001, "month": 2, "day": 28}
+  ],
+  "not fractions about": "julian fractions past what a float counts exactly, defined by float64: two to the 53rd, and half again as much",
+  "not fractions": [9007199254740992, 13510798882111488],
+  "not leap seconds about": "a 60th second on a day that ends in a leap second, but not in its last minute, defined by utc",
+  "not leap seconds": [{"year": 2016, "month": 12, "day": 31, "hour": 23, "minute": 30, "second": 60}],
   "leap day": {"year": 2000, "month": 2, "day": 29},
   "julian leap day": {"year": 1500, "month": 2, "day": 29},
   "washington height": 0,

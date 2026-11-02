@@ -1,8 +1,7 @@
 package hole
 
-// kerrTerms are the quantities of a point and a momentum that hamilton's
-// equations share between the velocity and the momentum's change: the
-// divisions are made once, here.
+// kerrTerms caches quantities shared by the velocity and momentum derivatives,
+// avoiding repeated divisions in Hamilton’s equations.
 type kerrTerms struct {
 	radius            float64
 	radiusSpinSum     float64
@@ -15,27 +14,27 @@ type kerrTerms struct {
 	pull              float64 // the scalar times reach
 }
 
-// rateAt is hamilton's equations for a point and a momentum whose
-// radius is already in hand.
+// rateAt is Hamilton's equations for a point and a momentum whose radius is
+// already in hand.
 //
-// The inverse metric is flat minus scalar * vector * vector, so with
-// reach the vector on the momentum, the hamiltonian is the flat one
-// less half of scalar * reach squared, and
+// The inverse metric is flat minus scalar * vector * vector, so with reach the
+// vector on the momentum, the hamiltonian is the flat one less half of scalar *
+// reach squared, and
 //
 //	velocity        = flat momentum - scalar * reach * vector
 //	momentum change = reach * (reach/2 * grad scalar + scalar * grad reach)
 //
-// Both gradients are a multiple of the radius's gradient plus a short
-// vector of their own, so the whole of it is three divisions and no
-// loop, written out in a line as a shader would have it. The kernel is
-// worked here again and not called for, to share those divisions.
+// Both gradients are a multiple of the radius's gradient plus a short vector of
+// their own, so the whole of it is three divisions and no loop, written out in
+// a line as a shader would have it. The kernel is worked here again and not
+// called for, to share those divisions.
 func (hole Hole) rateAt(
 	point, momentum Vec4, radius float64,
 ) (velocity, momentumChange Vec4) {
 	spin := hole.spin
 	radiusSquared, spinSquared := radius*radius, spin*spin
 	radiusSpinSum := radiusSquared + spinSquared
-	// r^4 + A^2 z^2, which is nought only on the ring and the disc
+	// r^4 + A^2 z^2, which is zero only on the ring and the disc
 	denominator := radiusSquared*radiusSquared + spinSquared*point.z*point.z
 	if denominator == nothing || radius == nothing {
 		// flat space, as kernel answers there
@@ -121,7 +120,8 @@ func (hole Hole) rateOf(
 	)
 }
 
-// Step is one runge-kutta step of the affine parameter.
+// Step advances by one fourth-order Runge–Kutta interval in the affine
+// parameter, using the caller’s step size.
 func (hole Hole) Step(ray Ray, stepSize float64) Ray {
 	velocity, momentumChange := hole.rateOf(ray.position, ray.momentum)
 	point, momentum := hole.stepFrom(
@@ -130,9 +130,8 @@ func (hole Hole) Step(ray Ray, stepSize float64) Ray {
 	return Ray{position: point, momentum: momentum}
 }
 
-// stepFrom is a runge-kutta step for a point and a momentum whose rates
-// where they stand are already in hand: the first of the step's four,
-// which March has worked out to size the step by.
+// stepFrom takes a Runge–Kutta step with the initial derivative already
+// available from the marcher’s step-size calculation.
 func (hole Hole) stepFrom(
 	point, momentum, velocity1, momentumChange1 Vec4, stepSize float64,
 ) (Vec4, Vec4) {

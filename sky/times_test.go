@@ -20,8 +20,8 @@ type timed struct {
 	Second float64 `json:"second"`
 }
 
-// term is one term of kaplan's series for tdb less tt: an amplitude in
-// seconds, a rate in radians a julian century and a phase in radians.
+// term is one term of Kaplan's series for TDB less TT: an amplitude in seconds,
+// a rate in radians a Julian century and a phase in radians.
 type term struct {
 	Amplitude float64 `json:"amplitude"`
 	Rate      float64 `json:"rate"`
@@ -36,8 +36,8 @@ type arc struct {
 	Seconds float64 `json:"seconds"`
 }
 
-// dated is a calendar date, its day carrying the time as a fraction,
-// and the julian date meeus gives for it.
+// dated is a calendar date, its day carrying the time as a fraction, and the
+// Julian date Meeus gives for it.
 type dated struct {
 	Year   int     `json:"year"`
 	Month  int     `json:"month"`
@@ -62,8 +62,17 @@ type clocked struct {
 		Seconds   float64 `json:"seconds"`
 		TooMuch   float64 `json:"too much"`
 		Tolerance float64 `json:"tolerance"`
+		Most      float64 `json:"most"`
 	} `json:"dut1"`
-	Washington struct {
+	GMSTFar struct {
+		At []struct {
+			Julian  float64 `json:"julian"`
+			Degrees float64 `json:"degrees"`
+		} `json:"at"`
+		Tolerance float64 `json:"tolerance"`
+	} `json:"gmst far"`
+	CountedJulian float64 `json:"counted julian"`
+	Washington    struct {
 		Latitude  arc `json:"latitude"`
 		Longitude arc `json:"longitude"`
 	} `json:"washington"`
@@ -88,6 +97,10 @@ type clocked struct {
 	MeeusDates      []dated   `json:"meeus dates"`
 	DateTolerance   float64   `json:"date tolerance"`
 	NotDates        []timed   `json:"not dates"`
+	LeapDays        []timed   `json:"leap days"`
+	RoundTrips      []timed   `json:"round trips"`
+	NotFractions    []float64 `json:"not fractions"`
+	NotLeapSeconds  []timed   `json:"not leap seconds"`
 	LeapDay         timed     `json:"leap day"`
 	JulianLeapDay   timed     `json:"julian leap day"`
 	WashingtonUp    float64   `json:"washington height"`
@@ -200,11 +213,11 @@ func at(test stopper, when timed, scale sky.Scale) sky.Instant {
 	return *moment
 }
 
-// secondsADay is a day of tai, tt and tdb. Defined by the si.
+// secondsADay is a day of TAI, TT and tdb. Defined by the si.
 const secondsADay = 86400.0
 
-// apart is how many seconds one instant is after another, both read on
-// the same scale's julian dates.
+// apart is how many seconds one instant is after another, both read on the same
+// scale's Julian dates.
 func apart(later, earlier sky.Instant) float64 {
 	laterWhole, laterFraction := later.Julian()
 	whole, fraction := earlier.Julian()
@@ -216,7 +229,7 @@ func apart(later, earlier sky.Instant) float64 {
 // degrees' or the hours'.
 func degreesOf(numbers clocked, angle arc) float64 {
 	sixty := numbers.Sexagesimal
-	unit := one
+	unit := degreesADegree
 	if angle.Hours != nought {
 		unit = sixty.DegreesAnHour
 	}
@@ -226,8 +239,10 @@ func degreesOf(numbers clocked, angle arc) float64 {
 	return math.Copysign(math.Abs(large)+unit*parts, large)
 }
 
-// one is a single unit. Defined by counting.
-const one = 1.0
+// degreesADegree is the degrees in an arc's unit when the arc is given
+// in degrees, as DegreesAnHour is when it is given in hours. Defined by
+// the degree.
+const degreesADegree = 1.0
 
 // angleOf is an arc as an angle.
 func angleOf(numbers clocked, angle arc) measure.Angle {

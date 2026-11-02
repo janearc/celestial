@@ -55,13 +55,12 @@ const (
 	radiusFour = 4
 )
 
-// The radii of a Kerr hole, by Bardeen, Press and Teukolsky (1972),
-// "Rotating black holes: locally nonrotating frames, energy extraction, and
-// scalar synchrotron radiation", Astrophysical Journal 178, 347.
+// The radii of a Kerr hole, by Bardeen, Press and Teukolsky (1972), "Rotating
+// black holes: locally nonrotating frames, energy extraction, and scalar
+// synchrotron radiation", Astrophysical Journal 178, 347.
 //
-// Read on 2026-10-31 by eye from the ads scan: the horizon is its
-// equation 2.6, the photon orbit 2.17 and 2.18, the innermost stable
-// orbit 2.21.
+// Read on 2026-10-31 by eye from the ADS scan: the horizon is its equation 2.6,
+// the photon orbit 2.17 and 2.18, the innermost stable orbit 2.21.
 const (
 	// photonSphereFactor is the 3 of 3 M, the photon sphere of a hole with
 	// no spin. It is defined by that formula.

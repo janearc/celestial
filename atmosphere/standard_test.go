@@ -1,7 +1,6 @@
 package atmosphere_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -10,8 +9,8 @@ import (
 	"pgregory.net/rapid"
 )
 
-// geometric is the height above sea level of a geopotential height, by
-// the 1976 standard's earth radius.
+// geometric is the height above sea level of a geopotential height, by the 1976
+// standard's Earth radius.
 func geometric(test *testing.T, geopotential float64) measure.Length {
 	radius := pickedNumbers(test).EarthRadius
 	return measure.Metres(radius * geopotential / (radius - geopotential))
@@ -61,19 +60,41 @@ func TestAU2FliesOverMostOfTheAir(test *testing.T) {
 	}
 }
 
-// The anti-test: the standard reaches from sea level to 86 km. Outside
-// it there is no answer, a height that is no number is none, and no
-// air is given.
+// The standard's own ends are inside it: from the sea and from its top
+// at 86 km, Standard gives the air, Along counts a way, and Skylight
+// sees the sky.
+func TestTheStandardsEndsAreInsideIt(test *testing.T) {
+	numbers := pickedNumbers(test)
+	up := way(test, nothing, whole, nothing)
+	green := []measure.Length{nanometres(numbers.GreenNM)}
+	for _, metres := range numbers.Edges.Metres {
+		height := measure.Metres(metres)
+		if _, err := atmosphere.Standard(height); err != nil {
+			test.Errorf("the standard at %g m: %v", metres, err)
+		}
+		if _, err := atmosphere.Along(height, measure.Degrees(
+			numbers.StraightUp)); err != nil {
+			test.Errorf("a way from %g m: %v", metres, err)
+		}
+		if _, err := dry(test).Skylight(height, up, up, green); err != nil {
+			test.Errorf("the sky from %g m: %v", metres, err)
+		}
+	}
+}
+
+// The anti-test: the standard reaches from sea level to 86 km. A height
+// outside it, or no number, is refused by Standard and by Along, and
+// gives no air.
 func TestHeightsOutsideTheStandardAreRefused(test *testing.T) {
 	heights := append(pickedNumbers(test).OutsideMetres, math.NaN())
 	for _, metres := range heights {
 		air, err := atmosphere.Standard(measure.Metres(metres))
-		if !errors.Is(err, atmosphere.ErrHeight()) || air != nil {
+		if err == nil || air != nil {
 			test.Errorf("%g m gave %v, %v", metres, air, err)
 		}
 		column, err := atmosphere.Along(measure.Metres(metres),
 			measure.Degrees(nothing))
-		if !errors.Is(err, atmosphere.ErrHeight()) || column != nil {
+		if err == nil || column != nil {
 			test.Errorf("a way from %g m gave %v, %v", metres, column, err)
 		}
 	}
@@ -121,7 +142,7 @@ func (thin thinning) check(test *rapid.T) {
 		drawn.OutsideMetres).Draw(test, "beyond")
 	for _, metres := range []float64{-beyond, drawn.Top + beyond} {
 		if air, err := atmosphere.Standard(measure.Metres(metres)); air !=
-			nil || !errors.Is(err, atmosphere.ErrHeight()) {
+			nil || err == nil {
 			test.Fatalf("%g m gave %v, %v", metres, air, err)
 		}
 	}

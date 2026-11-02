@@ -95,7 +95,7 @@ func landed(test stopper, plane sky.Tangent, at sky.Equatorial) sky.Offset {
 	return *offset
 }
 
-// nought is no angle at all. Defined by the scale.
+// zero is no angle at all. Defined by the scale.
 const nought = 0.0
 
 // A plane's centre lands on it at nothing east and nothing north.
@@ -202,9 +202,9 @@ func shortcutMiss(test *testing.T, declination, east float64) float64 {
 		shortNorth-exact.North().InArcseconds())
 }
 
-// The small-angle shortcut, which nilgai's sky draws with, is within a
-// tenth of an arcsecond of the gnomonic plane an arcminute from a centre
-// at sixty degrees north.
+// The small-angle shortcut, which a quick drawing of the sky reaches
+// for, is within a tenth of an arcsecond of the gnomonic plane an
+// arcminute from a centre at sixty degrees north.
 func TestTheShortcutHoldsInASmallField(test *testing.T) {
 	shortcut := planeNumbers(test).Shortcut
 	miss := shortcutMiss(test, shortcut.Declination, shortcut.Arcminute)

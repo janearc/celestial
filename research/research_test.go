@@ -77,11 +77,10 @@ type ledger struct {
 	Unread []string `json:"unread"`
 }
 
-// The test and the anti-test: the numbers measured from a source not yet
-// read against are the ledger's, no more and no fewer. A number added
-// from an unread source fails it until the ledger names it, and a source
-// read at last fails it until its numbers leave the ledger, so a caveat
-// held only in a comment cannot go unseen.
+// The test and anti-test: unread-source values must match the ledger exactly. A
+// new value from an unread source must enter the ledger; a newly verified
+// source must remove its values. Neither transition can hide in an overlooked
+// comment.
 func TestTheUnreadNumbersAreTheLedgers(test *testing.T) {
 	raw, err := os.ReadFile("testdata/unread.json")
 	if err != nil {

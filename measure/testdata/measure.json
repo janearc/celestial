@@ -1,5 +1,5 @@
 {
-  "about": "numbers measure's tests check against. thomson and the proton's mass in kilograms are CODATA 2022, read from nist's pages on 2026-10-31. stefan's constant and a kilogram's energy follow from the si's defining constants, so are exact. the sun's mass, a green photon's energy, the sun's temperature and the eddington limit are carried from slayer's measure tests with their tolerances. the round trips' amounts are picked: one of each unit, of a size the unit is used at. fused are amounts whose kilograms and seconds, made by an inlined product, fused with a subtraction on arm64 when Minus did not round each side first, and left a mass or a time less itself not nothing: found by the deceit review, 2026-10-31. sun gm is the iau's nominal solar gm, 2015 resolution b3, in m3 s-2, defined, held to a few roundings",
+  "about": "numbers measure's tests check against. a degree's 3600 arcseconds and the julian year's 31557600 s are defined, by the arcsecond and by the IAU's 365.25 days of 86400 s; ten joules at two watts, five seconds, is picked by the test author, 2026-11-01, worked by hand. thomson and the proton's mass in kilograms are CODATA 2022, read from nist's pages on 2026-10-31. stefan's constant and a kilogram's energy follow from the si's defining constants, so are exact. the sun's mass, a green photon's energy, the sun's temperature and the eddington limit are carried from slayer's measure tests with their tolerances. the round trips' amounts are picked: one of each unit, of a size the unit is used at. fused are amounts whose kilograms and seconds, made by an inlined product, fused with a subtraction on arm64 when Minus did not round each side first, and left a mass or a time less itself not nothing: found by the deceit review, 2026-10-31. sun gm is the iau's nominal solar gm, 2015 resolution b3, in m3 s-2, defined, held to a few roundings",
   "fused": [1.3, 2.7, 3.1, 5.9, 7.7, 11.1, 0.37],
   "sun gm": 1.3271244e20,
   "sun gm tolerance": 1e-12,
@@ -44,5 +44,8 @@
   "hydrogens in helium": 4,
   "fusion deficit": 0.0071,
   "fusion tolerance": 0.02,
-  "sun lifetime years": 1e11
+  "sun lifetime years": 1e11,
+  "arcseconds a degree": 3600,
+  "julian year seconds": 31557600,
+  "spent": {"joules": 10, "watts": 2, "seconds": 5}
 }

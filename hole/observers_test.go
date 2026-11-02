@@ -7,9 +7,9 @@ import (
 	"github.com/janearc/celestial/hole"
 )
 
-// onEquator is the point in the equator at a kerr-schild radius, on the x
-// axis: round a spinning hole x is the root of the radius squared plus the
-// spin squared.
+// onEquator is the point in the equator at a Kerr-schild radius, on the x axis:
+// round a spinning hole x is the root of the radius squared plus the spin
+// squared.
 func onEquator(black *hole.Hole, radius float64) hole.Vec3 {
 	spin := black.Spin()
 	return hole.NewVec3(math.Sqrt(radius*radius+spin*spin), none, none)
@@ -51,9 +51,9 @@ func TestStaticIsAUnitObserver(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: nothing is still inside the horizon of a hole with no spin, or inside
-// the ergosurface of a spinning one: Static answers parts that are not
-// numbers there, and numbers just outside.
+// The test and the anti-test: nothing is still inside the horizon of a
+// hole with no spin, or inside the ergosurface of a spinning one: Static
+// answers parts that are not numbers there, and numbers just outside.
 func TestStaticIsNotANumberWhereNothingIsStill(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)
@@ -72,8 +72,8 @@ func TestStaticIsNotANumberWhereNothingIsStill(t *testing.T) {
 	}
 }
 
-// Matter on a circle has a four-velocity of unit length, goes round at
-// kepler's rate with the hole's correction, and is prograde.
+// Matter on a circle has a four-velocity of unit length, goes round at Kepler's
+// rate with the hole's correction, and is prograde.
 func TestCircularGoesRoundAtKeplersRate(t *testing.T) {
 	numbers := pickedNumbers(t)
 	for _, from := range []spec{numbers.Holes.Still, numbers.Holes.Fast} {
@@ -99,9 +99,10 @@ func TestCircularGoesRoundAtKeplersRate(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: inside the prograde photon orbit nothing goes round at that rate, and
-// Circular answers parts that are not numbers; just outside it does not.
-// Inside the ergosphere, where Static fails, it still can.
+// The test and the anti-test: inside the prograde photon orbit nothing
+// goes round at that rate, and Circular answers parts that are not
+// numbers; just outside it does not. Inside the ergosphere, where Static
+// fails, it still can.
 func TestCircularStopsAtThePhotonOrbit(t *testing.T) {
 	numbers := pickedNumbers(t)
 	fast := build(t, numbers.Holes.Fast)
@@ -147,8 +148,9 @@ func TestNormalIsAUnitObserverWithoutAngularMomentum(t *testing.T) {
 	}
 }
 
-// The anti-test: the normal observer falls: round a still hole, where a still observer
-// has no spatial velocity, the normal one has an inward one.
+// The anti-test: the normal observer falls: round a still hole, where a
+// still observer has no spatial velocity, the normal one has an inward
+// one.
 func TestNormalIsNotStill(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)

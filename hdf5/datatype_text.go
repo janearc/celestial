@@ -1,5 +1,7 @@
 package hdf5
 
+import
+
 // The fields of a floating-point datatype's class bit field and its
 // properties, each defined by IV.A.2.d Floating-Point. Bits 0 and 6 of
 // the first byte together give the byte order, both clear being
@@ -9,6 +11,8 @@ package hdf5
 // in the bit field's second byte; a little-endian mantissa starts at bit
 // 0; the sign is the last bit, precision less one; and IEEE 754 biases
 // an exponent by 2^(e-1) - 1.
+"fmt"
+
 const (
 	floatOrderBits   = 0x41 // defined by IV.A.2.d
 	floatNormShift   = 4    // defined by IV.A.2.d
@@ -43,10 +47,9 @@ var ieeeFormats = []ieeeLayout{
 		mantissaSize: binary64Mantissa},
 }
 
-// floatingPoint is the datatype of a floating-point datatype, which must
-// be a little-endian IEEE 754 binary32 or binary64 with an implied
-// leading bit. IV.A.2.d Floating-Point. It refuses any other, and then
-// gives none.
+// floatingPoint validates little-endian IEEE binary32 or binary64 with an
+// implied leading bit (IV.A.2.d, Floating-Point). Unsupported layouts return an
+// error.
 func floatingPoint(bits []byte, size int, props []byte,
 	at uint64) (*datatype, error) {
 	walk := &cursor{data: props}
@@ -73,23 +76,23 @@ func floatingPoint(bits []byte, size int, props []byte,
 			return &datatype{class: floatClass, size: size}, nil
 		}
 	}
-	return nil, refuse(errUnsupported, at, "IV.A.2.d",
-		"a floating-point type of %d bytes (sign at %d, exponent "+
-			"%d bits at %d, mantissa %d bits at %d, bias %d, "+
-			"normalization %d, order bits %#x) that is not a "+
-			"little-endian IEEE 754 binary32 or binary64", size,
-		signAt, exponentSize, exponentAt, mantissaSize, mantissaAt,
-		bias, normalization, order)
+	return nil, fmt.Errorf("hdf5: part of the format not read: a "+
+		"floating-point type of %d bytes (sign at %d, exponent %d "+
+		"bits at %d, mantissa %d bits at %d, bias %d, normalization "+
+		"%d, order bits %#x) that is not a little-endian IEEE 754 "+
+		"binary32 or binary64, at address %#x (spec IV.A.2.d)",
+		size, signAt, exponentSize, exponentAt, mantissaSize,
+		mantissaAt, bias, normalization, order, at)
 }
 
-// The bit fields of the string datatype classes, each defined by
-// IV.A.2.d. The low four bits of a fixed string's first byte are its
-// padding and the high four its character set.
+// The bit fields of the string datatype classes, each defined by IV.A.2.d. The
+// low four bits of a fixed string's first byte are its padding and the high
+// four its character set.
 //
-// A variable-length string has its padding in the high four bits of the
-// first byte and its character set in the low four of the second. Of
-// the character sets, ascii is 0 and utf-8 1; of the variable-length
-// kinds, a sequence is 0 and a string 1.
+// A variable-length string has its padding in the high four bits of the first
+// byte and its character set in the low four of the second. Of the character
+// sets, ASCII is 0 and UTF-8 1; of the variable-length kinds, a sequence is 0
+// and a string 1.
 //
 // A string's base type is a one-byte character.
 const (
@@ -107,24 +110,23 @@ const (
 // and III.E.
 const variableElementSize = fourWide + addressSize + fourWide
 
-// fixedString is the datatype of a fixed-length string. IV.A.2.d String.
-// It refuses a padding or character set not read and a size of nothing,
-// and then gives none.
+// fixedString parses a fixed-length string (IV.A.2.d, String). Zero width and
+// unsupported padding or character sets return an error.
 func fixedString(bits []byte, size int, at uint64) (*datatype, error) {
 	padding := stringPadding(bits[firstField] & nibbleMask)
 	charset := int(bits[firstField] >> nibbleShift)
 	if padding >= paddingKinds || size == noBytes ||
 		charset > charsetUTF8 {
-		return nil, refuse(errUnsupported, at, "IV.A.2.d",
-			"a string of %d bytes with padding %d and character "+
-				"set %d", size, padding, charset)
+		return nil, fmt.Errorf("hdf5: part of the format not read: a "+
+			"string of %d bytes with padding %d and character "+
+			"set %d, at address %#x (spec "+
+			"IV.A.2.d)", size, padding, charset, at)
 	}
 	return &datatype{class: stringClass, size: size, padding: padding}, nil
 }
 
-// variableLength is the datatype of a variable-length string; a sequence
-// of anything else is refused. The base type that follows the class bit
-// field must be a one-byte character. IV.A.2.d Variable-Length.
+// variableLength requires a variable-length string with a one-byte character
+// base type. Other sequence types are unsupported (IV.A.2.d, Variable-Length).
 func variableLength(bits []byte, size int, props []byte,
 	at uint64) (*datatype, error) {
 	kind := int(bits[firstField] & nibbleMask)
@@ -132,20 +134,21 @@ func variableLength(bits []byte, size int, props []byte,
 	charset := int(bits[charsetField] & nibbleMask)
 	if kind != variableLengthText || padding >= paddingKinds ||
 		charset > charsetUTF8 || size != variableElementSize {
-		return nil, refuse(errUnsupported, at, "IV.A.2.d",
-			"a variable-length type that is not a string "+
-				"(kind %d, element size %d, padding %d, "+
-				"character set %d)", kind, size, padding,
-			charset)
+		return nil, fmt.Errorf("hdf5: part of the format not read: a "+
+			"variable-length type that is not a string (kind %d, "+
+			"element size %d, padding %d, character set "+
+			"%d), at address %#x (spec "+
+			"IV.A.2.d)", kind, size, padding, charset, at)
 	}
 	base, err := readDatatype(props, at+datatypeHeaderSize)
 	if err != nil {
 		return nil, err
 	}
 	if base.class != integerClass || base.size != oneByteCharacter {
-		return nil, refuse(errUnsupported, at+datatypeHeaderSize,
-			"IV.A.2.d", "a string whose characters are %v, not "+
-				"one byte", base)
+		return nil, fmt.Errorf("hdf5: part of the format not read: a "+
+			"string whose characters are %v, not one byte, at "+
+			"address %#x (spec "+
+			"IV.A.2.d)", base, at+datatypeHeaderSize)
 	}
 	return &datatype{class: stringClass, size: size, variable: true,
 		padding: padding}, nil

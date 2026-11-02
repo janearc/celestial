@@ -5,21 +5,18 @@ import (
 	"math"
 )
 
-// Hole is a black hole: its mass M and its spin A, the angular momentum
-// per unit mass, from nought for schwarzschild up to just under M. The
-// spin axis is z, and the hole turns from x toward y.
-//
-// Only NewHole makes one, and it makes only a hole the other methods are
-// right for.
+// Hole stores mass M and spin A = J/M in geometric length units. The spin axis
+// is z, with rotation from x toward y. Use NewHole to validate the range before
+// calling the geometric methods.
 type Hole struct{ mass, spin float64 }
 
-// the masses hole's arithmetic holds. radius and kernel take the fourth
-// power of a point's distance, and a hole must hold the points of its
-// own horizon, which lies between the mass and twice it.
+// The masses hole's arithmetic holds. radius and kernel take the fourth power
+// of a point's distance, and a hole must hold the points of its own horizon,
+// which lies between the mass and twice it.
 //
-// So the fourth power of twice the mass must not pass the largest
-// float64, and the fourth power of the mass must not fall below the
-// least normal one, where it would lose its digits.
+// So the fourth power of twice the mass must not pass the largest float64, and
+// the fourth power of the mass must not fall below the least normal one, where
+// it would lose its digits.
 var (
 	heaviest = math.Pow(math.MaxFloat64, fourthRoot) / horizonInMasses
 	lightest = math.Pow(leastNormal, fourthRoot)
@@ -29,32 +26,27 @@ var (
 const (
 	fourthRoot  = 0.25      // defined: a fourth root is the power a quarter
 	leastNormal = 0x1p-1022 // defined by float64: its least normal number
-	// horizonInMasses is the farthest a horizon lies, in masses. Defined
-	// by kerr's metric: the horizon is M + root(M² - a²), and 2M at a = 0.
+	// horizonInMasses is the farthest a horizon lies, in masses. Defined by
+	// Kerr's metric: the horizon is M + root(M² - a²), and 2M at a = 0.
 	horizonInMasses = 2
 )
 
-// NewHole returns a kerr hole of the given mass and spin, both lengths
-// in units where G = c = 1: spin is a = J/M, the angular momentum per
-// unit mass, so a spin and a mass compare directly. returns nil and error
-// for:
-//   - a mass outside what hole's arithmetic holds, about 1.2e-77 to
-//     5.8e76 in the caller's unit of length: past those, the hole could
-//     not place the points of its own horizon; see heaviest and lightest
-//   - a spin below zero: a hole turning the other way is this one seen
-//     from below, so turn z about instead
-//   - a spin at or past the mass: at a = M the inner and outer horizons
-//     meet, and past it there is no horizon and no black hole
+// NewHole constructs a Kerr hole with mass M and spin A = J/M, both in length
+// units with G = c = 1. It requires a finite positive mass within the
+// arithmetic bounds, and 0 <= A < M.
 //
-// NaN, either infinity, and a mass of zero or below fall outside these
-// ranges, so they are refused with them.
+// Mass limits are about 1.2e-77 to 5.8e76 in the caller’s length unit. The
+// fourth powers used by radius and kernel must resolve the hole’s own horizon
+// without overflow or loss of normal precision; see lightest and heaviest.
 //
-// a spin of zero is a hole: no real one stands still, but it is the
-// limit the textbook's closed forms are checked against.
+// Negative spin is represented by reversing the z axis instead. A = M is
+// excluded because the two horizons coincide; above it there is no black-hole
+// horizon. Zero spin is allowed as the Schwarzschild limit used by the
+// closed-form tests. Invalid inputs return nil and an error.
 //
-// a point farther than about 1.2e77 from the hole overflows radius,
-// whatever the hole, since radius takes the fourth power of its
-// distance. NewHole cannot guard that; the caller's units can.
+// Coordinates farther than about 1.2e77 overflow the radius calculation
+// regardless of mass. Constructor checks cannot prevent that; choose a suitable
+// coordinate scale.
 func NewHole(mass, spin float64) (*Hole, error) {
 	if !(mass >= lightest && mass <= heaviest) {
 		return nil, fmt.Errorf("hole: a mass of %v, outside %v to %v",
@@ -67,27 +59,26 @@ func NewHole(mass, spin float64) (*Hole, error) {
 	return &Hole{mass: mass, spin: spin}, nil
 }
 
-// Mass is the hole's mass M, which is also its unit of length.
+// Mass returns the geometric mass M, which sets the length scale.
 func (hole Hole) Mass() float64 { return hole.mass }
 
-// Spin is the hole's spin A, the angular momentum per unit mass, in the
-// same unit as the mass.
+// Spin returns A = J/M in the same length unit as Mass. The dimensionless spin
+// is A/M.
 func (hole Hole) Spin() float64 { return hole.spin }
 
-// Radius is the kerr-schild radius at a point: the schwarzschild r at
-// nought spin, and the oblate coordinate that reaches the ring singularity
-// with spin.
+// Radius returns the Kerr–Schild radial coordinate: the Schwarzschild radius
+// coordinate at zero spin, or the oblate coordinate with spin. It is zero on
+// the disc bounded by the ring singularity.
 //
-// On the disc the ring spans it is nought, and within a hair of that
-// disc it rounds to nought as well, being there the difference of two
-// numbers that agree to all their digits. No march comes there: a body
-// is stopped at the inner horizon and light at the outer.
+// Very near that disc, cancellation can also round the result to zero. The
+// marcher avoids relying on this region: bodies stop at the inner horizon,
+// while light uses its capture and horizon stopping rules.
 func (hole Hole) Radius(position Vec3) float64 {
 	return hole.radius(position.x, position.y, position.z)
 }
 
-// radius is Radius of a point given as three numbers, which is how the march
-// holds it.
+// radius evaluates Radius from separate spatial components used by the
+// integration code.
 func (hole Hole) radius(x, y, z float64) float64 {
 	positionSquaredSum := x*x + y*y + z*z
 	spinSquared := hole.spin * hole.spin
@@ -95,17 +86,16 @@ func (hole Hole) radius(x, y, z float64) float64 {
 	rootedSquare := math.Sqrt(discriminant*discriminant +
 		radiusFour*spinSquared*z*z)
 	// within a hair of the disc the sum is the difference of two numbers
-	// that agree to all their digits, and rounding may leave it below
-	// nought: that is nought, and not the root of a negative
+	// that agree to all their digits, and rounding may leave it below zero:
+	// that is zero, and not the root of a negative
 	radiusSquared := radiusHalf * (discriminant + rootedSquare)
 	return math.Sqrt(math.Max(nothing, radiusSquared))
 }
 
-// kernel is the kerr-schild scalar and the null covector at a
-// point: the metric is flat plus scalar * vector * vector.
-//
-// On the disc inside the ring the radius is nought and the kernel has
-// no value; it answers flat space there, which nothing should lean on.
+// kernel returns the Kerr–Schild scalar and null covector, with metric = flat +
+// scalar * vector * vector. On the disc inside the ring, radius is zero and the
+// form is undefined; the implementation returns a flat-space fallback, not a
+// physical model of that region.
 func (hole Hole) kernel(position Vec3) (scalar float64, vector Vec4) {
 	radius := hole.Radius(position)
 	spin := hole.spin
@@ -150,9 +140,8 @@ func (hole Hole) Metric(position Vec3) Mat4 {
 	return metric
 }
 
-// Inverse is the contravariant metric at a point: flat minus scalar *
-// vector * vector with vector raised, which the kerr-schild form gives
-// exactly.
+// Inverse is the contravariant metric at a point: flat minus scalar * vector *
+// vector with vector raised, which the Kerr-schild form gives exactly.
 func (hole Hole) Inverse(position Vec3) Mat4 {
 	scalar, vector := hole.kernel(position)
 	raisedVector := Vec4{
@@ -216,13 +205,13 @@ func raised(scalar float64, null, covector Vec4) Vec4 {
 	}
 }
 
-// Horizon is the outer horizon's radius: 2M at nought spin.
+// Horizon returns the outer horizon radius, 2M at zero spin.
 func (hole Hole) Horizon() float64 {
 	return hole.mass + hole.horizonSplit()
 }
 
-// innerHorizon is the inner horizon's radius: nought at nought spin,
-// where it is the singularity, and up to M at full spin.
+// innerHorizon is the inner horizon's radius: zero at zero spin, where it is
+// the singularity, and up to M at full spin.
 func (hole Hole) innerHorizon() float64 {
 	return hole.mass - hole.horizonSplit()
 }
@@ -233,20 +222,20 @@ func (hole Hole) horizonSplit() float64 {
 		hole.mass*hole.mass-hole.spin*hole.spin))
 }
 
-// PhotonSphere is the radius of the circular photon orbit of a hole
-// with no spin, 3M; with spin the orbits split prograde and retrograde
-// and this is the schwarzschild value. PhotonOrbit is the two.
+// PhotonSphere returns the Schwarzschild reference radius 3M. For a spinning
+// hole, PhotonOrbit gives the distinct prograde and retrograde equatorial
+// radii.
 func (hole Hole) PhotonSphere() float64 {
 	return photonSphereFactor * hole.mass
 }
 
 // PhotonOrbit is the radius of the circular photon orbit in the equator,
-// prograde or retrograde: 3M at nought spin, down to M prograde and up
-// to 4M retrograde at full spin, by bardeen, press and teukolsky's
-// equation 2.18, read on 2026-10-31 (numbers.go cites the paper).
+// prograde or retrograde: 3M at zero spin, down to M prograde and up to 4M
+// retrograde at full spin, by Bardeen, press and teukolsky's equation 2.18,
+// read on 2026-10-31 (numbers.go cites the paper).
 //
-// Every other photon orbit, the ones that leave the equator, lies between
-// the two.
+// Every other photon orbit, the ones that leave the equator, lies between the
+// two.
 func (hole Hole) PhotonOrbit(prograde bool) float64 {
 	against := hole.spin / hole.mass
 	if prograde {
@@ -256,17 +245,16 @@ func (hole Hole) PhotonOrbit(prograde bool) float64 {
 	return orbitScale * hole.mass * (orbitOne + math.Cos(angle))
 }
 
-// Shadow is the radius of the shadow a hole with no spin casts on the
-// sky of a far observer, root twenty-seven M: the impact parameter at
-// which a ray is just captured.
+// Shadow returns the Schwarzschild shadow impact parameter √27 M for a distant
+// observer. It is not a rotating-hole shadow contour.
 func (hole Hole) Shadow() float64 {
 	return math.Sqrt(shadowSquared) * hole.mass
 }
 
-// ISCO is the innermost stable circular orbit, prograde or retrograde:
-// 6M at nought spin, down to M prograde and up to 9M retrograde at
-// full spin, by bardeen, press and teukolsky's equation 2.21, read on
-// 2026-10-31 (numbers.go cites the paper).
+// ISCO is the innermost stable circular orbit, prograde or retrograde: 6M at
+// zero spin, down to M prograde and up to 9M retrograde at full spin, by
+// Bardeen, press and teukolsky's equation 2.21, read on 2026-10-31 (numbers.go
+// cites the paper).
 func (hole Hole) ISCO(prograde bool) float64 {
 	mass := hole.mass
 	normalizedSpin := hole.spin / mass

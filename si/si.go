@@ -1,29 +1,28 @@
-// Package si holds the physical constants celestial uses and the si's
-// decimal prefixes. The five constants here, Planck, Speed, Charge,
-// Boltzmann and Avogadro, are si defining constants: exact, not
-// measured, each typed here once.
+// Package si provides SI defining constants and decimal prefixes. Planck,
+// Speed, Charge, Boltzmann, and Avogadro are exact definitions, not
+// measurements. Each is declared once here.
 //
-// A measured constant, such as G, is read from celestial's research data
-// by name, through a function here.
+// Measured constants such as G are read by name from the research data through
+// functions, preserving the distinction between defined and measured values.
 package si
 
 import "github.com/janearc/celestial/research"
 
-// The si's defining constants, as the SI Brochure, 9th edition (BIPM,
-// 2019), table 1, fixes them.
+// The SI's defining constants, as the SI Brochure, 9th edition (BIPM, 2019),
+// table 1, fixes them.
 const (
-	// Planck is h, in joule seconds. Defined by the si since 2019.
+	// Planck is h, in joule seconds. Defined by the SI since 2019.
 	Planck = 6.62607015e-34
-	// Speed is c, the speed of light, in metres a second. Defined by
-	// the si since 1983.
+	// Speed is c, the speed of light, in metres a second. Defined by the SI
+	// since 1983.
 	Speed = 299792458.0
-	// Charge is e, the charge of one electron, in coulombs. Defined by
-	// the si since 2019.
+	// Charge is e, the charge of one electron, in coulombs. Defined by the
+	// SI since 2019.
 	Charge = 1.602176634e-19
-	// Boltzmann is k, in joules a kelvin. Defined by the si since 2019.
+	// Boltzmann is k, in joules a kelvin. Defined by the SI since 2019.
 	Boltzmann = 1.380649e-23
-	// Avogadro is the number of things in a mole. Defined by the si
-	// since 2019.
+	// Avogadro is the number of things in a mole. Defined by the SI since
+	// 2019.
 	Avogadro = 6.02214076e23
 )
 

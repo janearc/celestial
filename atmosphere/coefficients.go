@@ -6,9 +6,9 @@ import (
 	"github.com/janearc/celestial/research"
 )
 
-// coefficients is every measured number atmosphere takes from bodhaine
-// and the others (1999), and the earth's mean radius, as celestial's
-// research data holds them: read once, by name.
+// coefficients is every measured number atmosphere takes from Bodhaine and the
+// others (1999), and the Earth's mean radius, as celestial's research data
+// holds them: read once, by name.
 type coefficients struct {
 	molecules                     float64 // a cm^3 at 288.15 K, 1013.25 mb
 	constant, first, firstPole    float64 // peck and reeder's index

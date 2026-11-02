@@ -17,7 +17,7 @@ type edges struct {
 	Hi float64 `json:"hi"`
 }
 
-// point is a wavelength and a temperature to read planck's law at.
+// point is a wavelength and a temperature to read Planck's law at.
 type point struct {
 	NM     float64 `json:"nm"`
 	Kelvin float64 `json:"kelvin"`

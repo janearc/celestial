@@ -3,7 +3,6 @@ package atmosphere
 import (
 	_ "embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
 	"sync"
@@ -44,7 +43,8 @@ type layer struct {
 //go:embed standard.json
 var standardText []byte
 
-// readLayers is the standard's seven layers, or none and why.
+// readLayers is the standard's seven layers, or nil and the error that
+// stopped it.
 func readLayers() ([]layer, error) {
 	var file struct {
 		Layers []layer `json:"layers"`
@@ -59,28 +59,21 @@ func readLayers() ([]layer, error) {
 // kinetic temperature departs from the one here by under 0.3 K.
 var layers = sync.OnceValues(readLayers)
 
-// errHeight is a height the standard does not reach.
-var errHeight = errors.New("atmosphere: outside the standard")
-
-// ErrHeight is a height the standard does not reach: below sea level or
-// above its top, at 86 km.
-func ErrHeight() error { return errHeight }
-
 // The numbers the walk up the layers compares with, each defined.
 const (
 	seaLevel  = 0.0 // defined by the scale: no height above the sea
 	level     = 0.0 // defined: a layer whose temperature does not change
 	nextLayer = 1   // defined by a slice's order: the layer above
-	upward    = 1   // defined by math.Inf: the endless above
+	upward    = 1   // defined by math.Inf: the sign of the infinity above
 )
 
-// Standard is the 1976 standard air at a height above sea level, from
-// sea level to 86 km. It refuses a height outside that, and then gives
-// no air.
+// Standard returns the 1976 standard atmosphere from sea level to 86 km
+// geometric height. Out-of-range input returns an error.
 func Standard(height measure.Length) (*Air, error) {
 	metres := height.InMetres()
 	if !(metres >= seaLevel && metres <= topHeight) {
-		return nil, fmt.Errorf("%w: %g m", errHeight, metres)
+		return nil, fmt.Errorf("atmosphere: %g m, outside the "+
+			"standard's %g to %g m", metres, seaLevel, topHeight)
 	}
 	all, err := layers()
 	if err != nil {
@@ -103,8 +96,8 @@ func Standard(height measure.Length) (*Air, error) {
 	return &air, nil
 }
 
-// climbed is the temperature and pressure so far up a layer from its
-// base, by the hydrostatic law over a layer of one gradient.
+// climbed integrates hydrostatic pressure and temperature from a layer base
+// through its constant temperature gradient.
 func (one layer) climbed(kelvin, pascals, climb float64) (float64,
 	float64) {
 	scale := gravity * molarMass / gasConstant

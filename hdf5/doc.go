@@ -1,20 +1,16 @@
-// Package hdf5 reads the parts of the HDF5 file format that the open
-// science centre's strain files use, as the HDF5 File Format
-// Specification, version 3.0, describes them, and refuses the rest.
+// Package hdf5 reads the HDF5 structures used by the open science centre’s
+// strain files, following the HDF5 File Format Specification, version 3.0.
 //
-// It reads a version 0 superblock with eight-byte offsets and lengths,
-// version 1 object headers and their continuations, and old-style
-// groups: a version 1 B-tree of symbol table nodes over a local heap of
-// names.
+// Supported files have a version 0 superblock with eight-byte offsets and
+// lengths, version 1 object headers and continuations, and old-style groups
+// using version 1 B-trees, symbol table nodes, and local name heaps.
 //
-// It reads datasets and attributes of little-endian integers, binary32
-// and binary64 floats, and fixed and variable-length strings.
+// Datasets and attributes may contain little-endian integers, IEEE binary32
+// and binary64 floats, and fixed- or variable-length strings. Storage may
+// be contiguous or chunked; chunks may use deflate and Fletcher-32, whose
+// checksum is verified.
 //
-// A dataset is contiguous or chunked, and a chunk may be deflated and
-// may carry a Fletcher-32 checksum, which is checked.
-//
-// Anything else is refused with ErrUnsupported, which names the part
-// and its section of the specification. Bytes that contradict the
-// specification or themselves are refused with ErrCorrupt, and bytes
-// that are not HDF5 at all with ErrNotHDF5. A refusal gives nothing.
+// Other features return errors. Errors explain unsupported structures,
+// damaged data, or a missing HDF5 signature in words, with the address and
+// specification section where applicable. Failed reads return no result.
 package hdf5

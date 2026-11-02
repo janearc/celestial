@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"slices"
+	"strings"
 	"testing"
 
 	"go.uber.org/mock/gomock"
@@ -66,7 +67,7 @@ const (
 	once     = 1   // defined by counting: one call
 )
 
-// The survey's bands are wise's four, by the names wise writes.
+// The survey's bands are WISE's four, by the names WISE writes.
 func TestWISEHasItsFourBands(test *testing.T) {
 	zeros := pickedNumbers(test).Zeros
 	want := slices.Sorted(maps.Keys(zeros))
@@ -99,13 +100,19 @@ func TestMagnitudeZeroIsTheZeroPoint(test *testing.T) {
 
 // The anti-test: a band the survey does not have is refused, and gives
 // no flux, whether it is a band of another survey, a misspelling or
-// nothing.
+// nothing. The refusal names the survey it is no band of, so it is that
+// refusal, and not a flux of nothing refused for being too faint.
 func TestABandTheSurveyHasNotIsRefused(test *testing.T) {
 	survey := photometry.WISE()
 	for _, band := range pickedNumbers(test).NotBands {
 		flux, err := survey.Flux(band, nothing, nothing)
 		if err == nil || flux != nil {
 			test.Errorf("%q gave %v, %v", band, flux, err)
+			continue
+		}
+		if !strings.Contains(err.Error(), survey.String()) {
+			test.Errorf("%q was refused, but not as no band of %s: %v",
+				band, survey, err)
 		}
 	}
 }
@@ -202,9 +209,9 @@ func TestTooBrightOrTooFaintForAFloatIsRefused(test *testing.T) {
 	}
 }
 
-// Whatever the magnitude and its error, five fainter is a hundredth of
-// the flux, the error scales with the flux, and janskys and si agree on
-// both the flux and its error.
+// Whatever the magnitude and its error, five fainter is a hundredth of the
+// flux, the error scales with the flux, and janskys and SI agree on both the
+// flux and its error.
 func TestPogsonsScaleHoldsEverywhere(test *testing.T) {
 	rapid.Check(test, pogson{numbers: pickedNumbers(test)}.check)
 }

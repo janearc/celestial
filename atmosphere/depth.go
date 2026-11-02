@@ -7,8 +7,8 @@ import (
 	"github.com/janearc/celestial/si"
 )
 
-// The units bodhaine and the others' equation 25 is written in, each
-// defined by cgs and the si.
+// The units Bodhaine and the others' equation 25 is written in, each defined by
+// CGS and the si.
 const (
 	// dynesInAPascal is defined: a pascal is ten dynes a square
 	// centimetre.
@@ -18,19 +18,16 @@ const (
 	twiceLatitude = 2
 )
 
-// DepthAbove is the rayleigh optical depth of the air above a place:
-// how many times over the light of a wavelength coming straight down is
-// scattered on its way, bodhaine and the others' equation 25.
-//
-// The pressure is the place's. Gravity is taken at the column's
-// mass-weighted height, their equation 26. DepthAbove refuses what
-// CrossSection refuses, and then gives nothing.
+// DepthAbove returns vertical Rayleigh optical depth using local pressure and
+// Bodhaine et al.’s equation 25. Gravity is evaluated at the column’s
+// mass-weighted height, following equation 26. Unsupported wavelengths return
+// CrossSection’s error.
 func (air Composition) DepthAbove(wavelength measure.Length,
 	pressure Pressure, latitude measure.Angle,
-	height measure.Length) (float64, error) {
+	height measure.Length) (*float64, error) {
 	area, err := air.CrossSection(wavelength)
 	if err != nil {
-		return none, err
+		return nil, err
 	}
 	known := measured()
 	molar := known.molarCO2*air.carbonDioxide + known.molarDry
@@ -38,12 +35,13 @@ func (air Composition) DepthAbove(wavelength measure.Length,
 	dynes := pressure.pascals * dynesInAPascal
 	squareCentimetres := area.InSquareMetres() /
 		(si.Centi(oneMetre) * si.Centi(oneMetre))
-	return squareCentimetres * dynes * si.Avogadro /
-		(molar * gravityAt(latitude, column)), nil
+	depth := squareCentimetres * dynes * si.Avogadro /
+		(molar * gravityAt(latitude, column))
+	return &depth, nil
 }
 
-// gravityAt is the pull of gravity in cm/s^2 at a latitude and a height
-// in metres: list's (1968) formula, bodhaine and the others' 10 and 11.
+// gravityAt evaluates gravity in cm/s² at latitude and height in metres, using
+// List (1968) as reproduced in Bodhaine et al., equations 10–11.
 func gravityAt(latitude measure.Angle, metres float64) float64 {
 	known := measured()
 	twice := math.Cos(twiceLatitude * latitude.InRadians())

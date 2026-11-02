@@ -1,36 +1,21 @@
-// Package hole is the maths of a black hole for a renderer: a kerr
-// hole in kerr-schild form, null and timelike geodesics marched by
-// hamilton's equations, the quantities a geodesic keeps, the redshift
-// between two observers, and the frame of a camera falling in.
+// Package hole supplies black-hole maths for a renderer: Kerr geometry in
+// Kerr–Schild form, null and timelike geodesics from Hamilton’s equations,
+// conserved quantities, redshift, and the frame of a falling camera.
 //
-// It imports nothing but the standard library, so the relativity can
-// leave; what it does not know is anything about light or pictures.
+// Only the standard library is imported. The package describes geometry and
+// motion, not materials or finished pictures. gpu.go supplies float32 shader
+// parameters and CPU reference stepping; it does not execute GPU work.
 //
-// One file leans toward a renderer, gpu.go: the hole and a camera as
-// the float32 constants a shader takes, and a step that reports what a
-// ray keeps, to hold a shader's own steps against. There is no GPU in
-// it and nothing of a picture.
+// G and c are one. Mass sets the length scale, coordinates are (t, x, y, z),
+// the spin axis is z, the metric signature is (-, +, +, +), and momentum is
+// covariant. Formula-derived constants and their sources are in numbers.go.
+// Chosen integration tolerances are in choices.json, with their authors.
 //
-// Units: G and c are one, and a hole of mass M has its lengths in M. The
-// signature is minus, plus, plus, plus; a point is (t, x, y, z) and a
-// momentum is covariant.
+// The intended boundary leaves relativity here and moves rendering policy to
+// Slayer. March, PaceIn, Hovering, ClosestApproach, DeflectionAngle, Fate, the
+// choices used by Advance and ClassifyRay, choices.json, and gpu.go are part of
+// that proposed migration. They remain implemented in this checkout.
 //
-// Where its numbers come from. The Kerr-Schild form, the radii of a
-// Kerr hole and the runge-kutta step are defined by their formulas, and
-// numbers.go says by which.
-//
-// The march's tolerances are choices, not physics. They are in
-// choices.json, built in, each with what it says and who picked it.
-//
-// The march is ray tracing, and it is moving to slayer. These will
-// change or leave:
-//   - March, PaceIn, Hovering, ClosestApproach, DeflectionAngle and Fate
-//   - Advance and ClassifyRay, which read the march's choices
-//   - choices.json, and everything in gpu.go
-//
-// What stays is the physics a ray tracer steps with. celestial will add
-// one step of a geodesic, at a size the caller picks.
-//
-// The tests' own numbers are in testdata/hole.json, each with where it
-// came from.
+// Step already advances a geodesic at a caller-supplied interval. Test
+// expectations and their provenance live in testdata/hole.json.
 package hole

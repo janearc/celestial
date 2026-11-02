@@ -115,8 +115,8 @@ func TestTheParsecIsNotTakenInDegrees(test *testing.T) {
 	}
 }
 
-// Multiples come from the si's prefixes, not from names here: a micron
-// is a millionth of a metre and a kiloparsec a thousand parsecs.
+// Multiples come from the SI's prefixes, not from names here: a micron is a
+// millionth of a metre and a kiloparsec a thousand parsecs.
 func TestMultiplesComeFromThePrefixes(test *testing.T) {
 	want := pickedNumbers(test)
 	if got := si.Micro(length.Metre); got != want.Micron {
@@ -128,10 +128,9 @@ func TestMultiplesComeFromThePrefixes(test *testing.T) {
 	}
 }
 
-// The anti-test: the Planck length follows G. Squared, times c cubed over
-// hbar, it is G again, to a few roundings, which a figure typed in its
-// place would miss: hbar here is si's exact Planck constant over a turn,
-// not length's own.
+// The anti-test: the Planck length follows G. Squared, times c cubed over hbar,
+// it is G again, to a few roundings, which a figure typed in its place would
+// miss: hbar here is SI's exact Planck constant over a turn, not length's own.
 func TestThePlanckLengthFollowsG(test *testing.T) {
 	tolerance := pickedNumbers(test).FollowsTol
 	if !(tolerance > nothing) {

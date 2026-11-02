@@ -13,12 +13,15 @@ import (
 const (
 	// nothing is no amount at all. Defined by the scale.
 	nothing = 0.0
-	// eitherSign asks math.IsInf about both infinities. Defined by math.
+	// eitherSign asks math.IsInf about both infinities. Defined by
+	// math.IsInf.
 	eitherSign = 0
+	// upward asks math.Inf for the endless above. Defined by math.Inf.
+	upward = 1
 )
 
-// The sun is the IAU's nominal sun, and its mass is its GM over the
-// research data's G.
+// The Sun is the IAU's nominal Sun, and its mass is its GM over the research
+// data's G.
 func TestTheSunIsWhatTheIAUSays(test *testing.T) {
 	want := pickedNumbers(test)
 	sun := measure.Sun()
@@ -40,10 +43,10 @@ func TestTheSunIsWhatTheIAUSays(test *testing.T) {
 	}
 }
 
-// The anti-test: the sun's mass is its GM over G, and not its GM times
-// G, nor its GM taken as a mass, which a slip in the order of a division
-// would give: its mass in kilograms, times si's G, is the iau's nominal
-// GM again, typed from the resolution and not worked out by measure.
+// The anti-test: the Sun's mass is its GM over G, and not its GM times G, nor
+// its GM taken as a mass, which a slip in the order of a division would give:
+// its mass in kilograms, times SI's G, is the IAU's nominal GM again, typed
+// from the resolution and not worked out by measure.
 func TestTheSunsMassTimesGIsTheIAUsGM(test *testing.T) {
 	want := pickedNumbers(test)
 	if !(want.SunGM > nothing) {
@@ -78,8 +81,8 @@ func TestRedCarriesLessThanGreen(test *testing.T) {
 	}
 }
 
-// The sun's temperature follows from its light and its size, to the
-// IAU's nominal 5772 K.
+// The Sun's temperature follows from its light and its size, to the IAU's
+// nominal 5772 K.
 func TestTheSunsTemperatureFollowsFromItsLightAndSize(test *testing.T) {
 	want := pickedNumbers(test)
 	sun := measure.Sun()
@@ -106,8 +109,8 @@ func TestTheSameLightFromMoreSurfaceIsCooler(test *testing.T) {
 	}
 }
 
-// The eddington limit of a sun's mass is about thirty thousand suns, and
-// twice the mass may shine twice as bright.
+// The eddington limit of a Sun's mass is about thirty thousand suns, and twice
+// the mass may shine twice as bright.
 func TestTheEddingtonLimitIsAboutThirtyThousandSuns(test *testing.T) {
 	want := pickedNumbers(test)
 	limit := measure.Eddington(measure.SolarMasses(want.One)).
@@ -123,15 +126,15 @@ func TestTheEddingtonLimitIsAboutThirtyThousandSuns(test *testing.T) {
 	}
 }
 
-// The anti-test: what is no mass, or less than none, or not a number, is
-// not positive, and a body refuses it.
+// The anti-test: a mass of nothing, less than nothing, no number or
+// endlessly much is not positive, and the sun's is.
 func TestWhatWeighsNothingIsNotPositive(test *testing.T) {
 	for _, suns := range pickedNumbers(test).NotMasses {
 		if measure.SolarMasses(suns).Positive() {
 			test.Errorf("%v suns is positive", suns)
 		}
 	}
-	for _, none := range []float64{math.NaN(), math.Inf(eitherSign)} {
+	for _, none := range []float64{math.NaN(), math.Inf(upward)} {
 		if measure.Kilograms(none).Positive() {
 			test.Errorf("%v kilograms is positive", none)
 		}
@@ -159,6 +162,27 @@ func TestADegreeIsNotARadian(test *testing.T) {
 	}
 	if measure.Arcseconds(want.OneDegree).InDegrees() == want.OneDegree {
 		test.Error("an arcsecond is a degree")
+	}
+}
+
+// A degree is sixty arcminutes of sixty arcseconds: 3600 arcseconds
+// come to one degree.
+func TestADegreeIsThirtySixHundredArcseconds(test *testing.T) {
+	want := pickedNumbers(test)
+	degrees := measure.Arcseconds(want.Arcseconds).InDegrees()
+	if !near(degrees, want.OneDegree, want.TripTolerance) {
+		test.Errorf("%v arcseconds is %v degrees", want.Arcseconds, degrees)
+	}
+}
+
+// A julian year, the year of astronomy, is the IAU's 365.25 days of
+// 86400 seconds: 31557600 seconds.
+func TestAJulianYearIsItsSeconds(test *testing.T) {
+	want := pickedNumbers(test)
+	seconds := measure.Years(want.One).InSeconds()
+	if !near(seconds, want.YearSeconds, want.TripTolerance) {
+		test.Errorf("a year is %v seconds, not %v", seconds,
+			want.YearSeconds)
 	}
 }
 

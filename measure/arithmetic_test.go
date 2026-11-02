@@ -24,7 +24,7 @@ func TestTimesAndOverUndoEachOther(test *testing.T) {
 // of itself.
 type scaling struct{ numbers picked }
 
-// check draws a share and scales the sun's quantities by it.
+// check draws a share and scales the Sun's quantities by it.
 func (scales scaling) check(test *rapid.T) {
 	numbers, sun := scales.numbers, measure.Sun()
 	scale := share(test, numbers, "share")
@@ -86,8 +86,8 @@ func TestAQuantityLessItselfIsNothing(test *testing.T) {
 	}
 }
 
-// Helium 4 is lighter than the four hydrogen atoms that fuse into it, by
-// about seven parts in a thousand: the light the sun shines by.
+// Helium 4 is lighter than the four hydrogen atoms that fuse into it, by about
+// seven parts in a thousand: the light the Sun shines by.
 func TestHeliumIsLighterThanTheHydrogenItFusesFrom(test *testing.T) {
 	numbers := pickedNumbers(test)
 	four := measure.Hydrogen1().Times(numbers.Hydrogens)
@@ -98,9 +98,21 @@ func TestHeliumIsLighterThanTheHydrogenItFusesFrom(test *testing.T) {
 	}
 }
 
-// The anti-test: the sun, spending its own mass's energy at its own
-// luminosity, would shine for far longer than the universe is old. So
-// Spending divides the energy by the power, and not the other way.
+// A power spends an energy in the energy over the power: ten joules at
+// two watts take five seconds.
+func TestTenJoulesAtTwoWattsTakeFiveSeconds(test *testing.T) {
+	spent := pickedNumbers(test).Spent
+	took := measure.Watts(spent.Watts).Spending(measure.Joules(spent.Joules))
+	if seconds := took.InSeconds(); !near(seconds, spent.Seconds,
+		pickedNumbers(test).TripTolerance) {
+		test.Errorf("%v J at %v W takes %v s", spent.Joules, spent.Watts,
+			seconds)
+	}
+}
+
+// The anti-test: the Sun, spending its own mass's energy at its own luminosity,
+// would shine for far longer than the universe is old. So Spending divides the
+// energy by the power, and not the other way.
 func TestSpendingDividesEnergyByPower(test *testing.T) {
 	numbers := pickedNumbers(test)
 	sun := measure.Sun()

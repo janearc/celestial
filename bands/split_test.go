@@ -10,8 +10,7 @@ import (
 )
 
 // Light at every wavelength counts, those an eye never sees too: it has
-// power in its bands. The libtheme test went on to say that such light has
-// no colour; that assertion stays behind.
+// power in its bands.
 func TestInfraredIsLight(test *testing.T) {
 	spectrum := map[int]float64{}
 	for _, nm := range pickedNumbers(test).InfraredNM {

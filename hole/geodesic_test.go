@@ -58,8 +58,9 @@ func TestEnergyAndAngularMomentumAreWhatTheMomentumSays(t *testing.T) {
 	}
 }
 
-// The anti-test: anything but the time part of the momentum leaves the energy alone, and
-// anything but the x and y parts leaves the angular momentum alone.
+// The anti-test: anything but the time part of the momentum leaves the
+// energy alone, and anything but the x and y parts leaves the angular
+// momentum alone.
 func TestEnergyIgnoresSpaceAndLzIgnoresTimeAndZ(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Spinning)
@@ -118,8 +119,8 @@ func TestAStepInFlatSpaceGoesStraight(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: near a hole a step bends: the same step that went straight in flat space
-// does not.
+// The test and the anti-test: near a hole a step bends: the same step
+// that went straight in flat space does not.
 func TestAStepNearTheHoleBends(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -155,8 +156,8 @@ func TestHalvingTheStepChangesLittle(t *testing.T) {
 	}
 }
 
-// The anti-test: a step of nothing does not move a ray. The ray comes back
-// as it went in, near the hole where the rates are not nought.
+// The anti-test: a step of nothing does not move a ray. The ray comes back as
+// it went in, near the hole where the rates are not zero.
 func TestAStepOfNothingDoesNotMove(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Kerr)

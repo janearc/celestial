@@ -15,8 +15,8 @@ func nearly(got, want, tolerance float64) bool {
 }
 
 // A ray marched past a hundred M's worth of bending keeps what a geodesic
-// keeps: H nought for light, the energy, the angular momentum and the
-// carter constant.
+// keeps: H zero for light, the energy, the angular momentum and the Carter
+// constant.
 func TestAMarchedRayKeepsWhatItShould(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Kerr)
@@ -53,7 +53,8 @@ type kept struct {
 	before, after float64
 }
 
-// The anti-test: a step far too large does not keep H: the tolerance above has teeth.
+// The anti-test: a step far too large does not keep H: the tolerance
+// above has teeth.
 func TestAStepFarTooLargeDoesNotKeepH(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Kerr)
@@ -65,7 +66,7 @@ func TestAStepFarTooLargeDoesNotKeepH(t *testing.T) {
 	}
 }
 
-// The carter constant of a hole with no spin is the square of the angular
+// The Carter constant of a hole with no spin is the square of the angular
 // momentum less the square of its part about z.
 func TestCarterOfAStillHoleIsTheAngularMomentumLessLz(t *testing.T) {
 	numbers := pickedNumbers(t)
@@ -82,13 +83,10 @@ func TestCarterOfAStillHoleIsTheAngularMomentumLessLz(t *testing.T) {
 	}
 }
 
-// The anti-test: round a spinning hole, a ray is captured only if it falls in.
-// Rays sent past the hole at a range of impact parameters, on the side it
-// turns with and the side it turns against, are marched, and each fate is
-// held to the fate of the same ray stepped to the end with no early
-// capture. The tests above are of a hole with no spin, where the radius a
-// ray cannot come back from is three M whatever its angular momentum; with
-// spin it depends on the sign of that angular momentum.
+// The anti-test: early capture must agree with following a ray to the horizon.
+// Compare both methods across impact parameters on both sides of a spinning
+// hole. Schwarzschild-only cases miss this because the no-return photon radius
+// is always 3M there.
 func TestMarchCapturesOnlyWhatFallsInRoundASpinningHole(t *testing.T) {
 	numbers := pickedNumbers(t)
 	fast := build(t, numbers.Holes.Fast)
@@ -128,10 +126,9 @@ func fallsIn(black *hole.Hole, ray hole.Ray, far float64, steps int) (falls, set
 	return false, false
 }
 
-// The anti-test: the carter constant has the body's mass in it. A body of
-// unit mass moving in the polar angle round a spinning hole keeps it as light
-// does; a constant that took every ray for light, with no mass term, is
-// right for light and drifts for the body.
+// The anti-test: Carter’s constant includes the body’s mass term. A unit-mass
+// trajectory moving in polar angle around a spinning hole must conserve it too;
+// treating every ray as light misses this term.
 func TestCarterOfABodyIsKept(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Kerr)
@@ -139,7 +136,7 @@ func TestCarterOfABodyIsKept(t *testing.T) {
 	at := vec3(given.Position)
 	velocity := hole.NewVec4(perTime, given.Velocity.AlongX,
 		given.Velocity.AlongY, given.Velocity.AlongZ)
-	// the velocity is made a body's four-velocity, whose squared length in
+	// The velocity is made a body's four-velocity, whose squared length in
 	// the metric is minus one
 	lowered := black.Lower(at, velocity)
 	length := hole.Dot(lowered, velocity)
@@ -158,8 +155,8 @@ func TestCarterOfABodyIsKept(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: on the disc inside the ring the radius is nought and the carter constant
-// is not a number; anywhere else it is one.
+// The test and the anti-test: on the disc inside the ring the radius is zero
+// and the Carter constant is not a number; anywhere else it is one.
 func TestCarterIsNotANumberOnTheDisc(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Spinning)

@@ -2,14 +2,13 @@ package hole
 
 import "math"
 
-// Normal is the four-velocity of the observer normal to the chart's
-// slices of constant time at a point: it carries no angular momentum, is
-// carried round by the dragging and nothing else, and exists everywhere
-// outside the horizon, ergosphere included, where Static does not.
+// Normal returns the four-velocity normal to the chart’s constant-time slices.
+// It has zero angular momentum, follows frame dragging, and exists outside the
+// horizon, including the ergosphere.
 //
-// It is not still: in this chart it falls inward, slowly far out and
-// faster close in, even round a still hole. Where Static exists, it is
-// the one to prefer for a thing held in place.
+// It is not stationary: even without spin it falls inward, slowly far away and
+// faster nearby. Use Static where available for an object held at fixed
+// coordinates.
 func (hole Hole) Normal(position Vec3) Vec4 {
 	scalar, null := hole.kernel(position)
 	scale := whole / math.Sqrt(whole+scalar)

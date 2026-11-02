@@ -17,8 +17,8 @@ const failed = 1
 // defined by go test: -timeout 0 turns the timeout off.
 const noTimeout = 0
 
-// timeoutQuarter divides the timeout into the part taken off it. It is defined by
-// the arithmetic.
+// timeoutQuarter divides the timeout into the part taken off it. It is
+// defined by the arithmetic.
 const timeoutQuarter = 4
 
 // everyStack is the debug level of runtime/pprof that writes a stack for each

@@ -265,6 +265,45 @@ type picked struct {
 		}
 		Tolerance float64
 	} `json:"isco mid spins"`
+	Edges  edgesOf
+	Moving struct {
+		ProperTime   float64 `json:"proper time"`
+		Aim          place
+		CircleRadius float64 `json:"circle radius"`
+		CircleTime   float64 `json:"circle time"`
+		CircleShare  float64 `json:"circle share"`
+		LeastTurn    float64 `json:"least turn"`
+	}
+	Thrown struct {
+		Hole    spec
+		From    float64
+		HighTop float64 `json:"high top"`
+		LowTop  float64 `json:"low top"`
+		Steps   int
+	}
+	Pace struct {
+		Aim      place
+		Relative float64
+		Loud     float64
+	}
+}
+
+// edgesOf is the numbers for places where a rule of the fall or the march
+// changes.
+type edgesOf struct {
+	SingularityMargin float64 `json:"singularity margin"`
+	Double            spec
+	TwoHorizons       spec    `json:"two horizons"`
+	InnerHorizon      float64 `json:"inner horizon"`
+	OnTheInnerHorizon place   `json:"on the inner horizon"`
+	JustInsideInner   place   `json:"just inside the inner horizon"`
+	OnTheHorizon      place   `json:"on the horizon"`
+	HorizonLight      struct {
+		Position, Momentum four
+	} `json:"horizon light"`
+	Hair         four
+	OffTheHair   place `json:"off the hair"`
+	FromInfinity four  `json:"from infinity"`
 }
 
 // stopper is what a test or a property is stopped with.
@@ -317,7 +356,7 @@ const (
 	identity = 1
 )
 
-// sunOf is the numbers for a ray grazing the sun and rays at the edge of a
+// sunOf is the numbers for a ray grazing the Sun and rays at the edge of a
 // shadow.
 type sunOf struct {
 	RadiusKm    float64 `json:"radius km"`
@@ -356,8 +395,8 @@ type straightOf struct {
 }
 
 // relativeFloor is the size below which a relative tolerance is read as an
-// absolute one, so a quantity near nought is not held to nothing. It is
-// defined by this test: one, the unit of M.
+// absolute one, so a quantity near zero is not held to nothing. It is defined
+// by this test: one, the unit of M.
 const relativeFloor = 1
 
 // The formulas the geodesic tests hold the package to.
@@ -377,8 +416,8 @@ const (
 	// unitEnergy is the energy Null gives its ray as its observer measures
 	// it. It is defined by Null's own description: one.
 	unitEnergy = 1
-	// lorentzOne is the 1 of the Lorentz factor 1 / sqrt(1 - v^2) and of the
-	// doppler factor 1 / (gamma (1 - v)). It is defined by special
+	// lorentzOne is the 1 of the Lorentz factor 1 / sqrt(1 - v^2) and of
+	// the Doppler factor 1 / (gamma (1 - v)). It is defined by special
 	// relativity.
 	lorentzOne = 1
 	// schwarzschildOne is the 1 of sqrt(1 - 2 M / r), the rate of a still

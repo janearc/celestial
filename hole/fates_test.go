@@ -26,7 +26,8 @@ func describe(fate hole.Fate) string {
 	return "unknown"
 }
 
-// The test and the anti-test: a ray that is not a number is stuck at once, and handed back as it came.
+// The test and the anti-test: a ray that is not a number is stuck at
+// once, and handed back as it came.
 func TestMarchOfARayThatIsNotANumberIsStuck(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -40,8 +41,8 @@ func TestMarchOfARayThatIsNotANumberIsStuck(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: with no steps to take a ray is stuck where it stands; with room to move,
-// the same ray is not.
+// The test and the anti-test: with no steps to take a ray is stuck where
+// it stands; with room to move, the same ray is not.
 func TestMarchWithNoStepsIsStuck(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -57,7 +58,8 @@ func TestMarchWithNoStepsIsStuck(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: a ray already past the far radius has escaped, and is not stepped.
+// The test and the anti-test: a ray already past the far radius has
+// escaped, and is not stepped.
 func TestMarchOfARayAlreadyFarHasEscaped(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -68,9 +70,9 @@ func TestMarchOfARayAlreadyFarHasEscaped(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: light sent forward from inside the horizon is captured where it stands;
-// light sent outward from just outside it is not, however near: it gets
-// out.
+// The test and the anti-test: light sent forward from inside the horizon
+// is captured where it stands; light sent outward from just outside it
+// is not, however near: it gets out.
 func TestMarchFromTheEdgeOfTheHorizon(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)
@@ -92,9 +94,9 @@ func TestMarchFromTheEdgeOfTheHorizon(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: an arriving ray aimed at the hole is found hovering at the horizon in a
-// few hundred steps of PaceIn, with H still nought to a percent; a ray far
-// from the hole is not hovering.
+// The test and the anti-test: an arriving ray aimed at the hole is found
+// hovering at the horizon in a few hundred steps of PaceIn, with H still zero
+// to a percent; a ray far from the hole is not hovering.
 func TestAnArrivingRayLandsOnTheHorizon(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)
@@ -160,8 +162,8 @@ func TestLightLeavingTheEdgeIsNotHovering(t *testing.T) {
 	}
 }
 
-// The anti-test: a step is never nought or backward, for a leaving ray or
-// an arriving one, whose time runs the other way.
+// The anti-test: a step is never zero or backward, for a leaving ray or an
+// arriving one, whose time runs the other way.
 func TestPaceInIsNeverBackward(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)

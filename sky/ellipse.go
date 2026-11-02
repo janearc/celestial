@@ -7,19 +7,14 @@ import (
 	"github.com/janearc/celestial/measure"
 )
 
-// Ellipse is an error ellipse on the sky, as catalogues give a
-// position's: its semi-major and semi-minor axes, and the position angle
-// of the major axis, east of north.
+// Ellipse stores a positional error ellipse: major and minor semi-axes and the
+// major axis’s position angle east of north.
 type Ellipse struct{ major, minor, angle measure.Angle }
 
-// NewEllipse is the ellipse of two semi-axes and the position angle of
-// the major one, east of north. returns nil and error for:
-//   - a semi-minor axis below none, or longer than the semi-major
-//   - a semi-major axis past the far side of the sky, half a turn
-//   - a position angle more than a turn from north
-//
-// A semi-minor axis of none is an ellipse squashed to a line, which a
-// catalogue may give.
+// NewEllipse constructs an error ellipse. It rejects a negative minor axis, a
+// minor axis longer than the major, a major axis over half a turn, or a
+// position angle outside one turn in either direction. A zero minor axis is
+// allowed for a catalogue’s degenerate line ellipse.
 func NewEllipse(major, minor, angle measure.Angle) (*Ellipse, error) {
 	semiMajor, semiMinor := major.InRadians(), minor.InRadians()
 	fromNorth := angle.InDegrees()
@@ -47,10 +42,9 @@ const noAxis = 0.0
 // geometry: three, a triangle, the least outline that encloses an area.
 const fewestPoints = 3
 
-// Outline is so many points evenly round the ellipse, as offsets east
-// and north of its centre, starting at the end of the major axis the
-// position angle points to. It refuses fewer than three points, and then
-// gives none.
+// Outline returns evenly spaced points around the ellipse as east and north
+// offsets, beginning at the major-axis end selected by the position angle.
+// Fewer than three points returns an error.
 func (ellipse Ellipse) Outline(points int) ([]Offset, error) {
 	if points < fewestPoints {
 		return nil, fmt.Errorf("sky: an outline of %d points, fewer "+

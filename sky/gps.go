@@ -5,19 +5,15 @@ import (
 	"math"
 )
 
-// gpsEpochDay is the modified julian day of the gps epoch, 1980 january
-// 6, at whose start gps time reads nought. Defined by IS-GPS-200,
-// section 3.3.4, read on 2026-10-31 in revision M: "midnight on the
-// night of January 5, 1980/morning of January 6, 1980".
+// gpsEpochDay is the modified Julian day of the GPS epoch, 1980 January 6, at
+// whose start GPS time reads zero. Defined by IS-GPS-200, section 3.3.4, read
+// on 2026-10-31 in revision M: "midnight on the night of January 5,
+// 1980/morning of January 6, 1980".
 const gpsEpochDay = 44244
 
-// FromGPS is the instant a gps time names: seconds of gps time since the
-// gps epoch, 1980 january 6 0h utc. The LIGO and Virgo detectors, and
-// the open science centre that publishes their data, give their times
-// this way.
-//
-// FromGPS refuses a time that is not a finite number, or so far off its
-// days cannot be counted exactly, and then gives no instant.
+// FromGPS converts seconds since 1980-01-06 00:00 UTC to an instant on the GPS
+// scale used by LIGO, Virgo, and the open science centre. It rejects nonfinite
+// values and dates whose whole days float64 cannot count exactly.
 func FromGPS(seconds float64) (*Instant, error) {
 	days := math.Floor(seconds / secondsADay)
 	if !countable(days) {
@@ -29,18 +25,17 @@ func FromGPS(seconds float64) (*Instant, error) {
 	return &moment, nil
 }
 
-// mostDays is the most days an instant counts from its zero, either
-// way: the largest whole number a float counts exactly, past which a day
-// number is not one. Defined by float64.
+// mostDays is the largest whole day count representable exactly by float64 in
+// either direction.
 const mostDays = 1 << 53
 
-// countable is whether a number of days is a number, and few enough to
-// count exactly. A NaN fails the comparison, and is not.
+// countable checks that a day count is finite and within exact integer range.
+// NaN fails the comparison.
 func countable(days float64) bool { return math.Abs(days) < mostDays }
 
-// GPSSeconds is the instant as seconds of gps time since the gps epoch,
-// FromGPS undone. returns nil and error for what On refuses: an instant
-// on ut1, or on utc where its leap seconds are not known.
+// GPSSeconds returns seconds since the GPS epoch, reversing FromGPS. It reports
+// conversion errors from On, including UT1 input and UTC dates outside the leap
+// table’s coverage.
 func (moment Instant) GPSSeconds() (*float64, error) {
 	on, err := moment.On(GPS())
 	if err != nil {

@@ -1,10 +1,9 @@
-// Package bands is light carried as amounts in slices of the spectrum: the
-// form a renderer needs when light has to be added, filtered, redshifted or
-// bent by wavelength, before an eye reduces it to three numbers.
+// Package bands carries light as amounts in logarithmic wavelength bins. A
+// renderer can add, filter, or shift the spectrum before reducing it to colour.
+// Infrared and radio power count as light here too.
 //
-// Light in bands is what light is, coarsely. What it looks like is a
-// colour, and colour is libtheme's: its bands package folds this light
-// into a swatch through the 1931 observer.
+// This is a coarse spectral representation, not a colour model. Colour
+// conversion belongs to libtheme and its CIE 1931 observer integration.
 package bands
 
 import (
@@ -14,23 +13,20 @@ import (
 	"github.com/janearc/celestial/research"
 )
 
-// PerOctave is how many bands there are for every doubling of
-// wavelength. It is picked, not derived, and is the one number this
-// package takes; celestial's research data holds it, and says who picked
-// it and from what.
+// PerOctave returns the chosen number of logarithmic bands per doubling of
+// wavelength. Research data records the choice and its author.
 //
-// The bands are even in the logarithm of wavelength, not in nanometres.
-// Redshift multiplies every wavelength by the same factor, so it is a
-// slide along the bands, not a resampling.
+// Uniform spacing in log wavelength makes a redshift a translation through the
+// bands rather than a resampling on a linear grid.
 func PerOctave() Band { return Band(research.Value(perOctaveName)) }
 
 // perOctaveName is PerOctave's name in the research data.
 const perOctaveName = "bands-per-octave"
 
-// Band is one slice of the spectrum. Band i runs from 2^(i/PerOctave)
-// nanometres up to, but not including, 2^((i+1)/PerOctave). Band 0
-// starts at one nanometre, and the wavelength doubles every PerOctave
-// bands. Visible light is about bands 205 to 230.
+// Band identifies a half-open wavelength bin. Bin i spans [2^(i/PerOctave),
+// 2^((i+1)/PerOctave)) nanometres. Band zero begins at 1 nm; wavelengths double
+// every PerOctave bins. At the chosen spacing, visible light occupies roughly
+// bands 205–230.
 type Band int
 
 // The counts the bands are built of, each defined.
@@ -43,17 +39,16 @@ const (
 	above      = 1 // defined by math.IsInf: the infinity above
 )
 
-// Of is the band a wavelength in nanometres falls in.
+// Of returns the band containing a wavelength in nanometres.
 func Of(nm float64) Band { return grid(PerOctave()).of(nm) }
 
-// Edges is where a band starts and where the next one does, in
-// nanometres.
+// Edges returns the lower-inclusive and upper-exclusive wavelengths of a band,
+// in nanometres.
 func (band Band) Edges() (lo, hi float64) {
 	return grid(PerOctave()).edges(band)
 }
 
-// grid is a step, in bands per octave. The package only ever uses
-// PerOctave; libtheme-css's FUDGE.md holds the steps that were tried.
+// grid is a step, in bands per octave. bands always uses PerOctave.
 type grid int
 
 // of is Of at a step.
@@ -69,20 +64,17 @@ func (step grid) edges(band Band) (lo, hi float64) {
 		math.Exp2(float64(band+nextBand) / per)
 }
 
-// Light is the power in each of a run of neighbouring bands, starting at
-// band first. Its units are whatever the spectrum it came from used,
-// times a nanometre. The zero value is no light.
+// Light stores power over consecutive wavelength bands, beginning at first.
+// Units follow the input spectrum integrated over nanometres. The zero value
+// contains no light.
 type Light struct {
 	step  grid
 	first Band
 	power []float64
 }
 
-// Split is a spectrum, given as power by wavelength in nanometres, as
-// light in bands: each wavelength's power goes into the band it falls in.
-//
-// Every wavelength counts, including those an eye never sees. Light in
-// infrared bands is still light.
+// Split groups a spectrum sampled at integer nanometres into bands, adding each
+// sample to its containing band. Wavelengths outside human vision are retained.
 func Split(spectrum map[int]float64) Light {
 	return grid(PerOctave()).split(spectrum)
 }
@@ -96,13 +88,13 @@ func (step grid) split(spectrum map[int]float64) Light {
 	return step.lines(lines)
 }
 
-// Span is the first and last band this light has any entry for. Empty
-// light reports first greater than last.
+// Span returns the first and last stored bands, both inclusive. For empty
+// light, first is greater than last.
 func (light Light) Span() (first, last Band) {
 	return light.first, light.first + Band(len(light.power)) - nextBand
 }
 
-// Power is the light in one band, nothing outside the span.
+// Power returns the stored power in a band, or zero outside the span.
 func (light Light) Power(band Band) float64 {
 	place := int(band - light.first)
 	if place < firstPlace || place >= len(light.power) {
@@ -111,17 +103,17 @@ func (light Light) Power(band Band) float64 {
 	return light.power[place]
 }
 
-// Shift slides the light along the bands: up by steps is redder.
-// Redshift by a factor of 1 + z is PerOctave times log2(1 + z) steps,
-// exact when that is whole. The power in each band travels with it
-// unchanged; dimming with distance is the scene's business.
+// Shift translates power by whole bands; positive steps move toward longer,
+// redder wavelengths. A redshift factor 1+z corresponds to PerOctave*log2(1+z)
+// steps, exact when integral. Band powers do not change; distance dimming
+// belongs to the caller.
 func (light Light) Shift(steps int) Light {
 	out := Light{step: light.step, first: light.first + Band(steps)}
 	out.power = slices.Clone(light.power)
 	return out
 }
 
-// Scale is the light made so many times as strong in every band.
+// Scale returns a copy with every band’s power multiplied by times.
 func (light Light) Scale(times float64) Light {
 	out := Light{step: light.step, first: light.first}
 	out.power = make([]float64, len(light.power))
@@ -131,7 +123,7 @@ func (light Light) Scale(times float64) Light {
 	return out
 }
 
-// Add is two lights shining on the same place: in every band, the sum.
+// Add sums two spectra band by band without modifying either input.
 func Add(one, other Light) Light {
 	if len(one.power) == empty {
 		return other.Scale(asItIs)
@@ -150,16 +142,15 @@ func Add(one, other Light) Light {
 	return out
 }
 
-// Lines is light given at any wavelengths, each a line, grouped into the
-// bands by wavelength in nanometres. Gamma rays are a few thousandths of
-// a nanometre, and they have bands too.
+// Lines groups power at arbitrary wavelengths in nanometres into bands. Unlike
+// Split, it retains sub-nanometre line positions, including gamma rays.
 func Lines(spectrum map[float64]float64) Light {
 	return grid(PerOctave()).lines(spectrum)
 }
 
-// lines is Lines at a step, which Split and the tests share. A line at
-// no wavelength or less, at an endless one, or at none that is a number,
-// is no light, and is left out: there is no band for it.
+// lines implements Lines at the selected grid spacing, shared by Split and the
+// tests. Nonpositive, infinite, and NaN wavelengths are omitted because they
+// have no corresponding band.
 func (step grid) lines(spectrum map[float64]float64) Light {
 	var order []float64
 	for nm := range spectrum {

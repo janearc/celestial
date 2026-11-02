@@ -8,13 +8,14 @@ import (
 	"github.com/janearc/celestial/research"
 )
 
-// Photometer turns a magnitude measured in a named band, and its error,
-// into the flux density it stands for.
+// Photometer converts a magnitude and its uncertainty in a named band to
+// spectral flux density.
 type Photometer interface {
 	Flux(band string, magnitude, magnitudeError float64) (*Flux, error)
 }
 
-// A Survey is a Photometer: the build fails if it stops being one.
+// Survey must stay a Photometer: the build fails here if it stops being
+// one.
 var _ Photometer = (*Survey)(nil)
 
 // Pogson's scale, as defined: five magnitudes are a factor of a hundred.
@@ -27,23 +28,22 @@ const (
 	pogsonStep = 5
 )
 
-// Survey is a survey's bands, each known by the name the survey writes
-// and holding the flux density of a magnitude of zero in it.
+// Survey stores named bands with their magnitude-zero flux densities.
 type Survey struct {
 	name  string
 	zeros map[string]float64
 }
 
-// wiseBands is the name of each of wise's bands, and the name in
-// celestial's research data of its zero point, in janskys.
+// wiseBands is the name of each of WISE's bands, and the name in celestial's
+// research data of its zero point, in janskys.
 var wiseBands = map[string]string{
 	"W1": "wise-w1-zero-jy", "W2": "wise-w2-zero-jy",
 	"W3": "wise-w3-zero-jy", "W4": "wise-w4-zero-jy",
 }
 
-// WISE is the wide-field infrared survey explorer's four bands, with the
-// zero points of its vega magnitudes from its all-sky explanatory
-// supplement, as celestial's research data holds them.
+// WISE returns the Wide-field Infrared Survey Explorer’s four bands.
+// Vega-magnitude zero points come from its All-Sky Explanatory Supplement
+// through the research data.
 func WISE() *Survey {
 	zeros := make(map[string]float64, len(wiseBands))
 	for band, name := range wiseBands {
@@ -52,10 +52,10 @@ func WISE() *Survey {
 	return &Survey{name: "wise", zeros: zeros}
 }
 
-// Bands is the names of the survey's bands, in order.
+// Bands returns the survey’s band names in order.
 func (survey *Survey) Bands() []string {
 	return slices.Sorted(maps.Keys(survey.zeros))
 }
 
-// String is the survey's name.
+// String returns the survey name.
 func (survey *Survey) String() string { return survey.name }

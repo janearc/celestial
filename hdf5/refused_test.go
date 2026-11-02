@@ -2,7 +2,9 @@ package hdf5_test
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -20,9 +22,22 @@ func opening(raw []byte) (*hdf5.File, error) {
 	return hdf5.NewFile(bytes.NewReader(raw), size)
 }
 
-// causes is the refusal each mutation's cause names.
-var causes = map[string]error{"unsupported": hdf5.ErrUnsupported(),
-	"corrupt": hdf5.ErrCorrupt()}
+// The words each cause puts in a refusal, as hdf5 writes them.
+const (
+	damaged     = "hdf5: file is damaged"
+	notRead     = "hdf5: part of the format not read"
+	notHDF5     = "hdf5: not an HDF5 file"
+	notFound    = "hdf5: not found"
+	notThatKind = "hdf5: not that kind of value"
+)
+
+// causes is the words each mutation's cause puts in its refusal.
+var causes = map[string]string{"unsupported": notRead, "corrupt": damaged}
+
+// says is whether an error is one and holds the words.
+func says(err error, words string) bool {
+	return err != nil && strings.Contains(err.Error(), words)
+}
 
 // mutated is the strain file with a mutation's bytes written over it.
 func mutated(test *testing.T, want mutation) []byte {
@@ -55,14 +70,42 @@ func refusal(test *testing.T, want mutation) (bool, error) {
 // The anti-test: each field of the real file changed to a value the
 // reader does not read, or that contradicts the file, is refused where
 // the reader meets it, for the cause the expectations name, in words
-// that name the specification's section; and gives nothing.
+// that name the address and the specification's section; and gives
+// nothing.
 func TestAChangedFileIsRefused(test *testing.T) {
 	for _, want := range expectations(test).Mutations {
 		gave, err := refusal(test, want)
-		if gave || !errors.Is(err, causes[want.Cause]) ||
-			!strings.Contains(err.Error(), want.Section) {
+		where := fmt.Sprintf("at address %#x (spec %s)", want.Address,
+			want.Section)
+		if gave || !says(err, causes[want.Cause]) ||
+			!strings.Contains(err.Error(), where) {
 			test.Errorf("%s: gave %v, %v", want.Why, gave, err)
 		}
+	}
+}
+
+// The test: the real file's superblock alone, its end of file address
+// written as its own length, opens: opening reads the superblock and no
+// further, though its root group's header, at 96, is past the end.
+func TestASuperblockAloneOpens(test *testing.T) {
+	super := expectations(test).Superblock
+	raw := bytes.Clone(fileBytes(test)[:super.Length])
+	binary.LittleEndian.PutUint64(raw[super.EndAt:], uint64(super.Length))
+	if file, err := opening(raw); err != nil || file == nil {
+		test.Errorf("the superblock alone: %v, %v", file, err)
+	}
+}
+
+// The anti-test: the superblock a byte short, its end of file address
+// written as that length, is refused as damaged, and gives no file.
+func TestASuperblockAByteShortIsRefused(test *testing.T) {
+	super := expectations(test).Superblock
+	short := super.Length - one
+	raw := bytes.Clone(fileBytes(test)[:short])
+	binary.LittleEndian.PutUint64(raw[super.EndAt:], uint64(short))
+	if file, err := opening(raw); file != nil ||
+		!says(err, damaged) {
+		test.Errorf("the superblock a byte short: %v, %v", file, err)
 	}
 }
 
@@ -163,7 +206,7 @@ func TestAFailingReaderIsItsOwnError(test *testing.T) {
 	size := int64(len(raw))
 	if file, err := hdf5.NewFile(stingy{}, size); file != nil ||
 		!errors.Is(err, io.ErrUnexpectedEOF) ||
-		errors.Is(err, hdf5.ErrCorrupt()) {
+		says(err, damaged) {
 		test.Errorf("a stingy reader: %v, %v", file, err)
 	}
 	if file, err := hdf5.NewFile(broken{}, size); file != nil ||
@@ -172,28 +215,32 @@ func TestAFailingReaderIsItsOwnError(test *testing.T) {
 	}
 }
 
-// The anti-test: bytes that are no hdf5 file, a file cut in half and a
-// size below nothing are refused, and give no file.
+// The anti-test: non-HDF5 bytes, an empty file, a truncated file, and a
+// negative size must return an error and no File.
 func TestWhatIsNoFileIsRefused(test *testing.T) {
 	want := expectations(test)
+	if file, err := opening(nil); !says(err, notHDF5) ||
+		file != nil {
+		test.Errorf("no bytes read as a file: %v, %v", file, err)
+	}
 	words := []byte(want.NotHDF5)
-	if file, err := opening(words); !errors.Is(err, hdf5.ErrNotHDF5()) ||
+	if file, err := opening(words); !says(err, notHDF5) ||
 		file != nil {
 		test.Errorf("words read as a file: %v, %v", file, err)
 	}
 	short := []byte(want.TooShort)
-	if file, err := opening(short); !errors.Is(err, hdf5.ErrNotHDF5()) ||
+	if file, err := opening(short); !says(err, notHDF5) ||
 		file != nil {
 		test.Errorf("%q read as a file: %v, %v", short, file, err)
 	}
 	raw := fileBytes(test)
 	half := raw[:len(raw)/halved]
-	if file, err := opening(half); !errors.Is(err, hdf5.ErrCorrupt()) ||
+	if file, err := opening(half); !says(err, damaged) ||
 		file != nil {
 		test.Errorf("half a file read as one: %v, %v", file, err)
 	}
 	signed := raw[:want.Signature]
-	if file, err := opening(signed); !errors.Is(err, hdf5.ErrCorrupt()) ||
+	if file, err := opening(signed); !says(err, damaged) ||
 		file != nil {
 		test.Errorf("a signature alone read as a file: %v, %v", file, err)
 	}
@@ -212,8 +259,8 @@ func TestADamagedChunkIsRefused(test *testing.T) {
 	raw := bytes.Clone(fileBytes(test))
 	raw[len(raw)-want.FlippedFrom] ^= flipped
 	file := opened(test, raw)
-	if values, err := file.Read(want.Strain); !errors.Is(err,
-		hdf5.ErrCorrupt()) || values != nil {
+	if values, err := file.Read(want.Strain); !says(err, damaged) ||
+		values != nil {
 		test.Errorf("the damaged strain read: %v, %v", values, err)
 	}
 	read(test, file, "meta/Detector")
@@ -228,8 +275,8 @@ func TestWhatIsNotThereIsNotFound(test *testing.T) {
 	want := expectations(test)
 	file := opened(test, fileBytes(test))
 	for _, path := range want.NotPaths {
-		if values, err := file.Read(path); !errors.Is(err,
-			hdf5.ErrNotFound()) || values != nil {
+		if values, err := file.Read(path); !says(err, notFound) ||
+			values != nil {
 			test.Errorf("%q read: %v, %v", path, values, err)
 		}
 		if names, err := file.Members(path); err == nil || names != nil {
@@ -241,8 +288,8 @@ func TestWhatIsNotThereIsNotFound(test *testing.T) {
 		}
 	}
 	for _, name := range want.NotAttrs {
-		if values, err := file.Attribute(want.Strain, name); !errors.Is(err,
-			hdf5.ErrNotFound()) || values != nil {
+		if values, err := file.Attribute(want.Strain, name); !says(err,
+			notFound) || values != nil {
 			test.Errorf("the strain's %q read: %v, %v", name, values, err)
 		}
 	}
@@ -254,21 +301,21 @@ func TestTheWrongKindIsRefused(test *testing.T) {
 	want := expectations(test)
 	file := opened(test, fileBytes(test))
 	names := read(test, file, "quality/simple/DQShortnames")
-	if got, err := names.Floats(); !errors.Is(err, hdf5.ErrWrongType()) ||
+	if got, err := names.Floats(); !says(err, notThatKind) ||
 		got != nil {
 		test.Errorf("names read as floats: %v", got)
 	}
 	strain := read(test, file, want.Strain)
-	if got, err := strain.Texts(); !errors.Is(err, hdf5.ErrWrongType()) ||
+	if got, err := strain.Texts(); !says(err, notThatKind) ||
 		got != nil {
 		test.Errorf("the strain read as text: %v", got)
 	}
-	if got, err := strain.Integers(); !errors.Is(err,
-		hdf5.ErrWrongType()) || got != nil {
+	if got, err := strain.Integers(); !says(err, notThatKind) ||
+		got != nil {
 		test.Errorf("the strain read as integers: %v", got)
 	}
-	if values, err := file.Read("meta"); !errors.Is(err,
-		hdf5.ErrWrongType()) || values != nil {
+	if values, err := file.Read("meta"); !says(err, notThatKind) ||
+		values != nil {
 		test.Errorf("a group read as a dataset: %v, %v", values, err)
 	}
 	if got, err := file.Members(want.Strain); err == nil || got != nil {

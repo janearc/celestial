@@ -37,8 +37,7 @@ func addsEveryBand(test *rapid.T) {
 }
 
 // Light adds: two lights on one place are, in every band, the sum of the
-// two. The libtheme test also added the two colours and compared; that
-// assertion stays behind.
+// two.
 func TestLightAdds(test *testing.T) {
 	numbers := pickedNumbers(test)
 	one := bands.Split(numbers.Spectrum)
@@ -81,8 +80,7 @@ func TestALightAddedToItselfIsTwiceTheLight(test *testing.T) {
 	}
 }
 
-// The anti-test: no light and no light is no light. It has no span. (The
-// libtheme test also said it is no colour; that stays behind.)
+// The anti-test: no light and no light is no light. It has no span.
 func TestNoLightAndNoLightIsNoLight(test *testing.T) {
 	both := bands.Add(bands.Light{}, bands.Light{})
 	if first, last := both.Span(); first <= last {
@@ -91,8 +89,7 @@ func TestNoLightAndNoLightIsNoLight(test *testing.T) {
 }
 
 // No light is no light, whichever way it is asked for, and added to a
-// light it leaves the light. The libtheme test's colour assertions, that
-// no light is black, stay behind.
+// light it leaves the light.
 func TestNoLight(test *testing.T) {
 	numbers := pickedNumbers(test)
 	for _, light := range []bands.Light{{}, bands.Split(nil), bands.Split(map[int]float64{})} {

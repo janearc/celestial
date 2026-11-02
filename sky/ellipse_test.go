@@ -105,7 +105,7 @@ func TestWhatIsNoEllipseIsRefused(test *testing.T) {
 	}
 }
 
-// upward asks math.Inf for the endless above. Defined by math.
+// upward asks math.Inf for the endless above. Defined by math.Inf.
 const upward = 1
 
 // The anti-test: an outline of fewer than three points closes round no

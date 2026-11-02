@@ -113,8 +113,8 @@ func staysWithin(test *rapid.T) {
 	}
 }
 
-// The anti-test: a share never makes more light than arrived. In every
-// band the light after is no stronger than before.
+// The anti-test: a transmission fraction cannot increase incoming power in any
+// band.
 func TestAShareNeverMakesALamp(test *testing.T) {
 	rapid.Check(test, neverBrighter)
 }
@@ -179,9 +179,9 @@ func TestABandBetweenSamplesIsInterpolated(test *testing.T) {
 	}
 }
 
-// The anti-test: a band with a wavelength given in it takes the part
-// given, not the line between its neighbours. What was measured wins
-// over what would be drawn.
+// The anti-test: measured samples take precedence over interpolation. A band
+// containing a supplied wavelength uses its measured fraction, not a line drawn
+// between neighbouring bands.
 func TestAGivenPartIsNotDrawnOver(test *testing.T) {
 	numbers := pickedNumbers(test)
 	between := numbers.Between
@@ -238,9 +238,8 @@ func TestLitSpansTheLightNotTheShare(test *testing.T) {
 	}
 }
 
-// The anti-test: past either end of its run a share passes nothing, not
-// the part at the end it is past. The run is where it was measured, and
-// a curve does not go on by itself.
+// The anti-test: finite measured curves pass no light beyond either endpoint.
+// Do not extend the endpoint value into unmeasured bands.
 func TestAShareHoldsNothingPastItsRun(test *testing.T) {
 	run := pickedNumbers(test).Run
 	share, err := bands.Shares(map[int]float64{
@@ -340,9 +339,8 @@ func TestARefusedShareIsNoShare(test *testing.T) {
 	}
 }
 
-// The anti-test: a refusal says where. Shares names the wavelength it
-// refused at, and for a part that is no fraction what a fraction is, so
-// the curve can be fixed at that line and not searched.
+// The anti-test: fraction errors identify the wavelength and allowed range so
+// the bad sample can be found directly.
 func TestAShareRefusalSaysWhere(test *testing.T) {
 	numbers := pickedNumbers(test)
 	for _, part := range numbers.Refused {
@@ -375,7 +373,7 @@ func TestAShareAtNoWavelengthIsRefused(test *testing.T) {
 			test.Errorf("a share at %d nm: want a refusal", nm)
 		}
 	}
-	// the shortest wavelength bands carries is a nanometre, band 0
+	// The shortest wavelength bands carries is a nanometre, band 0
 	share := map[int]float64{numbers.ShortestNM: numbers.Half, numbers.Run.Low: numbers.Half}
 	if _, err := bands.Shares(share); err != nil {
 		test.Errorf("a share at %d nm: %v, want it allowed", numbers.ShortestNM, err)
@@ -383,7 +381,7 @@ func TestAShareAtNoWavelengthIsRefused(test *testing.T) {
 }
 
 func TestAShareOfNothingIsAllowed(test *testing.T) {
-	// a surface that sends nothing back is black, and still a surface
+	// A surface that sends nothing back is black, and still a surface
 	given := pickedLight(test)
 	lit := bands.Lit(given, even(test, none))
 	first, last := given.Span()

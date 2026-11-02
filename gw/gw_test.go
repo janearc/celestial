@@ -53,6 +53,13 @@ type picked struct {
 	} `json:"drawn"`
 	Units      []unitOf `json:"units"`
 	NearMisses []miss   `json:"near misses"`
+	MadeUp     struct {
+		Name     string  `json:"name"`
+		Value    float64 `json:"value"`
+		Lower    float64 `json:"lower"`
+		Unit     string  `json:"unit"`
+		Pipeline string  `json:"pipeline"`
+	} `json:"made up"`
 }
 
 // miss is a unit nearly one of the centre's, written for a parameter.
@@ -61,8 +68,8 @@ type miss struct {
 	Unit      string `json:"unit"`
 }
 
-// unitOf is a parameter the file gives in one of the centre's units, the
-// value it gives, and that unit in si, typed from its definition.
+// unitOf is a parameter the file gives in one of the centre's units, the value
+// it gives, and that unit in SI, typed from its definition.
 type unitOf struct {
 	Parameter string  `json:"parameter"`
 	Written   float64 `json:"written"`
@@ -149,10 +156,10 @@ func check(test *testing.T, event *gw.Event, name string, want expected,
 	}
 }
 
-// GW150914 is read with its name, catalogue and gps time, and the time
-// is the open science centre's gps 1126259462.4, 09:50:45.4 utc on
-// 2015-09-14. The discovery paper gives 09:50:45 utc, to the second
-// (read 2026-10-31); the tenth is gwosc's.
+// GW150914 is read with its name, catalogue and GPS time, and the time is the
+// open science centre's GPS 1126259462.4, 09:50:45.4 UTC on 2015-09-14. The
+// discovery paper gives 09:50:45 UTC, to the second (read 2026-10-31); the
+// tenth is gwosc's.
 func TestGW150914IsReadWhole(test *testing.T) {
 	want := pickedNumbers(test)
 	event := gw150914(test)
@@ -198,11 +205,11 @@ func TestItsEstimatesAreInSI(test *testing.T) {
 	}
 }
 
-// Each of the centre's units reads in si by the factor its definition
-// gives, typed in the test data and not worked out by measure, so a wrong
-// factor in gw cannot cancel against the same one in the test: a mass in
-// suns, a distance in megaparsecs, an energy in suns times c squared and
-// an area of sky in square degrees.
+// Each of the centre's units reads in SI by the factor its definition gives,
+// typed in the test data and not worked out by measure, so a wrong factor in gw
+// cannot cancel against the same one in the test: a mass in suns, a distance in
+// megaparsecs, an energy in suns times c squared and an area of sky in square
+// degrees.
 func TestEachUnitIsItsDefinitionInSI(test *testing.T) {
 	want := pickedNumbers(test)
 	if len(want.Units) == noUnits {
@@ -262,7 +269,7 @@ func TestAnEstimateWithoutBoundsHasNoInterval(test *testing.T) {
 }
 
 // The anti-test: a parameter the centre left blank, or never gave, is absent:
-// refused, with no estimate, never a nought.
+// refused, with no estimate, never a zero.
 func TestABlankParameterIsAbsent(test *testing.T) {
 	event := gw150914(test)
 	for _, name := range pickedNumbers(test).Absent {
@@ -464,6 +471,111 @@ func TestABoundOfNothingIsKnown(test *testing.T) {
 			name, lowest, highest, known)
 	}
 }
+
+// readOne is the one event of a file, or the test stops.
+func readOne(test *testing.T, raw []byte) *gw.Event {
+	test.Helper()
+	events, err := gw.ReadEvents(raw)
+	if err != nil || len(events) != single {
+		test.Fatalf("read %v, %v", events, err)
+	}
+	return events[firstEvent]
+}
+
+// madeUpFile is the test file with the made-up parameter's value and
+// unit written into the event, and nothing else of it.
+func madeUpFile(test *testing.T) []byte {
+	test.Helper()
+	numbers := pickedNumbers(test)
+	made := numbers.MadeUp
+	raw, err := os.ReadFile(numbers.File)
+	if err != nil {
+		test.Fatal(err)
+	}
+	raw = writtenOver(test, raw, numbers.Name, made.Name, made.Value)
+	return writtenOver(test, raw, numbers.Name, made.Name+unitSuffix,
+		made.Unit)
+}
+
+// An estimate whose bounds the centre does not write at all, not even as
+// null, is read, and its interval is not known.
+func TestAnEstimateWithNoBoundsWrittenIsRead(test *testing.T) {
+	made := pickedNumbers(test).MadeUp
+	found := estimate(test, readOne(test, madeUpFile(test)), made.Name)
+	if _, _, known := found.Interval(); known {
+		test.Errorf("%s with no bounds has a known interval", made.Name)
+	}
+}
+
+// The anti-test: an estimate with one bound and not the other has no
+// known interval either: an interval is both its ends.
+func TestAnEstimateWithOneBoundHasNoInterval(test *testing.T) {
+	numbers := pickedNumbers(test)
+	made := numbers.MadeUp
+	raw := writtenOver(test, madeUpFile(test), numbers.Name,
+		made.Name+lowerSuffix, made.Lower)
+	found := estimate(test, readOne(test, raw), made.Name)
+	if _, _, known := found.Interval(); known {
+		test.Errorf("%s with one bound has a known interval", made.Name)
+	}
+}
+
+// The anti-test: a parameter estimation the centre does not prefer gives
+// no estimates; only its preferred one fills in what the event's own
+// values leave out.
+func TestAnEstimationNotPreferredGivesNothing(test *testing.T) {
+	numbers := pickedNumbers(test)
+	made := numbers.MadeUp
+	raw, err := os.ReadFile(numbers.File)
+	if err != nil {
+		test.Fatal(err)
+	}
+	raw = writtenOver(test, raw, numbers.Name, parametersKey,
+		map[string]any{made.Pipeline: map[string]any{
+			pipelineKey: estimation, preferredKey: false,
+			made.Name: made.Value, made.Name + unitSuffix: made.Unit}})
+	if found, err := readOne(test, raw).Estimate(made.Name); err == nil {
+		test.Errorf("a pipeline not preferred gave %s %v", made.Name,
+			found)
+	}
+}
+
+// The anti-test: a file whose events hold one that is no object, a
+// number where an event goes, is refused whole, though its other events
+// would read: no part is taken of a file gw cannot read.
+func TestAFileWithAnEventThatIsNoObjectIsRefused(test *testing.T) {
+	numbers := pickedNumbers(test)
+	raw, err := os.ReadFile(numbers.File)
+	if err != nil {
+		test.Fatal(err)
+	}
+	var file map[string]any
+	if err := json.Unmarshal(raw, &file); err != nil {
+		test.Fatal(err)
+	}
+	events, held := file[eventsKey].(map[string]any)
+	if !held {
+		test.Fatalf("the file has no %s object", eventsKey)
+	}
+	events[numbers.MadeUp.Name] = numbers.MadeUp.Value
+	written, err := json.Marshal(file)
+	if err != nil {
+		test.Fatal(err)
+	}
+	if read, err := gw.ReadEvents(written); err == nil || read != nil {
+		test.Errorf("a file with an event of %v gave %v, %v",
+			numbers.MadeUp.Value, read, err)
+	}
+}
+
+// The keys of the centre's format these tests write, each its own.
+const (
+	eventsKey     = "events"
+	parametersKey = "parameters"
+	pipelineKey   = "pipeline_type"
+	preferredKey  = "is_preferred"
+	estimation    = "pe"
+)
 
 // The bounds that test writes, and where it finds a parameter to write
 // them for.

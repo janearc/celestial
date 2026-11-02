@@ -1,9 +1,13 @@
 package hdf5
 
+import
+
 // The sizes in a global heap collection, each defined by III.E: the
 // header is the signature (4), the version (1), 3 reserved bytes and the
 // collection size (8); an object starts with its index (2), reference
 // count (2), 4 reserved bytes and its size (8), and is padded to 8 bytes.
+"fmt"
+
 const (
 	collectionHeaderSize = 16 // defined by III.E
 	heapObjectHeaderSize = 16 // defined by III.E
@@ -45,8 +49,9 @@ func (store *globalHeap) object(at uint64, index uint32) ([]byte, error) {
 	}
 	data, held := made[index]
 	if !held {
-		return nil, refuse(errCorrupt, at, "III.E",
-			"no object %d in the global heap collection", index)
+		return nil, fmt.Errorf("hdf5: file is damaged: no object %d "+
+			"in the global heap collection, at address %#x (spec "+
+			"III.E)", index, at)
 	}
 	return data, nil
 }
@@ -59,17 +64,20 @@ func (store *globalHeap) collection(at uint64) (collection, error) {
 	}
 	walk := &cursor{data: raw}
 	if !walk.opens(collectionSignature) {
-		return nil, refuse(errCorrupt, at, "III.E", "no GCOL signature")
+		return nil, fmt.Errorf("hdf5: file is damaged: no GCOL "+
+			"signature, at address %#x (spec III.E)", at)
 	}
 	if version := walk.u8(); version != collectionVersion {
-		return nil, refuse(errUnsupported, at, "III.E",
-			"global heap version %d, only 1 exists", version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"global heap version %d, only 1 exists, at address "+
+			"%#x (spec III.E)", version, at)
 	}
 	walk.skip(collectionReserved)
 	size := walk.u64()
 	if size < collectionHeaderSize {
-		return nil, refuse(errCorrupt, at, "III.E",
-			"collection size %d is smaller than its header", size)
+		return nil, fmt.Errorf("hdf5: file is damaged: collection "+
+			"size %d is smaller than its header, at address %#x "+
+			"(spec III.E)", size, at)
 	}
 	body, err := store.from.read(at+collectionHeaderSize,
 		size-collectionHeaderSize, "III.E")
@@ -96,9 +104,10 @@ func parseObjects(body []byte, at uint64) (collection, error) {
 		data := walk.take(bounded)
 		if walk.short || size > room {
 			reached := at + uint64(walk.at)
-			return nil, refuse(errCorrupt, reached, "III.E",
+			return nil, fmt.Errorf("hdf5: file is damaged: "+
 				"object %d of %d bytes runs past its "+
-					"collection", index, size)
+				"collection, at address %#x (spec "+
+				"III.E)", index, size, reached)
 		}
 		walk.align(heapObjectAlign)
 		made[uint32(index)] = data

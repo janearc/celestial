@@ -72,8 +72,6 @@ func TestVisibleLightIsTwentySixBandsWide(test *testing.T) {
 }
 
 // Redshift by one step moves every band's light exactly one band redder.
-// The colour half of the libtheme test, that shifted daylight is not the
-// same colour as daylight, stays behind in libtheme.
 func TestShiftByOneMovesEveryBandOne(test *testing.T) {
 	light := bands.Split(pickedNumbers(test).Spectrum)
 	shifted := light.Shift(int(neighbour))

@@ -125,8 +125,8 @@ func refusedAs(t *testing.T, why string, mass, spin float64) {
 	}
 }
 
-// The property and its anti-test: any mass and any spin under it make a hole, and any spin at the mass or
-// over it do not.
+// The property and its anti-test: any mass and any spin under it make a
+// hole, and a spin at the mass or over it does not.
 func TestNewHoleIsRightExactlyForSpinsUnderTheMass(t *testing.T) {
 	rapid.Check(t, newHoleIsRightExactlyForSpinsUnderTheMass)
 }
@@ -204,11 +204,12 @@ func TestPhotonSphereAndShadowAreAStillHolesRadii(t *testing.T) {
 	}
 }
 
-// Between nought and full spin, the prograde innermost stable orbit is
-// where kerrgeodesic_gw, a program apart from celestial, documents it.
-// The tests above hold it only at nought and nearly one, where a wrong in
-// the middle of bardeen, press and teukolsky's formula can still come
-// out right; the data's about says what these numbers are and are not.
+// Between zero and full spin, the prograde innermost stable orbit is where
+// kerrgeodesic_gw, a program apart from celestial, documents it.
+//
+// The tests above hold it only at zero and nearly one, where a wrong in the
+// middle of Bardeen, press and teukolsky's formula can still come out right;
+// the data's about says what these numbers are and are not.
 func TestTheISCOAtMidSpinsIsWhereAnotherProgramPutsIt(t *testing.T) {
 	numbers := pickedNumbers(t)
 	mid := numbers.IscoMidSpins

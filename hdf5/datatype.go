@@ -78,9 +78,8 @@ const (
 	bitsPerByte        = 8    // defined: precision is counted in bits
 )
 
-// readDatatype parses a Datatype message at an address. It refuses a
-// message too short for its header, a version not read, and a class not
-// read, and then gives none.
+// readDatatype parses the datatype header at address (IV.A.2.d), rejecting
+// truncated headers and unsupported versions or classes.
 func readDatatype(data []byte, at uint64) (*datatype, error) {
 	walk := &cursor{data: data}
 	head := walk.u8()
@@ -88,13 +87,14 @@ func readDatatype(data []byte, at uint64) (*datatype, error) {
 	bits := walk.take(classFieldBytes)
 	size := int(walk.u32())
 	if walk.short {
-		return nil, refuse(errCorrupt, at, "IV.A.2.d",
-			"datatype message of %d bytes is shorter than its "+
-				"header", len(data))
+		return nil, fmt.Errorf("hdf5: file is damaged: datatype "+
+			"message of %d bytes is shorter than its header, at "+
+			"address %#x (spec IV.A.2.d)", len(data), at)
 	}
 	if version != versionOneDatatype {
-		return nil, refuse(errUnsupported, at, "IV.A.2.d",
-			"datatype version %d, only version 1 is read", version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"datatype version %d, only version 1 is read, at "+
+			"address %#x (spec IV.A.2.d)", version, at)
 	}
 	props := data[datatypeHeaderSize:]
 	switch class {
@@ -107,9 +107,10 @@ func readDatatype(data []byte, at uint64) (*datatype, error) {
 	case classVariableLength:
 		return variableLength(bits, size, props, at)
 	}
-	return nil, refuse(errUnsupported, at, "IV.A.2.d",
-		"datatype class %d (%s), only fixed-point, floating-point and "+
-			"string are read", class, className(class))
+	return nil, fmt.Errorf("hdf5: part of the format not read: datatype "+
+		"class %d (%s), only fixed-point, floating-point and string "+
+		"are read, at address %#x (spec "+
+		"IV.A.2.d)", class, className(class), at)
 }
 
 // classNames is the specification's name for each class number refused.
@@ -127,36 +128,37 @@ func className(class int) string {
 	return "not defined"
 }
 
-// fixedPoint is the datatype of a fixed-point datatype: little-endian,
-// with every bit of its size used. IV.A.2.d Fixed-Point. It refuses any
-// other, and then gives none.
+// fixedPoint validates a little-endian integer using all stored bits (IV.A.2.d,
+// Fixed-Point). Other representations return an error.
 func fixedPoint(bits []byte, size int, props []byte,
 	at uint64) (*datatype, error) {
 	if bits[firstField]&bigEndianBit != noBitOffset {
-		return nil, refuse(errUnsupported, at, "IV.A.2.d",
-			"a big-endian integer, only little-endian is read")
+		return nil, fmt.Errorf("hdf5: part of the format not read: a "+
+			"big-endian integer, only little-endian is read, at "+
+			"address %#x (spec IV.A.2.d)", at)
 	}
 	walk := &cursor{data: props}
 	offset, precision := int(walk.u16()), int(walk.u16())
 	if walk.short || offset != noBitOffset ||
 		precision != size*bitsPerByte || !sizeFits(size) {
-		return nil, refuse(errUnsupported, at, "IV.A.2.d",
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
 			"an integer of %d bytes with bit offset %d and "+
-				"precision %d: only whole 1, 2, 4 or 8 byte "+
-				"integers are read", size, offset, precision)
+			"precision %d: only whole 1, 2, 4 or 8 byte "+
+			"integers are read, at address %#x "+
+			"(spec "+
+			"IV.A.2.d)", size, offset, precision, at)
 	}
 	signed := bits[firstField]&signedBit != noBitOffset
 	return &datatype{class: integerClass, size: size, signed: signed}, nil
 }
 
-// sizeFits says whether a count is the size in bytes of an integer the
-// reader has code for.
+// sizeFits checks whether this reader supports the integer byte width.
 func sizeFits(count int) bool {
 	return count == byteWide || count == twoWide || count == fourWide ||
 		count == eightWide
 }
 
-// String is a description of a datatype for a refusal.
+// String formats the datatype for error reporting.
 func (kind datatype) String() string {
 	return fmt.Sprintf("class %d size %d", kind.class, kind.size)
 }

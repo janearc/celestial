@@ -1,27 +1,31 @@
-# to do
+# Work ahead
 
-## simple lens planes
+## Thin lens planes
 
-Lensing far from any one hole, where a thin plane of mass bends light
-as it passes. Galaxies and clusters bend background light into arcs and
-Einstein rings.
+Far from an individual hole, a thin plane of mass can model the deflection
+of passing light. Galaxies and clusters make arcs and Einstein rings;
+a passing star can briefly brighten a background source in microlensing.
 
-In microlensing a passing star briefly brightens one behind it.
+Useful first models are a point mass, a singular isothermal sphere, and a
+mass sheet for the surrounding field. Each maps a position on the lens
+plane to a deflection. A renderer could query them as it queries Kerr
+geometry, without implementing the same lens model in each scene.
 
-The usual models are a point mass and a singular isothermal sphere,
-plus a sheet of mass for the rest. Each one maps where a ray crosses
-the plane to how far it's bent. slayer would use them the way it uses
-the Kerr hole today.
+## Separate the physics from rendering policy
 
-## the full Kerr march
+The package currently includes both geodesic stepping and higher-level
+marching. `Step` advances by a caller-supplied interval; `March` chooses
+steps and decides when a ray escapes or is captured.
 
-slayer marches its own rays through a hole today, in
-render/trace/field.go, using hole's geodesics. The march itself
-belongs here.
+The march is ray tracing and is moving to Slayer, together with its
+choices and `gpu.go`. Celestial will retain the physics a renderer needs:
 
-Given where a ray starts and which way it goes, the march follows the
-geodesic until the ray escapes the reach or crosses the horizon, and
-says which happened.
+- One geodesic step at a size the caller chooses.
+- The radius at a position.
+- The horizon and the capture boundary beyond which a ray cannot return.
+- The vector arithmetic used by a step.
 
-When it escapes it says where and how far the light has shifted. slayer
-then calls it instead of stepping the geodesic itself.
+The move includes `March`, `PaceIn`, `Hovering`, `ClosestApproach`,
+`DeflectionAngle`, `Fate`, `Advance`, `ClassifyRay`, and the shader adapter.
+They are still implemented here, but new callers should plan around the
+smaller stepping API.

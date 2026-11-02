@@ -6,7 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"maps"
 	"math"
 	"math/big"
@@ -18,15 +18,20 @@ import (
 	"pgregory.net/rapid"
 )
 
-// built is what testdata/parsers.json holds: bytes for each parser;
-// files built by hand, by name; the datasets made of those files by the
-// changes each case writes over them; and chunks too large to read.
+// built describes parser byte cases, hand-built files, dataset mutations,
+// oversized-chunk cases, and the cases in pieces_test.go from
+// testdata/parsers.json.
 type built struct {
-	Cases    []parsed             `json:"cases"`
-	Bases    map[string]string    `json:"bases"`
-	Datasets map[string][]changed `json:"datasets"`
-	TooLarge tooLarge             `json:"too large"`
-	Shapes   []shapeCount         `json:"shapes"`
+	Cases      []parsed             `json:"cases"`
+	Bases      map[string]string    `json:"bases"`
+	Datasets   map[string][]changed `json:"datasets"`
+	TooLarge   tooLarge             `json:"too large"`
+	Shapes     []shapeCount         `json:"shapes"`
+	Short      shortReads           `json:"short reads"`
+	Kept       []keptKinds          `json:"kept"`
+	ByteCounts []byteCounted        `json:"byte counts"`
+	Grids      []gridded            `json:"grids"`
+	Placements []placement          `json:"placements"`
 }
 
 // shapeCount is a shape, the elements it holds, and whether a uint64
@@ -38,7 +43,8 @@ type shapeCount struct {
 }
 
 // parsed is bytes for one parser, spelled out or a base with changes
-// written over it, and the cause it must refuse them for, or none.
+// written over it; the cause it must refuse them for, or none; and where
+// and in what words, if the case says.
 type parsed struct {
 	Parser  string   `json:"parser"`
 	Why     string   `json:"why"`
@@ -46,6 +52,15 @@ type parsed struct {
 	Base    string   `json:"base"`
 	Changes []change `json:"changes"`
 	Cause   string   `json:"cause"`
+	Refusal *placed  `json:"refusal"`
+}
+
+// placed is where a refusal must say it met the bytes, and what it must
+// say of them: an address, a section and words, each if given.
+type placed struct {
+	At      *uint64 `json:"at"`
+	Section string  `json:"section"`
+	Says    string  `json:"says"`
 }
 
 // tooLarge is chunk shapes that count too many elements or bytes, and a
@@ -56,12 +71,13 @@ type tooLarge struct {
 }
 
 // changed is a base with bytes written over it; the cause reading it
-// must be refused for, or none; and the kind its elements are read as,
-// with what that gives or the cause it is refused for.
+// must be refused for, or none, and where; and the kind its elements are
+// read as, with what that gives or the cause it is refused for.
 type changed struct {
 	Why      string    `json:"why"`
 	Changes  []change  `json:"changes"`
 	Cause    string    `json:"cause"`
+	Refusal  *placed   `json:"refusal"`
 	As       string    `json:"as"`
 	Integers []int64   `json:"integers"`
 	Floats   []float64 `json:"floats"`
@@ -126,19 +142,42 @@ func (made built) bytesOf(test *testing.T, each parsed) []byte {
 	return made.based(test, each.Base, each.Changes)
 }
 
-// causes is the refusal each case's cause names.
-var causes = map[string]error{"corrupt": errCorrupt,
-	"unsupported": errUnsupported, "wrong type": errWrongType,
-	"not found": errNotFound}
+// causes is the words each case's cause puts in its refusal.
+var causes = map[string]string{"corrupt": damaged,
+	"unsupported": "hdf5: part of the format not read",
+	"wrong type":  "hdf5: not that kind of value",
+	"not found":   "hdf5: not found"}
 
-// judged is whether a parse did as its cause says: with no cause, it
-// gave its result and no error; with one, it gave nothing and that
-// refusal.
+// damaged is the words of a refusal of a damaged file.
+const damaged = "hdf5: file is damaged"
+
+// says is whether an error is one and holds the words.
+func says(err error, words string) bool {
+	return err != nil && strings.Contains(err.Error(), words)
+}
+
+// judged checks a parser’s result against the expected outcome. Success
+// requires a result without an error; failure requires no result and an
+// error containing the expected words.
 func judged(cause string, gave bool, err error) bool {
 	if cause == "" {
 		return gave && err == nil
 	}
-	return !gave && errors.Is(err, causes[cause])
+	return !gave && says(err, causes[cause])
+}
+
+// placedAs is whether an error is the refusal a case places: with none
+// placed, any error; with one, a refusal naming its address and its
+// section and holding its words, each where the case gives it.
+func placedAs(want *placed, err error) bool {
+	if want == nil {
+		return true
+	}
+	return err != nil &&
+		(want.At == nil || says(err, fmt.Sprintf("at address %#x",
+			*want.At))) &&
+		(want.Section == "" || says(err, "(spec "+want.Section+")")) &&
+		says(err, want.Says)
 }
 
 // The fixed arguments the parsers are given, each defined by
@@ -159,18 +198,38 @@ func fileOf(raw []byte) *source {
 	return &source{reader: bytes.NewReader(raw), size: uint64(len(raw))}
 }
 
-// parsers is each parser the cases name, taking the case's bytes and
-// saying whether it gave its result.
+// parsers is each parser the cases name that takes bytes, saying whether
+// it gave its result.
 var parsers = map[string]func([]byte) (bool, error){
 	"dataspace": dataspaceOf, "datatype": datatypeOf,
 	"filters": filtersOf, "layout": layoutOf,
 	"symbol table": symbolTableOf, "continuation": continuationOf,
 	"chunk key": chunkKeyOf, "objects": objectsOf,
 	"fletcher32": fletcherOf, "inflate": inflateOf,
-	"attribute": attributeOf, "heap": heapOf, "name": nameOf,
-	"node": nodeOf, "group tree": groupTreeOf,
+	"attribute": attributeOf, "name": nameOf, "attributes": attributesOf,
+}
+
+// filed is each parser the cases name that reads through a file, saying
+// whether it gave its result.
+var filed = map[string]func(*source) (bool, error){
+	"heap": heapOf, "node": nodeOf, "group tree": groupTreeOf,
 	"collection": collectionOf, "chunk tree": chunkTreeOf,
-	"header": headerOf, "attributes": attributesOf, "members": membersOf,
+	"header": headerOf, "members": membersOf,
+}
+
+// parseWith gives a case's bytes to the parser it names, one that takes
+// bytes or one that reads a file of them; and says whether it gave its
+// result, and whether a parser has that name.
+func parseWith(name string, raw []byte) (gave, known bool, err error) {
+	if parse, found := parsers[name]; found {
+		gave, err = parse(raw)
+		return gave, found, err
+	}
+	if read, found := filed[name]; found {
+		gave, err = read(fileOf(raw))
+		return gave, found, err
+	}
+	return false, false, nil
 }
 
 // attributesOf is attribute A of an object whose one message is an
@@ -183,10 +242,10 @@ func attributesOf(raw []byte) (bool, error) {
 }
 
 // membersOf is the members of the group of the tree at the start of a
-// file of the bytes and the heap at 96.
-func membersOf(raw []byte) (bool, error) {
+// file and the heap at 96.
+func membersOf(from *source) (bool, error) {
 	table := groupTable{tree: start, heap: groupHeap}
-	links, err := fileOf(raw).members(table, leafOfOne)
+	links, err := from.members(table, leafOfOne)
 	return links != nil, err
 }
 
@@ -257,9 +316,9 @@ func attributeOf(raw []byte) (bool, error) {
 	return made != nil, err
 }
 
-// heapOf reads the local heap at the start of a file of the bytes.
-func heapOf(raw []byte) (bool, error) {
-	store, err := fileOf(raw).readHeap(start)
+// heapOf reads the local heap at the start of a file.
+func heapOf(from *source) (bool, error) {
+	store, err := from.readHeap(start)
 	return store != nil, err
 }
 
@@ -269,53 +328,51 @@ func nameOf(raw []byte) (bool, error) {
 	return name != "", err
 }
 
-// nodeOf reads the symbol table node at the start of a file of the
-// bytes.
-func nodeOf(raw []byte) (bool, error) {
-	symbols, err := fileOf(raw).readNode(start, leafOfOne)
+// nodeOf reads the symbol table node at the start of a file.
+func nodeOf(from *source) (bool, error) {
+	symbols, err := from.readNode(start, leafOfOne)
 	return symbols != nil, err
 }
 
-// groupTreeOf reads the group B-tree at the start of a file of the
-// bytes, at whatever level it says.
-func groupTreeOf(raw []byte) (bool, error) {
-	symbols, err := fileOf(raw).groupSymbols(start, noLevel, leafOfOne)
+// groupTreeOf reads the group B-tree at the start of a file, at whatever
+// level it says.
+func groupTreeOf(from *source) (bool, error) {
+	symbols, err := from.groupSymbols(start, noLevel, leafOfOne)
 	return symbols != nil, err
 }
 
 // collectionOf is object 1 of the global heap collection at the start
-// of a file of the bytes.
-func collectionOf(raw []byte) (bool, error) {
-	store := newGlobalHeap(fileOf(raw))
+// of a file.
+func collectionOf(from *source) (bool, error) {
+	store := newGlobalHeap(from)
 	data, err := store.object(start, firstObject)
 	return data != nil, err
 }
 
 // chunkTreeOf reads the chunk B-tree of one dimension at the start of a
-// file of the bytes, at whatever level it says.
-func chunkTreeOf(raw []byte) (bool, error) {
-	entries, err := fileOf(raw).chunkEntries(start, noLevel, oneDimension)
+// file, at whatever level it says.
+func chunkTreeOf(from *source) (bool, error) {
+	entries, err := from.chunkEntries(start, noLevel, oneDimension)
 	return entries != nil, err
 }
 
-// headerOf reads the object header at the start of a file of the bytes.
-func headerOf(raw []byte) (bool, error) {
-	found, err := readObject(fileOf(raw), start)
+// headerOf reads the object header at the start of a file.
+func headerOf(from *source) (bool, error) {
+	found, err := readObject(from, start)
 	return found != nil, err
 }
 
-// The test and the anti-test, for each parser: bytes built from the
-// specification give their result, and bytes that break it are refused
-// for the cause the case names, and give nothing.
+// The test and anti-test: each parser accepts specification-built bytes and
+// rejects malformed cases with no result. Errors must identify the expected
+// address, specification section, and reason in words.
 func TestEachParserTakesItsBytesAndRefusesTheRest(test *testing.T) {
 	made := builtBytes(test)
 	for _, each := range made.Cases {
-		parse, known := parsers[each.Parser]
+		gave, known, err := parseWith(each.Parser, made.bytesOf(test, each))
 		if !known {
 			test.Fatalf("no parser %q", each.Parser)
 		}
-		gave, err := parse(made.bytesOf(test, each))
-		if !judged(each.Cause, gave, err) {
+		if !judged(each.Cause, gave, err) || !placedAs(each.Refusal, err) {
 			test.Errorf("%s, %s: gave %v, %v", each.Parser, each.Why, gave,
 				err)
 		}
@@ -324,8 +381,9 @@ func TestEachParserTakesItsBytesAndRefusesTheRest(test *testing.T) {
 
 // The test and the anti-test, for whole datasets: each case's changes
 // written over its base read as the case says, or are refused for its
-// cause and give no values; and its elements, read as the case's kind,
-// are what it says, or are refused for its cause and give none.
+// cause, where it places the refusal, and give no values; and its
+// elements, read as the case's kind, are what it says, or are refused
+// for its cause and give none.
 func TestTheBuiltDatasetsReadAsTheirChangesSay(test *testing.T) {
 	made := builtBytes(test)
 	for base, cases := range made.Datasets {
@@ -338,7 +396,8 @@ func TestTheBuiltDatasetsReadAsTheirChangesSay(test *testing.T) {
 			}
 			held, err := (&File{from: from}).valuesOf(found)
 			if each.Cause != "" || err != nil {
-				if !judged(each.Cause, held != nil, err) {
+				if !judged(each.Cause, held != nil, err) ||
+					!placedAs(each.Refusal, err) {
 					test.Errorf("%s, %s: %v, %v", base, each.Why, held, err)
 				}
 				continue
@@ -348,9 +407,8 @@ func TestTheBuiltDatasetsReadAsTheirChangesSay(test *testing.T) {
 	}
 }
 
-// The anti-test: chunks of more elements than a uint64 counts, or of
-// more bytes than a file holds, are refused as damaged before any chunk
-// is read, and give no bytes.
+// The anti-test: reject overflowing element counts and byte counts larger than
+// the file before reading or allocating chunk data.
 func TestChunksTooLargeToCountAreRefused(test *testing.T) {
 	large := builtBytes(test).TooLarge
 	from := fileOf(unhex(test, large.Tree))
@@ -361,7 +419,7 @@ func TestChunksTooLargeToCountAreRefused(test *testing.T) {
 			layout: &layout{chunked: true, chunk: chunk},
 			count:  oneElement}
 		raw, err := set.rawChunked(from)
-		if raw != nil || !errors.Is(err, errCorrupt) {
+		if raw != nil || !says(err, damaged) {
 			test.Errorf("chunks of %v: %v, %v", chunk, raw, err)
 		}
 	}
@@ -434,8 +492,8 @@ const (
 	everyBit      = math.MaxUint8
 )
 
-// The property: any bytes written over a built file, anywhere, read
-// without a panic, and every refusal gives nothing.
+// The property: arbitrary mutations of a built file never panic, and failed
+// reads return no partial result.
 func TestChangedBytesNeverPanicAndRefusalsGiveNothing(test *testing.T) {
 	made := builtBytes(test)
 	bases := map[string][]byte{}
@@ -532,7 +590,7 @@ func (summing) check(test *rapid.T) {
 	turn := rapid.ByteRange(someBit, everyBit).Draw(test, "turn")
 	summed[at] ^= turn
 	if got, err := verifyFletcher32(summed, chunkEntry{}); got != nil ||
-		!errors.Is(err, errCorrupt) {
+		!says(err, damaged) {
 		test.Fatalf("byte %d turned by %#x: %v, %v", at, turn, got, err)
 	}
 }

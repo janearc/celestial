@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// File is an open HDF5 file. It reads from the io.ReaderAt it was given,
-// when asked, and holds nothing of the file but its superblock.
+// File reads on demand from its io.ReaderAt, retaining the parsed superblock
+// rather than copying the whole file.
 type File struct {
 	from  *source
 	super *superblock
@@ -17,10 +17,9 @@ type File struct {
 // noSize is no bytes at all. Defined: a file shorter than nothing is none.
 const noSize = 0
 
-// NewFile opens the HDF5 file a reader holds, so many bytes long. It
-// refuses a file that is not HDF5 with ErrNotHDF5, one that uses a part of
-// the format this reader does not read with ErrUnsupported, saying which
-// part and where, and a size below nothing, and then gives no file.
+// NewFile validates a reader and byte length as a supported HDF5 file. Negative
+// sizes, missing signatures, and unsupported format features return an error
+// and no File. Format errors identify the feature and its location.
 func NewFile(reader io.ReaderAt, size int64) (*File, error) {
 	if size < noSize {
 		return nil, fmt.Errorf("hdf5: a file cannot be %d bytes long",
@@ -37,8 +36,8 @@ func NewFile(reader io.ReaderAt, size int64) (*File, error) {
 // pathSeparator joins the names of a path. Defined by HDF5's paths.
 const pathSeparator = "/"
 
-// resolve is the object header at a path of names joined by slashes. The
-// empty path and "/" are the root group.
+// resolve finds an object header by slash-separated path. Empty path and /
+// identify the root group.
 func (file *File) resolve(path string) (*object, error) {
 	at := file.super.rootHeader
 	walked := ""
@@ -53,8 +52,8 @@ func (file *File) resolve(path string) (*object, error) {
 		}
 		links, err := file.groupLinks(parent)
 		if errors.Is(err, errNotGroup) {
-			return nil, fmt.Errorf("%w: %q is no group, so holds "+
-				"no %q", errNotFound, pathSeparator+walked,
+			return nil, fmt.Errorf("hdf5: not found: %q is no "+
+				"group, so holds no %q", pathSeparator+walked,
 				name)
 		}
 		if err != nil {
@@ -70,28 +69,25 @@ func (file *File) resolve(path string) (*object, error) {
 	return readObject(file.from, at)
 }
 
-// errNoMember is the cause when a group has no member of a name.
-var errNoMember = fmt.Errorf("%w: no member of that name", errNotFound)
-
 // noAddress is what findLink gives beside a refusal. Defined: none.
 const noAddress = 0
 
-// findLink is the object header address of the member of a name.
+// findLink finds a named group member’s object-header address.
 func findLink(links []link, name string) (uint64, error) {
 	for _, member := range links {
 		if member.name == name {
 			return member.header, nil
 		}
 	}
-	return noAddress, errNoMember
+	return noAddress, errors.New("hdf5: not found: no member of that name")
 }
 
-// errNotGroup is the cause when members are asked of an object that has
-// none: the wrong kind of object.
-var errNotGroup = fmt.Errorf("%w: not a group", errWrongType)
+// errNotGroup is what groupLinks gives for an object with no members to
+// list. Members checks for it, and then says the path is not found.
+var errNotGroup = errors.New("hdf5: not that kind of value: not a group")
 
-// groupLinks is the members of a group object. An object with no symbol
-// table message is not a group this reader can list.
+// groupLinks lists an old-style group through its symbol table message. An
+// object without that message is not a supported group.
 func (file *File) groupLinks(group *object) ([]link, error) {
 	for _, msg := range group.messages {
 		if msg.kind != messageSymbolTable {

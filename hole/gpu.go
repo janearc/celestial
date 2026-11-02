@@ -7,28 +7,25 @@ import (
 	"math"
 )
 
-// GPUBlackHole is a hole and a camera held still beside it, as a shader
-// wants them: ShaderParams is the two as float32 constants, and StepRay
-// steps a ray on the processor and reports what it keeps, for holding a
-// shader's own steps against.
+// GPUBlackHole is a hole and stationary-camera adapter for shaders.
+// ShaderParams exports float32 constants; StepRay supplies CPU reference steps
+// and diagnostics for comparison with a shader.
 //
-// There is no GPU in it. It steps one ray at a time on one core, and
-// its batches are loops. SetCamera changes it, so it is not to be
-// shared between goroutines while one of them sets the camera.
-//
-// GPUBlackHole, and everything in this file, is moving to slayer and
-// will change; see the package doc.
+// No GPU work runs here. Batches step sequentially on one core. SetCamera
+// mutates the adapter, so callers must synchronize concurrent use with camera
+// changes. This adapter belongs to the proposed rendering-policy migration to
+// Slayer.
 type GPUBlackHole struct {
 	hole      Hole
 	cameraPos Vec3
-	// the still observer's at cameraPos; not a number until a camera is set
+	// The still observer's at cameraPos; not a number until a camera is set
 	cameraVelocity Vec4
 	cameraFrame    Frame
 }
 
-// RayStep is a ray after a step and what it keeps there: a geodesic
-// holds Energy, AngularMomentum, CarterConstant and Hamiltonian fixed,
-// so their drift from step to step is the stepping's error.
+// RayStep records a stepped ray and its diagnostic invariants. Energy, axial
+// angular momentum, Carter constant, and Hamiltonian should remain conserved;
+// numerical drift measures stepping error.
 type RayStep struct {
 	position        Vec4
 	momentum        Vec4
@@ -46,9 +43,9 @@ func (step RayStep) Position() Vec4 { return step.position }
 // Momentum is the ray's covariant momentum after the step.
 func (step RayStep) Momentum() Vec4 { return step.momentum }
 
-// Redshift is the photon's energy at the camera over its energy as an
-// emitter held still where the ray now is would have it. It is not a
-// number before a camera is set, and where nothing is still.
+// Redshift returns energy at the stationary camera divided by energy for a
+// stationary emitter at the current point. It is NaN before a camera is set or
+// where a stationary emitter cannot exist.
 func (step RayStep) Redshift() float64 { return step.redshift }
 
 // Energy is the energy the ray keeps.
@@ -58,21 +55,18 @@ func (step RayStep) Energy() float64 { return step.energy }
 // ray keeps.
 func (step RayStep) AngularMomentum() float64 { return step.angularMomentum }
 
-// CarterConstant is the carter constant the ray keeps.
+// CarterConstant is the Carter constant the ray keeps.
 func (step RayStep) CarterConstant() float64 { return step.carterConstant }
 
 // Hamiltonian is the ray's H, which a geodesic keeps.
 func (step RayStep) Hamiltonian() float64 { return step.hamiltonian }
 
-// Radius is the ray's kerr-schild radius after the step.
+// Radius is the ray's Kerr-schild radius after the step.
 func (step RayStep) Radius() float64 { return step.radius }
 
-// ShaderParams is the hole and the camera as constants for a shader, in
-// float32, which is what a shader has.
-//
-// Its layout is a contract with the shader's own struct: five floats, a
-// packed three, and a four by four at byte 32, 96 bytes in all. Bytes is
-// that layout.
+// ShaderParams stores float32 geometry and camera constants. Its 96-byte shader
+// layout is five scalars, three packed position values, and a 4×4 frame
+// beginning at byte 32. Bytes serializes that contract.
 type ShaderParams struct {
 	mass, spin, horizon, photonSphere, shadow float32
 	cameraPos                                 [cameraPlaces]float32
@@ -108,9 +102,8 @@ func (params ShaderParams) CameraFrame() [dimensions][dimensions]float32 {
 	return params.cameraFrame
 }
 
-// Bytes is the constants as the shader's struct holds them: little endian,
-// the five scalars first, then the camera's position, then the frame a row
-// at a time. It is 96 bytes.
+// Bytes serializes the 96-byte shader layout in little-endian order: five
+// scalars, three position values, then four frame rows.
 func (params ShaderParams) Bytes() []byte {
 	values := []float32{
 		params.mass, params.spin, params.horizon,
@@ -132,17 +125,13 @@ func (params ShaderParams) Bytes() []byte {
 // errNothingStill is what ErrNothingStill answers.
 var errNothingStill = errors.New("hole: nothing can be held still there")
 
-// ErrNothingStill is SetCamera's refusal of a point where no observer
-// can be held still: inside the ergosurface of a spinning hole, or
-// inside the horizon of any.
-//
-// It is a function so that it cannot be changed behind a caller's back;
-// errors.Is finds it in what SetCamera returns.
+// ErrNothingStill identifies a location where SetCamera cannot hold an observer
+// stationary: inside the ergosurface or horizon. The function returns a stable
+// error value for errors.Is comparisons.
 func ErrNothingStill() error { return errNothingStill }
 
-// NewGPUBlackHole returns a hole of a mass and a spin with no camera yet.
-// SetCamera gives it one. returns nil and NewHole's error for a mass and
-// spin that make no hole.
+// NewGPUBlackHole validates mass and spin through NewHole and creates an
+// adapter without a camera. Invalid geometry returns NewHole’s error.
 func NewGPUBlackHole(mass, spin float64) (*GPUBlackHole, error) {
 	hole, err := NewHole(mass, spin)
 	if err != nil {
@@ -158,11 +147,9 @@ func NewGPUBlackHole(mass, spin float64) (*GPUBlackHole, error) {
 	}, nil
 }
 
-// SetCamera puts a camera held still at a point and works out its
-// frame, once, for every step and every ShaderParams after it.
-//
-// Where nothing is still there is no such camera: it answers
-// ErrNothingStill and leaves the camera where it was.
+// SetCamera installs a stationary observer and caches its frame for subsequent
+// steps and shader parameters. Where that observer cannot exist, it returns
+// ErrNothingStill and preserves the previous camera.
 func (gb *GPUBlackHole) SetCamera(position Vec3) error {
 	velocity := gb.hole.Static(position)
 	if math.IsNaN(velocity.time) {
@@ -178,11 +165,9 @@ func (gb *GPUBlackHole) SetCamera(position Vec3) error {
 	return nil
 }
 
-// StepRay takes a ray one runge-kutta step of a size, in place, and
-// reports where it now is and what it keeps there.
-//
-// The report costs more than twice what the step does, so a march that
-// does not read it is better made with Hole's March or Step.
+// StepRay advances a ray in place by one Runge–Kutta interval and reports the
+// new state and invariants. Diagnostics cost more than twice the step alone;
+// use Hole.Step or March when those reports are unnecessary.
 func (gb *GPUBlackHole) StepRay(ray *Ray, stepSize float64) RayStep {
 	stepped := gb.hole.Step(*ray, stepSize)
 	*ray = stepped
@@ -202,12 +187,9 @@ func (gb *GPUBlackHole) StepRay(ray *Ray, stepSize float64) RayStep {
 	}
 }
 
-// StepRaysBatch takes each ray of a slice one step of a size, in place,
-// and reports on each in the same order.
-//
-// The reports go into the slice handed in when it is long enough, so a
-// caller that keeps handing back what this returns allocates once; nil
-// will do for the first call.
+// StepRaysBatch advances rays in order and returns one report per ray. It
+// reuses reports when capacity permits; pass nil initially, then reuse the
+// returned slice to avoid repeated allocation.
 func (gb *GPUBlackHole) StepRaysBatch(
 	reports []RayStep, rays []Ray, stepSize float64,
 ) []RayStep {
@@ -221,14 +203,13 @@ func (gb *GPUBlackHole) StepRaysBatch(
 	return reports
 }
 
-// Hole is the hole itself, for everything a Hole can be asked: its
-// metric, its marches, what its rays keep.
+// Hole returns the underlying black-hole geometry.
 func (gb *GPUBlackHole) Hole() Hole {
 	return gb.hole
 }
 
-// ShaderParams is the hole and the camera as constants for a shader.
-// Before a camera is set the camera's part is all nought.
+// ShaderParams returns float32 constants for the hole and current camera.
+// Before SetCamera, the camera fields are zero.
 func (gb *GPUBlackHole) ShaderParams() ShaderParams {
 	params := ShaderParams{
 		mass:         float32(gb.hole.mass),

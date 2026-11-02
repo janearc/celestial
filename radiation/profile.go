@@ -5,50 +5,43 @@ import (
 	"math"
 )
 
-// Profile maps one range of wavelengths onto another, evenly in the
-// logarithm of wavelength. A false colour profile is made of one: it
-// takes radiation the eye cannot see onto light it can.
-//
-// What colour that is belongs to libtheme; here the profile only says
-// where a wavelength lands.
+// Profile maps one wavelength interval to another linearly in log wavelength. A
+// false-colour profile can use it to place invisible radiation in the visible
+// range; libtheme determines the displayed colour.
 type Profile struct {
 	name           string
 	source, render Range
 }
 
-// NewProfile is the profile of a name that maps a source range onto a
-// render range. It refuses either range when it is no range, and then
-// gives no profile.
+// NewProfile constructs a named mapping from source to render range. An invalid
+// range returns an error and no profile.
 func NewProfile(name string, source, render Range) (*Profile, error) {
 	if !valid(source) || !valid(render) {
-		return nil, fmt.Errorf("%w: %s maps %v onto %v", errRange, name,
-			source, render)
+		return nil, fmt.Errorf("radiation: %s maps %v onto %v, and "+
+			"one is no range", name, source, render)
 	}
 	return &Profile{name: name, source: source, render: render}, nil
 }
 
-// String is the profile, for humans with eyeballs.
+// String formats the profile for humans with eyeballs.
 func (profile Profile) String() string {
 	return fmt.Sprintf("%s, %v, shown as %v", profile.name, profile.source,
 		profile.render)
 }
 
-// Holds is whether a wavelength is inside the profile's source, from its
-// short end up to but not including its long end. The zero Profile,
-// whose ranges are none, holds nothing.
+// Holds checks the half-open source range. The zero Profile contains no
+// wavelengths.
 func (profile Profile) Holds(nm float64) bool {
 	return valid(profile.render) && profile.source.Holds(nm)
 }
 
-// Onto is where a wavelength in the source lands in the render, evenly
-// in the logarithm of wavelength. ok is false, and the wavelength is not
-// mapped, when the profile does not hold it: the answer would be a
-// number, but not one the profile means.
+// Onto maps a source wavelength into the render interval in log space.
+// Wavelengths outside the source return ok=false rather than an extrapolated
+// answer.
 //
-// Onto's answer is always inside the render, short end in and long end
-// out, so Back takes back whatever Onto gives. A wavelength a rounding
-// below the source's long end can work out to the render's long end
-// exactly; Onto gives the float just below it instead.
+// Results remain inside the half-open render range so Back can reverse them. If
+// rounding reaches the exclusive long endpoint, Onto uses the preceding float
+// instead.
 func (profile Profile) Onto(nm float64) (mapped float64, ok bool) {
 	if !profile.Holds(nm) {
 		return mapped, false
@@ -61,10 +54,8 @@ func (profile Profile) Onto(nm float64) (mapped float64, ok bool) {
 	return mapped, true
 }
 
-// Back is the reciprocal of Onto: where a wavelength in the render came
-// from in the source. ok is false, and the wavelength is not mapped,
-// when it is outside the render (its long end is outside, as the
-// source's is) or the profile's ranges are none.
+// Back reverses Onto, returning ok=false outside the half-open render range or
+// when either profile range is invalid.
 func (profile Profile) Back(nm float64) (source float64, ok bool) {
 	if !valid(profile.source) || !profile.render.Holds(nm) {
 		return source, false

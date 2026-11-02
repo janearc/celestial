@@ -36,14 +36,14 @@ func pickedNumbers(test *testing.T) picked {
 	return numbers
 }
 
-// eitherSign asks math.IsInf about both infinities. Defined by math.
-const eitherSign = 0
+// upward asks math.Inf for the endless above. Defined by math.Inf.
+const upward = 1
 
 // The anti-test: a point refuses what weighs nothing, less than nothing,
 // no number or endlessly much, and gives no body.
 func TestAPointRefusesWhatWeighsNothing(test *testing.T) {
 	given := append(pickedNumbers(test).NotSuns, math.NaN(),
-		math.Inf(eitherSign))
+		math.Inf(upward))
 	for _, suns := range given {
 		body, err := grav.Point(measure.SolarMasses(suns))
 		if err == nil || body != nil {
@@ -52,7 +52,7 @@ func TestAPointRefusesWhatWeighsNothing(test *testing.T) {
 	}
 }
 
-// A point of a sun's mass has the sun's GM, and weighs a sun.
+// A point of a Sun's mass has the Sun's GM, and weighs a sun.
 func TestAPointOfASunHasTheSunsGM(test *testing.T) {
 	numbers := pickedNumbers(test)
 	sun, err := grav.Point(measure.Sun().Mass())
@@ -69,9 +69,9 @@ func TestAPointOfASunHasTheSunsGM(test *testing.T) {
 	}
 }
 
-// The property and its anti-test: a point of any mass weighs that mass
-// and has the sun's GM for each sun of it, GM being the mass times a
-// constant; and a point of the same mass below nought is refused.
+// The property and its anti-test: a point of any mass weighs that mass and has
+// the Sun's GM for each Sun of it, GM being the mass times a constant; and a
+// point of the same mass below zero is refused.
 func TestAnyPointsGMIsItsMassInSuns(test *testing.T) {
 	numbers := pickedNumbers(test)
 	if numbers.Drawn.Highest <= numbers.Drawn.Lowest {
@@ -94,8 +94,8 @@ const (
 	below         = -1.0 // defined: the sign of a mass below nought
 )
 
-// check draws a mass in suns, weighs a point of it, and refuses one of
-// it below nought.
+// check draws a mass in suns, weighs a point of it, and refuses one of it below
+// zero.
 func (weigh weighing) check(test *rapid.T) {
 	numbers := weigh.numbers
 	mantissa := rapid.Float64Range(leastMantissa, mostMantissa).Draw(test,

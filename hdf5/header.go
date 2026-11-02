@@ -1,8 +1,12 @@
 package hdf5
 
+import
+
 // The header message type numbers of IV.A.2, Disk Format: Level 2 - Data
 // Object Header Messages, each defined by it. Only the ones this reader
 // reads or knowingly passes over are named.
+"fmt"
+
 const (
 	// messageNil is IV.A.2.a, NIL. Defined by IV.A.2.
 	messageNil = 0x0000
@@ -75,9 +79,9 @@ func readObject(from *source, at uint64) (*object, error) {
 	walk := &cursor{data: prefix}
 	version := walk.u8()
 	if version != versionOneHeader {
-		return nil, refuse(errUnsupported, at, "IV.A.1.a",
-			"object header version %d, only version 1 is read",
-			version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"object header version %d, only version 1 is read, "+
+			"at address %#x (spec IV.A.1.a)", version, at)
 	}
 	walk.skip(byteWide) // reserved
 	count := int(walk.u16())
@@ -119,9 +123,10 @@ func (found *object) readBlock(from *source, in block, seen *int,
 		*seen++
 		if *seen > count {
 			reached := in.at + uint64(walk.at)
-			return nil, refuse(errCorrupt, reached, "IV.A.1.a",
-				"more messages than the %d the header declares",
-				count)
+			return nil, fmt.Errorf("hdf5: file is damaged: more "+
+				"messages than the %d the header declares, "+
+				"at address %#x (spec "+
+				"IV.A.1.a)", count, reached)
 		}
 		kind, size := walk.u16(), uint64(walk.u16())
 		flags := walk.u8()
@@ -129,13 +134,16 @@ func (found *object) readBlock(from *source, in block, seen *int,
 		start := in.at + uint64(walk.at)
 		data := walk.take(int(size))
 		if walk.short {
-			return nil, refuse(errCorrupt, start, "IV.A.1.a",
-				"message of type %#x holds %d bytes, past its "+
-					"block", kind, size)
+			return nil, fmt.Errorf("hdf5: file is damaged: "+
+				"message of type %#x holds %d bytes, past "+
+				"its block, at address %#x (spec "+
+				"IV.A.1.a)", kind, size, start)
 		}
 		if flags&messageSharedFlag != noFlag {
-			return nil, refuse(errUnsupported, start, "IV.A.2",
-				"shared message of type %#x", kind)
+			return nil, fmt.Errorf("hdf5: part of the format not "+
+				"read: shared message of type %#x, at "+
+				"address %#x (spec "+
+				"IV.A.2)", kind, start)
 		}
 		switch kind {
 		case messageContinuation:
@@ -155,15 +163,15 @@ func (found *object) readBlock(from *source, in block, seen *int,
 }
 
 // continuation is the block a header continuation message names: the
-// address of the block and its length, each eight bytes. IV.A.2.p. It
-// refuses a message too short for them, and then gives none.
+// address of the block and its length, each eight bytes. IV.A.2.p.
+// A message too short to hold them returns an error.
 func continuation(data []byte, at uint64) (*block, error) {
 	walk := &cursor{data: data}
 	next := block{at: walk.u64(), size: walk.u64()}
 	if walk.short {
-		return nil, refuse(errCorrupt, at, "IV.A.2.p",
-			"continuation message is %d bytes, 16 are needed",
-			len(data))
+		return nil, fmt.Errorf("hdf5: file is damaged: continuation "+
+			"message is %d bytes, 16 are needed, at address %#x "+
+			"(spec IV.A.2.p)", len(data), at)
 	}
 	return &next, nil
 }

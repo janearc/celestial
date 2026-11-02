@@ -1,6 +1,9 @@
 package hdf5
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"fmt"
+)
 
 // checksumSize is the bytes the Fletcher32 filter (filter id 3, IV.A.2.l)
 // appends to a chunk. Defined by reading them: four bytes.
@@ -29,22 +32,25 @@ const (
 // odd number of bytes has no defined sum and is refused.
 func verifyFletcher32(data []byte, entry chunkEntry) ([]byte, error) {
 	if len(data) < checksumSize {
-		return nil, refuse(errCorrupt, entry.at, "IV.A.2.l",
-			"the chunk at %v is %d bytes, too short for a checksum",
-			entry.origin, len(data))
+		return nil, fmt.Errorf("hdf5: file is damaged: the chunk at "+
+			"%v is %d bytes, too short for a checksum, at "+
+			"address %#x (spec "+
+			"IV.A.2.l)", entry.origin, len(data), entry.at)
 	}
 	cut := len(data) - checksumSize
 	body, stored := data[:cut], data[cut:]
 	if len(body)%evenWords != whole {
-		return nil, refuse(errUnsupported, entry.at, "IV.A.2.l",
-			"a Fletcher32 sum over %d bytes, an odd number: its "+
-				"words are not defined", len(body))
+		return nil, fmt.Errorf("hdf5: part of the format not read: a "+
+			"Fletcher32 sum over %d bytes, an odd number: its "+
+			"words are not defined, at address %#x (spec "+
+			"IV.A.2.l)", len(body), entry.at)
 	}
 	got, want := fletcher32(body), binary.LittleEndian.Uint32(stored)
 	if got != want {
-		return nil, refuse(errCorrupt, entry.at, "IV.A.2.l",
-			"the chunk at %v sums to %#08x, its checksum says "+
-				"%#08x", entry.origin, got, want)
+		return nil, fmt.Errorf("hdf5: file is damaged: the chunk at "+
+			"%v sums to %#08x, its checksum says %#08x, at "+
+			"address %#x (spec "+
+			"IV.A.2.l)", entry.origin, got, want, entry.at)
 	}
 	return body, nil
 }

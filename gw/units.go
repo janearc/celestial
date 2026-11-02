@@ -9,8 +9,8 @@ import (
 	"github.com/janearc/celestial/si"
 )
 
-// conversion is how a unit the centre writes becomes si: the si unit, and
-// what one of the centre's is in it.
+// conversion pairs an SI unit name with the scale converting one catalogue unit
+// to that SI unit.
 type conversion struct {
 	unit   string
 	factor float64
@@ -20,15 +20,14 @@ type conversion struct {
 const (
 	// one is one of a unit. Defined by counting.
 	one = 1.0
-	// ergInJoules is the cgs erg in joules. Defined by cgs: 1e-7 J.
+	// ergInJoules is the CGS erg in joules. Defined by CGS: 1e-7 J.
 	ergInJoules = 1e-7
 	// peakScale is the power of ten the centre writes its peak luminosity's
 	// unit with. Defined by that unit, 10^56 erg s^-1.
 	peakScale = 1e56
 )
 
-// toSI is the conversion for a unit as the centre writes it. It refuses
-// a unit it does not have, and then gives none.
+// toSI looks up an explicit unit conversion and rejects unknown strings.
 func toSI(written string) (*conversion, error) {
 	sun := measure.SolarMasses(one).InKilograms()
 	into := conversion{factor: one}

@@ -1,15 +1,14 @@
-# against-iers.awk: holds every step of tai less utc in sky/leapseconds.json
-# to the iers earth orientation centre's UTC-TAI.history, as game run
-# sources fetches it. game run extract runs it:
+# Compare TAI−UTC steps in sky/leapseconds.json with IERS’s UTC-TAI.history.
+# game run sources fetches the reference; game run extract runs:
 #
 #   awk -f sky/against-iers.awk \
 #     sky/leapseconds.json cited-sources/iers-utc-tai-history.txt
 #
-# each step is the year and month it began and the whole seconds tai is
-# ahead from then. it prints every step one has and the other does not,
-# or has with other seconds, and fails if there is one.
+# Each entry records its starting year and month and the whole seconds
+# TAI leads UTC. Report missing steps or differing offsets in either
+# input and fail if any are found.
 
-# sky's steps: {"year": 1972, "month": 1, "ahead": 10}, two to a line.
+# Sky entries have year, month, and ahead fields, two records per line.
 FNR == NR {
 	line = $0
 	while (match(line, /"year": [0-9]+, "month": [0-9]+, "ahead": [0-9]+/)) {
@@ -22,10 +21,9 @@ FNR == NR {
 	next
 }
 
-# the history's steps from 1972, when utc took whole seconds: a line
-# begins with its year, or with its month under the year above it, and
-# ends with the seconds, as 11s. the lines before 1972 are rates, not
-# steps, and are passed over.
+# Read steps from 1972, when UTC began using whole SI seconds. Rows start
+# with a year or a month continuing the previous year, and end with an
+# offset such as 11s. Earlier entries describe rates, not these steps.
 $1 ~ /^[0-9][0-9][0-9][0-9]$/ {
 	year = $1
 	month = $2

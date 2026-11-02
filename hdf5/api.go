@@ -4,18 +4,17 @@ import (
 	"slices"
 )
 
-// Values is the elements of a dataset or an attribute as read: their
-// shape, and the bytes the file holds, decoded when asked for in a kind.
+// Values holds a dataset or attribute’s shape and stored bytes, decoded into a
+// requested value type on demand.
 type Values struct {
 	shape []uint64
 	read  values
 	from  *source
 }
 
-// Read is the elements of the dataset at a path of names joined by
-// slashes, such as strain/Strain. It refuses a path the file does not
-// have, an object there that is no dataset, and a dataset this reader
-// cannot read, and then gives none.
+// Read loads the dataset at a slash-separated path such as strain/Strain.
+// Missing paths, objects that are not datasets, and unsupported storage return
+// an error with no values.
 func (file *File) Read(path string) (*Values, error) {
 	found, err := file.resolve(path)
 	if err != nil {
@@ -24,9 +23,8 @@ func (file *File) Read(path string) (*Values, error) {
 	return file.valuesOf(found)
 }
 
-// valuesOf is the elements of the dataset an object header describes. It
-// refuses an object that is no dataset, and a dataset this reader cannot
-// read, and then gives none.
+// valuesOf reads dataset elements from their object header, rejecting
+// non-datasets and unsupported representations.
 func (file *File) valuesOf(found *object) (*Values, error) {
 	set, err := datasetOf(found)
 	if err != nil {
@@ -40,9 +38,8 @@ func (file *File) valuesOf(found *object) (*Values, error) {
 		from: file.from}, nil
 }
 
-// Attribute is the elements of an attribute of the group or dataset at a
-// path, by its name, such as Xspacing on strain/Strain. It refuses a path
-// or a name the file does not have, and then gives none.
+// Attribute reads a named attribute from a group or dataset, such as Xspacing
+// on strain/Strain. Missing paths or names return an error.
 func (file *File) Attribute(path, name string) (*Values, error) {
 	found, err := file.resolve(path)
 	if err != nil {
@@ -56,9 +53,8 @@ func (file *File) Attribute(path, name string) (*Values, error) {
 		raw: held.raw}, from: file.from}, nil
 }
 
-// Members is the names of the members of the group at a path, in order.
-// The path "" and "/" are the root group. It refuses a path the file does
-// not have and an object there that is no group, and then gives none.
+// Members lists a group’s members in file order. Empty path and / identify the
+// root. Missing paths and non-group objects return an error.
 func (file *File) Members(path string) ([]string, error) {
 	found, err := file.resolve(path)
 	if err != nil {
@@ -76,23 +72,23 @@ func (file *File) Members(path string) ([]string, error) {
 	return names, nil
 }
 
-// Shape is the size of each of the values' dimensions; a scalar has none.
+// Shape returns dimension sizes. A scalar has no dimensions.
 func (held *Values) Shape() []uint64 { return slices.Clone(held.shape) }
 
-// Floats is the values as floats, in the file's order. It refuses values
-// that are not floating-point, and then gives none.
+// Floats decodes floating-point elements in file order and rejects other
+// element types.
 func (held *Values) Floats() ([]float64, error) {
 	return held.read.float64s()
 }
 
-// Integers is the values as integers, in the file's order. It refuses
-// values that are not fixed-point, and then gives none.
+// Integers decodes integer elements in file order and rejects other element
+// types.
 func (held *Values) Integers() ([]int64, error) {
 	return held.read.int64s()
 }
 
-// Texts is the values as text, fixed or variable in length, in the file's
-// order. It refuses values that are not strings, and then gives none.
+// Texts decodes fixed- or variable-length strings in file order and rejects
+// other element types.
 func (held *Values) Texts() ([]string, error) {
 	return held.read.strings(held.from)
 }

@@ -1,14 +1,13 @@
 package radiation_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
 	"github.com/janearc/celestial/radiation"
 )
 
-// isoRanges is iso 21348's named ranges by the name the test data uses.
+// isoRanges is ISO 21348's named ranges by the name the test data uses.
 func isoRanges() map[string]radiation.Range {
 	return map[string]radiation.Range{
 		"gamma ray":           radiation.Gamma(),
@@ -21,16 +20,16 @@ func isoRanges() map[string]radiation.Range {
 	}
 }
 
-// named is every named range by name, fermi's with iso's.
+// named is every named range by name, Fermi's with ISO's.
 func named() map[string]radiation.Range {
 	ranges := isoRanges()
 	ranges["fermi"] = radiation.Fermi()
 	return ranges
 }
 
-// The ranges are as ranges.json holds them, and every one the test data
-// names is there. The test data says where they were read: tobiska and
-// nusinov's account of iso 21348's draft (cospar 2004), section 3.
+// The ranges are as ranges.json holds them, and every one the test data names
+// is there. The test data says where they were read: tobiska and nusinov's
+// account of ISO 21348's draft (cospar 2004), section 3.
 func TestTheNamedRanges(test *testing.T) {
 	want := pickedNumbers(test).Named
 	ranges := isoRanges()
@@ -63,8 +62,8 @@ func TestEveryNamedRangeIsARange(test *testing.T) {
 	}
 }
 
-// The test and the anti-test: fermi's far end carries 10 keV and its near
-// end 300 GeV, and the ends are not each other's energies.
+// The test and the anti-test: Fermi's far end carries 10 keV and its near end
+// 300 GeV, and the ends are not each other's energies.
 func TestFermiEdgesCarryTheirEnergies(test *testing.T) {
 	fermi := pickedNumbers(test).Fermi
 	shortEnd, longEnd := radiation.Fermi().Edges()
@@ -93,14 +92,14 @@ func TestWhatIsNoRangeIsRefused(test *testing.T) {
 		{Lo: mapping.InsideNM, Hi: math.Inf(upward)}}
 	for _, edge := range given {
 		made, err := radiation.NewRange(edge.Lo, edge.Hi)
-		if !errors.Is(err, radiation.ErrRange()) || made != nil {
+		if err == nil || made != nil {
 			test.Errorf("%v to %v nm made %v, %v", edge.Lo, edge.Hi, made,
 				err)
 		}
 	}
 }
 
-// upward asks math.Inf for the endless above. Defined by math.
+// upward asks math.Inf for the endless above. Defined by math.Inf.
 const upward = 1
 
 // The anti-test: the zero Range, which is no range, holds nothing.

@@ -1,17 +1,14 @@
-// Package celestial holds the physics of the sky in one place, for the
-// ray tracer, the catalogue readers and the gravitational-wave work alike.
+// Package celestial brings the physics of the sky together for renderers,
+// catalogue readers, and gravitational-wave work. The root package has no
+// runtime API; each subject lives in its own package.
 //
-// Package celestial itself holds nothing yet. Its packages each hold one
-// subject:
-//   - units and constants, each cited as defined or measured
-//   - time and its scales, frames on the sky and places on Earth
-//   - spectra, light and the atmosphere
-//   - stars, and gravitation from Newton's to a Kerr hole's
-//   - the file formats the data comes in: HDF5 now, FITS to come
-//   - LIGO and Virgo's events; their strain, read through hdf5, to come
+// The implemented foundations include units and constants, time and sky
+// coordinates, spectra and atmospheres, stars, point-mass gravity, Kerr
+// geometry, HDF5 reading, and the open science centre event estimates. FITS and
+// strain analysis remain planned work.
 //
-// Exported quantities are in SI, and a package that works in natural
-// units inside converts at its edge, both ways. Three do not yet: hole
-// works in units of its hole's mass, as relativity does, and radiation
-// and bands take nanometres and electronvolts, as libtheme-css's did.
+// Most public quantities use SI. Packages using natural units convert at the
+// boundary. The documented exceptions are hole, which uses geometric units set
+// by its mass, and radiation and bands, which retain nanometres and
+// electronvolts where inherited from the spectral APIs.
 package celestial

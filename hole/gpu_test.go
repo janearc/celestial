@@ -57,9 +57,9 @@ func TestNewGPUBlackHoleRefusesWhatNoHoleIs(t *testing.T) {
 	}
 }
 
-// The anti-test: a camera can be held still outside the ergosurface and nowhere inside
-// it. SetCamera refuses a point inside, says why, and leaves the camera it
-// had.
+// The anti-test: a camera can be held still outside the ergosurface and
+// nowhere inside it. SetCamera refuses a point inside, says why, and
+// leaves the camera it had.
 func TestSetCameraRefusesWhereNothingIsStill(t *testing.T) {
 	numbers := pickedNumbers(t)
 	gpu := camera(t, numbers.Holes.Fast, numbers.Places.Eye)
@@ -83,8 +83,8 @@ func TestSetCameraAcceptsWhereSomethingIsStill(t *testing.T) {
 	}
 }
 
-// The anti-test: before a camera is set there is no camera to shift against, and the
-// redshift is not a number: not a nought that reads as a shift.
+// The anti-test: before a camera is set there is no camera to shift against,
+// and the redshift is not a number: not a zero that reads as a shift.
 func TestRedshiftBeforeACameraIsNotANumber(t *testing.T) {
 	numbers := pickedNumbers(t)
 	gpu := gpuOf(t, numbers.Holes.Still)

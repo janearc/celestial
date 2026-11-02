@@ -23,9 +23,9 @@ func TestTheJanskyInSI(test *testing.T) {
 	}
 }
 
-// The anti-test: the cgs value of a jansky, 1e-23, is not its SI value,
-// which is the slip the units invite. Zero stays zero and a negative
-// density keeps its sign, so nothing is clamped on the way.
+// The anti-test: the CGS value of a jansky, 1e-23, is not its SI value, which
+// is the slip the units invite. Zero stays zero and a negative density keeps
+// its sign, so nothing is clamped on the way.
 func TestAJanskyIsNotItsCGSValue(test *testing.T) {
 	jansky := pickedNumbers(test).Jansky
 	if radiation.JanskyToSI(one) == jansky.CGSOne {

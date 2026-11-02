@@ -17,8 +17,8 @@ func on(test stopper, moment sky.Instant, scale sky.Scale) sky.Instant {
 	return *moved
 }
 
-// Tai less utc is as iers publishes it in bulletin c: 10 s from 1972,
-// 36 s through 2016, 37 s from 2017 january 1.
+// Tai less UTC is as IERS publishes it in bulletin c: 10 s from 1972, 36 s
+// through 2016, 37 s from 2017 January 1.
 func TestTAIIsUTCAndItsLeapSeconds(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, when := range numbers.TAILessUTC {
@@ -35,9 +35,9 @@ func TestTAIIsUTCAndItsLeapSeconds(test *testing.T) {
 	}
 }
 
-// The test and the anti-test: the leap second at the end of 2016 is a
-// real second of utc, and it is 37 s before the new year on tai; a leap
-// second where there was none is no time, and gives no instant.
+// The test and the anti-test: the leap second at the end of 2016 is a real
+// second of UTC, and it is 37 s before the new year on TAI; a leap second where
+// there was none is no time, and gives no instant.
 func TestALeapSecondIsAnInstant(test *testing.T) {
 	numbers := clockNumbers(test)
 	leap := numbers.LeapSecond
@@ -56,8 +56,20 @@ func TestALeapSecondIsAnInstant(test *testing.T) {
 	}
 }
 
-// Tt is tai and 32.184 s, by the iau's definition, and going there and
-// back is the same instant.
+// The anti-test: a day that ends in a leap second has its 60th second in
+// its last minute and no other; at half past eleven it is no time.
+func TestALeapSecondIsOnlyInTheLastMinute(test *testing.T) {
+	for _, wrong := range clockNumbers(test).NotLeapSeconds {
+		if moment, err := sky.Calendar(wrong.Year, wrong.Month, wrong.Day,
+			wrong.Hour, wrong.Minute, wrong.Second, sky.UTC()); err == nil ||
+			moment != nil {
+			test.Errorf("%+v on utc is a time: %v", wrong, err)
+		}
+	}
+}
+
+// Tt is TAI and 32.184 s, by the IAU's definition, and going there and back is
+// the same instant.
 func TestTTIsTAIAndThirtyTwoSeconds(test *testing.T) {
 	numbers := clockNumbers(test)
 	atomic := at(test, numbers.TT.At, sky.TAI())
@@ -77,7 +89,7 @@ func TestTTIsTAIAndThirtyTwoSeconds(test *testing.T) {
 	}
 }
 
-// Tdb keeps within two milliseconds of tt over a year, and comes back.
+// Tdb keeps within two milliseconds of TT over a year, and comes back.
 func TestTDBIsWithinTwoMillisecondsOfTT(test *testing.T) {
 	numbers := clockNumbers(test)
 	whole, fraction := at(test, numbers.TDB.From, sky.TT()).Julian()
@@ -102,10 +114,10 @@ func TestTDBIsWithinTwoMillisecondsOfTT(test *testing.T) {
 	}
 }
 
-// The anti-test: utc before 1972 had seconds of other lengths, ut1 needs
-// iers's measurements of the earth's turning, a leap second past what
-// iers has published is not known, and no scale is none: each is
-// refused, by name, and gives no instant.
+// The anti-test: UTC before 1972 had seconds of other lengths, UT1 needs IERS's
+// measurements of the Earth's turning, a leap second past what IERS has
+// published is not known, and no scale is none: each is refused, by name, and
+// gives no instant.
 func TestWhatIsNotKnownIsRefused(test *testing.T) {
 	numbers := clockNumbers(test)
 	var none sky.Scale
@@ -128,8 +140,8 @@ func TestWhatIsNotKnownIsRefused(test *testing.T) {
 	}
 }
 
-// Utc to tai and back is the same instant, every half second across the
-// leap second that ended 2016, the leap second itself included.
+// Utc to TAI and back is the same instant, every half second across the leap
+// second that ended 2016, the leap second itself included.
 func TestUTCGoesToTAIAndBackAcrossALeapSecond(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, step := range numbers.AcrossLeap {
@@ -157,11 +169,13 @@ func TestEveryScaleSaysItsName(test *testing.T) {
 	}
 }
 
-// Tdb less tt is all seven terms of kaplan's equation 2.6 (usno circular
-// 179), worked here from the test data's own copy of the circular's
-// coefficients: at j2000, today, and 1600 and 2200, where the seventh
-// term, which grows by the century, is largest. A term left out, or the
-// seventh not scaled by the centuries, is off by microseconds.
+// Tdb less TT is all seven terms of Kaplan's equation 2.6 (USNO circular 179),
+// worked here from the test data's own copy of the circular's coefficients: at
+// j2000, today, and 1600 and 2200, where the seventh term, which grows by the
+// century, is largest.
+//
+// A term left out, or the seventh not scaled by the centuries, is off by
+// microseconds.
 func TestTDBIsKaplansSevenTerms(test *testing.T) {
 	kaplan := clockNumbers(test).Kaplan
 	for _, julian := range kaplan.Julians {
@@ -183,7 +197,7 @@ func TestTDBIsKaplansSevenTerms(test *testing.T) {
 	}
 }
 
-// at is a term of kaplan's series at so many julian centuries.
+// at is a term of Kaplan's series at so many Julian centuries.
 func (each term) at(centuries float64) float64 {
 	return each.Amplitude * math.Sin(each.Rate*centuries+each.Phase)
 }

@@ -1,7 +1,7 @@
 package sky
 
-// utcToTAI is an instant on utc told on tai: the seconds into its utc
-// day, and that day's leap seconds, from the start of the same day.
+// utcToTAI is an instant on UTC told on TAI: the seconds into its UTC day, and
+// that day's leap seconds, from the start of the same day.
 func (moment Instant) utcToTAI() (*Instant, error) {
 	ahead, err := aheadOn(moment.day)
 	if err != nil {
@@ -14,16 +14,16 @@ func (moment Instant) utcToTAI() (*Instant, error) {
 
 // The tries taiToUTC makes, and what it misses by when it is done.
 const (
-	// tries is defined by sofa's taiutc, which tries three times.
+	// tries is defined by SOFA's taiutc, which tries three times.
 	tries = 3
-	// missed is defined: a utc instant that is the tai one misses by
+	// missed is defined: a UTC instant that is the TAI one misses by
 	// nothing.
 	missed = 0.0
 )
 
-// taiToUTC is an instant on tai told on utc, by trying the same day and
-// fraction on utc and moving it by what it misses by, as sofa's taiutc
-// does, until it misses by nothing, three tries at most.
+// taiToUTC is an instant on TAI told on UTC, by trying the same day and
+// fraction on UTC and moving it by what it misses by, as SOFA's taiutc does,
+// until it misses by nothing, three tries at most.
 func (atomic Instant) taiToUTC() (*Instant, error) {
 	civil := atomic.relabel(UTC())
 	for range tries {
@@ -41,8 +41,8 @@ func (atomic Instant) taiToUTC() (*Instant, error) {
 	return &civil, nil
 }
 
-// utcAfter is an instant on utc moved so many seconds, over days that may
-// be 86401 s long.
+// utcAfter is an instant on UTC moved so many seconds, over days that may be
+// 86401 s long.
 func (moment Instant) utcAfter(seconds float64) Instant {
 	day := moment.day
 	into := moment.part*dayLength(UTC(), day) + seconds

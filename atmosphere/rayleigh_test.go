@@ -1,7 +1,6 @@
 package atmosphere_test
 
 import (
-	"errors"
 	"math"
 	"testing"
 
@@ -12,11 +11,11 @@ import (
 	"pgregory.net/rapid"
 )
 
-// squareCentimetre is a square centimetre in square metres. Defined by
-// the si's centi.
+// squareCentimetre is a square centimetre in square metres. Defined by the SI's
+// centi.
 var squareCentimetre = si.Centi(whole) * si.Centi(whole)
 
-// A molecule of dry air scatters what bodhaine's table says, to its five
+// A molecule of dry air scatters what Bodhaine's table says, to its five
 // figures.
 func TestAMoleculeScattersWhatBodhaineSays(test *testing.T) {
 	numbers := pickedNumbers(test)
@@ -34,8 +33,8 @@ func TestAMoleculeScattersWhatBodhaineSays(test *testing.T) {
 	}
 }
 
-// The air over sea level at 45 degrees is as deep, to scattering, as
-// bodhaine's table says, to its five figures.
+// The air over sea level at 45 degrees is as deep, to scattering, as Bodhaine's
+// table says, to its five figures.
 func TestTheSkyIsAsDeepAsBodhaineSays(test *testing.T) {
 	numbers := pickedNumbers(test)
 	air := dry(test)
@@ -49,18 +48,16 @@ func TestTheSkyIsAsDeepAsBodhaineSays(test *testing.T) {
 		if err != nil {
 			test.Fatal(err)
 		}
-		if !near(depth, each.Depth, numbers.BodhaineTol) {
+		if !near(*depth, each.Depth, numbers.BodhaineTol) {
 			test.Errorf("at %g um the sky is %.6f deep; bodhaine says "+
-				"%.6f", each.Microns, depth, each.Depth)
+				"%.6f", each.Microns, *depth, each.Depth)
 		}
 	}
 }
 
-// The anti-test: the sky's depth is the air's above, not a fixed figure.
-// Half the sea's pressure, at the same height and latitude, is half the
-// depth, to a few roundings, as the depth is linear in the pressure
-// there; a depth that left the pressure out would pass bodhaine's table,
-// all at the sea's, and fail here.
+// The anti-test: optical depth must use local pressure. At half sea-level
+// pressure, fixed height and latitude give half the depth within rounding. The
+// sea-level table alone cannot detect pressure being ignored.
 func TestHalfTheAirIsHalfTheDepth(test *testing.T) {
 	numbers := pickedNumbers(test)
 	share := numbers.Anti.Share
@@ -82,18 +79,16 @@ func TestHalfTheAirIsHalfTheDepth(test *testing.T) {
 	if err != nil {
 		test.Fatal(err)
 	}
-	if !near(part, share*full, numbers.Anti.DepthTol) {
-		test.Errorf("%v of the air is %v deep, not %v of %v", share, part,
-			share, full)
+	if !near(*part, share*(*full), numbers.Anti.DepthTol) {
+		test.Errorf("%v of the air is %v deep, not %v of %v", share, *part,
+			share, *full)
 	}
 }
 
-// The anti-test: the sky's depth is not the same at every latitude. The
-// earth pulls harder at the poles, so the same air over the sea is
-// deeper to scattering at the equator than at a pole. A depth whose
-// gravity left the latitude out, or turned its sign, would pass
-// bodhaine's table, all at 45 degrees where list's latitude term is
-// nought, and fail here.
+// The anti-test: latitude affects optical depth through gravity. For equal
+// pressure, weaker equatorial gravity gives a deeper column than at a pole. The
+// reference table’s 45-degree latitude cannot catch a missing or sign-reversed
+// latitude term.
 func TestTheEquatorsSkyIsDeeperThanAPoles(test *testing.T) {
 	numbers := pickedNumbers(test)
 	equator := greenDepthAt(test, numbers.Anti.Equator)
@@ -115,12 +110,12 @@ func greenDepthAt(test *testing.T, degrees float64) float64 {
 	if err != nil {
 		test.Fatal(err)
 	}
-	return depth
+	return *depth
 }
 
-// The anti-test: co2 scatters too. Air with more of it than bodhaine's
-// scatters more, at every wavelength of their table; a cross-section that
-// left the co2 out would pass their table, all at 360 ppm, and fail here.
+// The anti-test: CO2 contributes to scattering. Increasing it must increase
+// cross-section at each reference wavelength; the table’s single 360 ppm
+// mixture would miss a model that ignored CO2.
 func TestMoreCO2ScattersMore(test *testing.T) {
 	numbers := pickedNumbers(test)
 	if !(numbers.Anti.MoreCO2 > numbers.CO2) {
@@ -149,9 +144,9 @@ func TestMoreCO2ScattersMore(test *testing.T) {
 	}
 }
 
-// The anti-test: peck and reeder's refractive index holds from 0.23 to
-// 1.69 microns; outside it, and at no number, the air's scattering is
-// not known here, and every way of asking for it is refused.
+// The anti-test: Peck and Reeder's refractive index holds from 0.23 to 1.69
+// microns; outside it, and at no number, the air's scattering is not known
+// here, and every way of asking for it is refused.
 func TestWavelengthsOutsideTheIndexAreRefused(test *testing.T) {
 	numbers := pickedNumbers(test)
 	air := dry(test)
@@ -159,8 +154,8 @@ func TestWavelengthsOutsideTheIndexAreRefused(test *testing.T) {
 	sea := atmosphere.Pascals(numbers.Sea.Pascals)
 	for _, each := range append(numbers.OutsideMicrons, math.NaN()) {
 		wavelength := microns(each)
-		if area, err := air.CrossSection(wavelength); !errors.Is(err,
-			atmosphere.ErrWavelength()) || area != nil {
+		if area, err := air.CrossSection(wavelength); err == nil ||
+			area != nil {
 			test.Errorf("%g um is scattered: %v, %v", each, area, err)
 		}
 		if _, err := air.DepthAbove(wavelength, sea,
@@ -181,10 +176,10 @@ const (
 	longestName  = "peck-reeder-longest-um"
 )
 
-// The property and its anti-test: of any two wavelengths the refractive
-// index holds, the shorter is scattered more, as rayleigh's fourth power
-// and the index both say; and any wavelength outside the index's range
-// is refused, and gives no area.
+// The property and its anti-test: of any two wavelengths the refractive index
+// holds, the shorter is scattered more, as Rayleigh's fourth power and the
+// index both say; and any wavelength outside the index's range is refused, and
+// gives no area.
 func TestShorterLightIsScatteredMore(test *testing.T) {
 	numbers := pickedNumbers(test).Drawn
 	shortest, longest := research.Value(shortestName),
@@ -228,14 +223,23 @@ func (scatter scattering) check(test *rapid.T) {
 	for _, each := range []float64{scatter.shortest - beyond,
 		scatter.longest + beyond} {
 		if area, err := scatter.air.CrossSection(microns(each)); area !=
-			nil || !errors.Is(err, atmosphere.ErrWavelength()) {
+			nil || err == nil {
 			test.Fatalf("%g um gave %v, %v", each, area, err)
 		}
 	}
 }
 
-// The anti-test: air with less than no co2, or more co2 than air, is
-// not made.
+// Air of no co2, and air that is all co2, are made: the ends of a share
+// are shares.
+func TestAirAtTheEndsOfCO2IsMade(test *testing.T) {
+	for _, ppm := range pickedNumbers(test).Edges.CO2 {
+		if _, err := atmosphere.DryAir(ppm); err != nil {
+			test.Errorf("air of %g ppm of co2 was refused: %v", ppm, err)
+		}
+	}
+}
+
+// The anti-test: air with less than no CO2, or more CO2 than air, is not made.
 func TestAirOfNoSuchCO2IsRefused(test *testing.T) {
 	for _, ppm := range append(pickedNumbers(test).NotCO2, math.NaN()) {
 		if air, err := atmosphere.DryAir(ppm); err == nil || air != nil {

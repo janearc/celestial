@@ -9,12 +9,12 @@ package radiation
 // IAU's own transactions for 1973 are not open and were not read.
 const jansky = 1e-26
 
-// JanskyToSI is a spectral flux density in janskys as watts a square
-// metre a hertz, the unit every exported flux density here is in. The
-// jansky is outside the si: radio and infrared catalogues, WISE's among
-// them, still state flux densities in it.
+// JanskyToSI is a spectral flux density in janskys as watts a square metre a
+// hertz, the unit every exported flux density here is in. The jansky is outside
+// the SI: radio and infrared catalogues, WISE's among them, still state flux
+// densities in it.
 //
-// It lives in radiation, not si, because si holds the defining constants
-// and the prefixes, and a jansky is a unit of radiation: a power per area
-// per frequency.
+// It lives in radiation, not SI, because SI holds the defining constants and
+// the prefixes, and a jansky is a unit of radiation: a power per area per
+// frequency.
 func JanskyToSI(jy float64) float64 { return jy * jansky }

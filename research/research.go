@@ -1,12 +1,11 @@
-// Package research is every measured or picked number celestial uses,
-// as research-derived-data.yml holds it: a measured one read from its
-// published source, never typed from memory, and a picked one saying who
-// picked it. Code asks for a number by its name and holds no copy.
+// Package research supplies named measured and chosen values from
+// research-derived-data.yml. Measured values identify published sources; chosen
+// parameters identify their authors. sources.yaml records the works those
+// entries cite.
 //
-// The sources the data names are in sources.yaml, beside it.
-//
-// A number true by definition is not here: it is a constant in the
-// package it belongs to, and its comment says what defines it.
+// Callers request values by name rather than copying them into code. Exact
+// definitions instead remain constants beside the formulas or units they
+// define, with comments explaining their origin.
 package research
 
 import (
@@ -25,9 +24,8 @@ var data []byte
 // is why it did not parse, if it did not.
 var loaded, loadErr = numbers.Read("research-derived-data.yml", data)
 
-// Read returns every number in the research data, for a caller that
-// wants to say where a number came from. returns nil and error if the
-// data did not parse.
+// Read returns the recorded values and provenance, or the error from parsing
+// the embedded data.
 func Read() (numbers.Numbers, error) {
 	if loadErr != nil {
 		return nil, loadErr
@@ -35,10 +33,9 @@ func Read() (numbers.Numbers, error) {
 	return loaded, nil
 }
 
-// Value returns a number by its name, measured or picked. the data is
-// built into celestial, so a name it does not hold is a bug in
-// celestial's own code, which its tests find: asking for one panics and
-// names it.
+// Value looks up a measured or chosen parameter by name. Missing names and
+// invalid embedded data are internal errors: Value panics with the cause so the
+// project’s tests can identify them.
 func Value(name string) float64 {
 	read, err := Read()
 	if err != nil {

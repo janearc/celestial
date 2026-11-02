@@ -2,42 +2,40 @@ package hole
 
 import "math"
 
-// Ray is a geodesic's state: where it is in spacetime and its covariant
-// momentum. For light the momentum is null; for a body it is timelike
-// with unit mass.
+// Ray stores spacetime position and covariant momentum. Light has null
+// momentum; the massive-body model uses timelike unit mass.
 type Ray struct{ position, momentum Vec4 }
 
-// NewRay is a geodesic at a point in spacetime with a covariant momentum.
-// Any two vectors make one; a ray whose parts are not numbers is stuck at
-// once when marched.
+// NewRay stores a position and covariant momentum without validating their
+// physical relation. Nonfinite state is allowed to propagate as an invalid ray;
+// March reports it as stuck.
 func NewRay(position, momentum Vec4) Ray {
 	return Ray{position: position, momentum: momentum}
 }
 
-// Position is where the ray is in spacetime, (t, x, y, z).
+// Position returns (t, x, y, z).
 func (ray Ray) Position() Vec4 { return ray.position }
 
-// Momentum is the ray's covariant momentum.
+// Momentum returns the covariant momentum.
 func (ray Ray) Momentum() Vec4 { return ray.momentum }
 
-// Space is the ray's point in space.
+// Space returns the spatial position.
 func (ray Ray) Space() Vec3 { return ray.position.Space() }
 
-// Fate is how a march ended.
-//
-// Fate is moving to slayer with the march; see the package doc.
+// Fate records why a march stopped. It belongs to the proposed move of
+// rendering policy to Slayer; see the package documentation.
 type Fate int
 
 // The fates.
 const (
 	Escaped  Fate = iota // past the far radius, and straight from there
 	Captured             // not coming back: see March
-	// the step budget ran out, or the ray stopped being a number
+	// The step budget ran out, or the ray stopped being a number
 	Stuck
 )
 
-// limits is the radii a march decides a ray's fate by, worked out once
-// for the ray before it is stepped.
+// limits caches the radius thresholds used to classify one ray before stepping
+// begins.
 type limits struct {
 	horizon float64 // inside it an arriving ray may be found hovering
 	// inside it a ray still going inward is not coming back
@@ -52,35 +50,27 @@ func (hole Hole) limitsOf(point, momentum Vec4) limits {
 	}
 }
 
-// noReturn is the radius inside which a ray that is still going inward
-// is never coming back out: the radius of the photon orbit that has the
-// ray's own angular momentum about the axis for its energy.
+// noReturn finds the photon-orbit radius associated with the ray’s conserved
+// Lz/E. An inward ray inside that radius cannot turn back outward. Bardeen’s
+// spherical-orbit relation is
 //
-// Light can circle a spinning hole at any radius between the prograde
-// and retrograde orbits of the equator, on an orbit that leaves the
-// equator, and at each radius only with one ratio of Lz to E:
+//	Lz/E = -(r³ - 3Mr² + A²r + A²M) / (A(r - M)).
 //
-//	Lz/E = -(r^3 - 3 M r^2 + A^2 r + A^2 M) / (A (r - M))
+// With r = M+y, solve the positive root of
 //
-// by bardeen. A ray keeps that ratio, and whatever else it has, the places
-// it can turn about lie either side of the orbit with its ratio: outside it
-// if it came from outside, and then it is not inside going inward; inside it
-// if it came from the hole, and then going inward it is past its turn.
+//	y³ + (A² + A Lz/E - 3M²)y - 2M(M² - A²) = 0.
 //
-// So inside that radius and going inward there is no turn ahead. The
-// radius is M + y, with y the one root above nought of the cubic the
-// equation makes,
+// The cubic is negative at zero and convex above it. Newton iteration from
+// above the positive root approaches without crossing and stops when the
+// iterate no longer decreases.
 //
-//	y^3 + (A^2 + A Lz/E - 3 M^2) y - 2 M (M^2 - A^2) = 0
+// The prograde equatorial orbit bounds all spherical photon orbits from below.
+// It also serves when energy is zero and Lz/E is undefined. At zero spin the
+// result is always 3M.
 //
-// which is below nought at nought and convex above it, so newton's
-// method from above the root falls onto it and does not pass, and it is
-// run until it stops falling.
-//
-// The innermost photon orbit, the prograde one, is inside all the
-// others and bounds the answer below. A ray with no energy has no
-// ratio, and the innermost serves for it. At nought spin every answer
-// is 3M.
+// For a given Lz/E, turning points lie outside the matching orbit for rays
+// arriving from outside, or inside for rays originating near the hole. Once
+// inside and still moving inward, no outward turn remains.
 func (hole Hole) noReturn(point, momentum Vec4) float64 {
 	innermost := hole.PhotonOrbit(true)
 	turning := (point.x*momentum.y - point.y*momentum.x) / -momentum.time
@@ -90,7 +80,7 @@ func (hole Hole) noReturn(point, momentum Vec4) float64 {
 	spinSquared, massSquared := hole.spin*hole.spin, hole.mass*hole.mass
 	linear := spinSquared + hole.spin*turning - cubicThree*massSquared
 	constant := -cubicTwo * hole.mass * (massSquared - spinSquared)
-	// the root is below the root of the linear term's size plus the cube
+	// The root is below the root of the linear term's size plus the cube
 	// root of the constant's
 	y := math.Sqrt(math.Abs(linear)) + math.Cbrt(-constant)
 	for {
@@ -104,40 +94,37 @@ func (hole Hole) noReturn(point, momentum Vec4) float64 {
 	return math.Max(innermost, hole.mass+y)
 }
 
-// goingInward is whether a point moving at a velocity is losing radius:
-// the sign of the radius's gradient on the velocity, the gradient being
-// along (x r^2, y r^2, z (r^2 + A^2)).
+// goingInward tests whether spatial velocity decreases Kerr radius, using the
+// gradient proportional to (x r², y r², z(r² + A²)).
 func (hole Hole) goingInward(point, velocity Vec4, radius float64) bool {
 	radiusSquared := radius * radius
 	return radiusSquared*(point.x*velocity.x+point.y*velocity.y)+
 		(radiusSquared+hole.spin*hole.spin)*point.z*velocity.z < nothing
 }
 
-// Hamiltonian is hamilton's function, half the inverse metric on the
-// momentum: nought along a null ray and minus a half along a body of unit
-// mass, kept along any geodesic.
+// Hamiltonian returns H = g^{ab}p_a p_b / 2. It is conserved along a geodesic:
+// zero for light and -1/2 for a unit-mass body.
 func (hole Hole) Hamiltonian(ray Ray) float64 {
 	return hamiltonianHalf * Dot(ray.momentum, hole.Velocity(ray))
 }
 
-// Energy is the energy a geodesic keeps, minus the time momentum.
+// Energy returns conserved energy, minus the time component of momentum.
 func (hole Hole) Energy(ray Ray) float64 { return -ray.momentum.time }
 
-// Lz is the angular momentum about the spin axis a geodesic keeps.
+// Lz returns conserved angular momentum about the spin axis.
 func (hole Hole) Lz(ray Ray) float64 {
 	return ray.position.x*ray.momentum.y - ray.position.y*ray.momentum.x
 }
 
-// Carter is the carter constant, which a geodesic keeps beside E and
-// Lz. In the angle theta that the kerr-schild coordinates share with
-// boyer and lindquist's, z = R cos theta, it is
+// Carter returns the conserved Carter constant, alongside energy and Lz.
+// Kerr–Schild and Boyer–Lindquist coordinates share z = R cos(theta):
 //
-//	Q = p_theta^2 + cos^2 theta (A^2 (mu^2 - E^2) + Lz^2 / sin^2 theta)
+//	Q = p_theta² + cos²(theta) *
+//	    (A²(mu² - E²) + Lz² / sin²(theta)).
 //
-// with mu^2 minus twice H: nought for light, one for a body of unit
-// mass. At nought spin it is the square of the angular momentum less
-// Lz squared. On the disc inside the ring, where R is nought, it is not
-// a number.
+// Here mu² = -2H: zero for light and one for a unit-mass body. At zero spin Q
+// is total angular momentum squared minus Lz². It is NaN on the disc inside the
+// ring, where R is zero.
 func (hole Hole) Carter(ray Ray) float64 {
 	position := ray.Space()
 	radius := hole.Radius(position)
@@ -149,17 +136,16 @@ func (hole Hole) Carter(ray Ray) float64 {
 			(massSquared-energy*energy)
 }
 
-// acrossAxisSquared is the square of the angular momentum across the
-// spin axis, for a momentum at a point of known radius: Lx squared plus
-// Ly squared at nought spin, and with spin the first and last terms of
-// Carter,
+// acrossAxisSquared is the square of the angular momentum across the spin axis,
+// for a momentum at a point of known radius: Lx squared plus Ly squared at zero
+// spin, and with spin the first and last terms of Carter,
 //
 //	p_theta^2 + cos^2 theta Lz^2 / sin^2 theta
 //
-// It is worked as the squared length of one vector in the xy plane, so
-// no angle is taken, nothing is divided by sin theta, and the spin axis
-// is a point like any other. With spin a geodesic does not keep it;
-// Carter is the part it keeps.
+// It is worked as the squared length of one vector in the xy plane, so no angle
+// is taken, nothing is divided by sin theta, and the spin axis is a point like
+// any other. With spin a geodesic does not keep it; Carter is the part it
+// keeps.
 func (hole Hole) acrossAxisSquared(
 	position Vec3, momentum Vec4, radius float64,
 ) float64 {
@@ -171,8 +157,7 @@ func (hole Hole) acrossAxisSquared(
 	return (acrossX*acrossX + acrossY*acrossY) / radiusSpinSum
 }
 
-// Velocity is the contravariant velocity along the geodesic, dx by the
-// affine parameter: the inverse metric on the momentum.
+// Velocity raises covariant momentum to give dx/dlambda along the geodesic.
 func (hole Hole) Velocity(ray Ray) Vec4 {
 	return hole.Raise(ray.Space(), ray.momentum)
 }

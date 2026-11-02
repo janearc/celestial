@@ -129,7 +129,7 @@ func TestANanometreIsNotAMetre(test *testing.T) {
 	}
 }
 
-// The units' multiples, from the si's prefixes, are its powers of ten.
+// The units' multiples, from the SI's prefixes, are its powers of ten.
 func TestTheUnitsArePowersOfTen(test *testing.T) {
 	ladders := pickedNumbers(test).Ladders
 	energy := ladder(radiation.Electronvolt)

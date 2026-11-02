@@ -1,5 +1,5 @@
 {
-  "about": "numbers space's tests use. three and four make five, so a direction's parts and a distance's are exact; the earth's orbit is an AU (IAU 2012 B2) at 29.78 km/s, carried from slayer's measure tests; light is 299792.458 km/s, defined",
+  "about": "numbers space's tests use. three and four make five, so a direction's parts and a distance's are exact; the ways beyond squaring are parts whose squares overflow or underflow a float, picked by the test author, 2026-11-01; the earth's orbit is an AU (IAU 2012 B2) at 29.78 km/s, carried from slayer's measure tests; light is 299792.458 km/s, defined",
   "three four": {"x": 3, "y": 4, "z": 0},
   "east": {"x": 1, "y": 0, "z": 0},
   "five": 5,
@@ -7,7 +7,9 @@
   "here": {"x": 1, "y": 2, "z": 3},
   "there": {"x": 4, "y": 6, "z": 3},
   "no ways": [{"x": 0, "y": 0, "z": 0}],
-  "too fast km/s": [{"x": 300000, "y": 0, "z": 0}, {"x": 0, "y": 0, "z": -1e6}],
+  "beyond squaring": [{"x": 1e200, "y": 0, "z": 0}, {"x": 1e-200, "y": 0, "z": 0}, {"x": 0, "y": -1e300, "z": 1e300}, {"x": 0, "y": 1e300, "z": 1}, {"x": 1.7e308, "y": 1.7e308, "z": 1.7e308}],
+  "too fast km/s": [{"x": 300000, "y": 0, "z": 0}, {"x": 0, "y": 0, "z": -1e6}, {"x": 299792.458, "y": 0, "z": 0}],
+  "every part": {"about": "picked by the test author, 2026-11-01: by and other have no part of nought, and none two of them alike, so each of a sum's terms shows, and a product mistaken for a quotient does too; square is at a right angle to by; their dot, cross and sums worked by hand", "by m": {"x": 1, "y": 2, "z": 3}, "other m": {"x": 4, "y": 5, "z": 6}, "dot m2": 32, "square m": {"x": -2, "y": 1, "z": 0}, "moving km/s": {"x": 4, "y": 5, "z": 6}, "north": {"x": -1, "y": 2, "z": -1}, "sweep squared": 54, "plus m": {"x": 5, "y": 7, "z": 9}},
   "earth out m": {"x": 1.495978707e11, "y": 0, "z": 0},
   "earth moving km/s": {"x": 0, "y": 0, "z": -29.78},
   "earth speed km/s": 29.78,

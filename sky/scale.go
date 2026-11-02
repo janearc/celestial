@@ -8,9 +8,8 @@ import (
 	"github.com/janearc/celestial/research"
 )
 
-// Scale is the clock an instant is on: utc, tai, tt, tdb, ut1 or gps.
-// doc/sky.md says what each is. The zero Scale is none of them, and
-// every instant refuses it.
+// Scale identifies UTC, TAI, TT, TDB, UT1, or GPS time. The zero value is
+// invalid and is rejected when constructing or converting instants.
 type Scale struct{ name string }
 
 // UTC is coordinated universal time, the civil clock, with leap seconds.
@@ -19,18 +18,18 @@ func UTC() Scale { return Scale{"utc"} }
 // TAI is international atomic time.
 func TAI() Scale { return Scale{"tai"} }
 
-// TT is terrestrial time, tai and 32.184 s.
+// TT is terrestrial time: TAI plus exactly 32.184 seconds.
 func TT() Scale { return Scale{"tt"} }
 
-// TDB is barycentric dynamical time, tt and a wobble of under two
-// thousandths of a second.
+// TDB is barycentric dynamical time, differing periodically from TT by less
+// than about two milliseconds.
 func TDB() Scale { return Scale{"tdb"} }
 
-// UT1 is the earth's own turning.
+// UT1 is time based on Earth’s rotation.
 func UT1() Scale { return Scale{"ut1"} }
 
-// GPS is the global positioning system's time, tai less 19 s, the clock
-// LIGO, Virgo and the open science centre give their times on.
+// GPS is the continuous satellite time scale, TAI minus 19 seconds, also used
+// for LIGO, Virgo, and the open science centre event timestamps.
 func GPS() Scale { return Scale{"gps"} }
 
 // String is the scale's name, or "no scale" for the zero Scale.
@@ -44,19 +43,18 @@ func (scale Scale) String() string {
 // known is whether a scale is one of the six.
 func (scale Scale) known() bool { return scale.name != "" }
 
-// ttLessTAI is tt less tai, in seconds. Defined by the iau's definition
-// of tt.
+// ttLessTAI is TT less TAI, in seconds. Defined by the IAU's definition of tt.
 const ttLessTAI = 32.184
 
-// taiLessGPS is tai less gps time, in seconds. Defined: gps time was set
-// to utc at its epoch, 1980 january 6 0h utc, when tai was 19 s ahead of
-// utc, and gps time has never taken a leap second since (IS-GPS-200,
-// section 3.3.4).
+// taiLessGPS is TAI less GPS time, in seconds. Defined: GPS time was set to UTC
+// at its epoch, 1980 January 6 0h UTC, when TAI was 19 s ahead of UTC, and GPS
+// time has never taken a leap second since (IS-GPS-200, section 3.3.4).
 const taiLessGPS = 19.0
 
-// On is the same instant on another scale. ut1 needs iers's measurements
-// of the earth's turning, which sky does not hold yet, so it is refused
-// by name. On refuses no scale, and then gives no instant.
+// On expresses the same instant on another supported scale. Unknown scales
+// and UTC dates outside the leap-second table’s coverage return an error.
+// UT1 conversions require Earth-rotation data; use UT1 with a measured DUT1
+// instead.
 func (moment Instant) On(scale Scale) (*Instant, error) {
 	switch {
 	case !scale.known():
@@ -74,7 +72,7 @@ func (moment Instant) On(scale Scale) (*Instant, error) {
 	return atomic.fromTAI(scale)
 }
 
-// toTAI is the instant on tai.
+// toTAI converts an instant to TAI.
 func (moment Instant) toTAI() (*Instant, error) {
 	switch moment.scale {
 	case TT():
@@ -92,7 +90,7 @@ func (moment Instant) toTAI() (*Instant, error) {
 	return &moment, nil
 }
 
-// fromTAI is an instant on tai told on another scale.
+// fromTAI converts a TAI instant to the requested scale.
 func (atomic Instant) fromTAI(scale Scale) (*Instant, error) {
 	on := atomic
 	switch scale {
@@ -109,20 +107,19 @@ func (atomic Instant) fromTAI(scale Scale) (*Instant, error) {
 	return &on, nil
 }
 
-// relabel is the same day and fraction read on another scale: a step in
-// a conversion, never an answer.
+// relabel reinterprets the same day and fraction on another scale as an
+// intermediate conversion step, not a completed conversion.
 func (moment Instant) relabel(scale Scale) Instant {
 	moment.scale = scale
 	return moment
 }
 
-// The epoch and the century kaplan's terms count from, each defined:
-// j2000.0, julian date 2451545.0 on tt, and the julian century of 36525
-// days.
+// The epoch and the century Kaplan's terms count from, each defined: j2000.0,
+// Julian date 2451545.0 on TT, and the Julian century of 36525 days.
 const (
-	// j2000 is the julian date of j2000.0. Defined by the iau.
+	// j2000 is the Julian date of j2000.0. Defined by the iau.
 	j2000 = 2451545.0
-	// daysACentury is a julian century. Defined by the iau.
+	// daysACentury is a Julian century. Defined by the iau.
 	daysACentury   = 36525.0
 	kaplanFirst    = "tdb-first"
 	kaplanSecond   = "tdb-second"
@@ -141,13 +138,13 @@ const (
 var kaplanPeriodic = []string{kaplanFirst, kaplanSecond, kaplanThird,
 	kaplanFourth, kaplanFifth, kaplanSixth}
 
-// tdbLessTT is tdb less tt in seconds at an instant on tt or tdb, by all
-// seven terms of kaplan, usno circular 179 (2005), equation 2.6, as
-// celestial's research data holds them: good, the circular says, to
-// about 10 microseconds from 1600 to 2200.
+// tdbLessTT is TDB less TT in seconds at an instant on TT or TDB, by all seven
+// terms of Kaplan, USNO circular 179 (2005), equation 2.6, as celestial's
+// research data holds them: good, the circular says, to about 10 microseconds
+// from 1600 to 2200.
 //
-// Six are periodic; the seventh's amplitude grows by the century, so it
-// is its term times the centuries from j2000.
+// Six are periodic; the seventh's amplitude grows by the century, so it is its
+// term times the centuries from j2000.
 func tdbLessTT(moment Instant) float64 {
 	whole, fraction := moment.Julian()
 	centuries := ((whole - j2000) + fraction) / daysACentury
@@ -158,9 +155,8 @@ func tdbLessTT(moment Instant) float64 {
 	return sum + centuries*tdbTerm(kaplanSecular, centuries)
 }
 
-// tdbTerm is one term of the circular's series at so many centuries
-// from j2000: its amplitude times the sine of its rate times the
-// centuries, plus its phase.
+// tdbTerm evaluates one periodic term at Julian centuries from J2000: amplitude
+// times sin(rate * centuries + phase).
 func tdbTerm(term string, centuries float64) float64 {
 	amplitude := research.Value(term + amplitudeOfTDB)
 	turned := research.Value(term+rateOfTDB)*centuries +

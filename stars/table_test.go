@@ -12,9 +12,11 @@ import (
 // tableNumbers is what these tests check the table against, from
 // testdata/stars.json.
 type tableNumbers struct {
-	Rows     int     `json:"rows"`
-	Yield    float64 `json:"fusion yield"`
-	YieldTol float64 `json:"fusion tolerance"`
+	Rows       int     `json:"rows"`
+	Yield      float64 `json:"fusion yield"`
+	YieldTol   float64 `json:"fusion tolerance"`
+	BetweenTol float64 `json:"between tolerance"`
+	Younger    float64 `json:"a moment younger"`
 }
 
 // readTableNumbers reads the test numbers, or the test stops.

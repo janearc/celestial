@@ -27,9 +27,9 @@ type fine struct {
 	Red   float64 `json:"red nm"`
 }
 
-// The sky's sums are fine enough: low over the horizon at moonrise, with
-// the sun just up behind, the light summed in the sky's own steps and
-// pieces is within a percent of the light summed in ten times as many.
+// The sky's sums are fine enough: low over the horizon at moonrise, with the
+// Sun just up behind, the light summed in the sky's own steps and pieces is
+// within a percent of the light summed in ten times as many.
 func TestTheSkysSumsAreFineEnough(test *testing.T) {
 	var numbers fine
 	raw, err := os.ReadFile("testdata/atmosphere.json")

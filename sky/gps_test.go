@@ -9,12 +9,13 @@ import (
 	"github.com/janearc/celestial/sky"
 )
 
-// Gps time is tai less 19 s at every instant: the same wall reading on
-// gps is 19 s after it on tai. IS-GPS-200 (revision M, section 3.3.4)
-// makes gps time continuous, with no leap seconds, but never names tai;
-// the 19 s is the BIPM's, read on 2026-10-31 in its Circular T 22 (1989
-// december 1): "TAI-GPS TIME = 19 seconds + Co", Co a small measured
-// correction.
+// Gps time is TAI less 19 s at every instant: the same wall reading on GPS is
+// 19 s after it on tai.
+//
+// IS-GPS-200 (revision M, section 3.3.4) makes GPS time continuous, with no
+// leap seconds, but never names TAI; the 19 s is the BIPM's, read on 2026-10-31
+// in its Circular T 22 (1989 December 1): "TAI-GPS TIME = 19 seconds + Co", Co
+// a small measured correction.
 func TestGPSIsTAILessNineteenSeconds(test *testing.T) {
 	numbers := clockNumbers(test)
 	wall := at(test, numbers.GPS.Wall, sky.GPS())
@@ -31,8 +32,8 @@ func TestGPSIsTAILessNineteenSeconds(test *testing.T) {
 	}
 }
 
-// Gps time nought is the start of 1980 january 6 on utc, by the
-// definition of the gps epoch (IS-GPS-200).
+// Gps time zero is the start of 1980 January 6 on UTC, by the definition of the
+// GPS epoch (IS-GPS-200).
 func TestGPSNoughtIsTheEpoch(test *testing.T) {
 	numbers := clockNumbers(test)
 	epoch, err := sky.FromGPS(nought)
@@ -46,11 +47,13 @@ func TestGPSNoughtIsTheEpoch(test *testing.T) {
 	}
 }
 
-// GW150914 is at gps 1126259462.4, as the open science centre's event
-// record gives it. LIGO's discovery paper (Abbott et al. 2016, PRL 116,
-// 061102) gives 2015 september 14, 09:50:45 utc. Gps less utc was 17 s
-// then (tai less utc 36 s from 2015 july 1, less the 19 s gps is behind
-// tai), so the tenth of a second is 09:50:45.4.
+// GW150914 is at GPS 1126259462.4, as the open science centre's event record
+// gives it.
+//
+// LIGO's discovery paper (Abbott et al. 2016, PRL 116, 061102) gives 2015
+// September 14, 09:50:45 utc. Gps less UTC was 17 s then (TAI less UTC 36 s
+// from 2015 July 1, less the 19 s GPS is behind TAI), so the tenth of a second
+// is 09:50:45.4.
 func TestGW150914IsAtItsPublishedTime(test *testing.T) {
 	numbers := clockNumbers(test)
 	event, err := sky.FromGPS(numbers.GPS.GW150914)
@@ -64,13 +67,13 @@ func TestGW150914IsAtItsPublishedTime(test *testing.T) {
 	}
 }
 
-// The property: gps seconds to an instant and back is the same number,
-// to well inside a microsecond, from 1950 to 2075.
+// The property: GPS seconds to an instant and back is the same number, to well
+// inside a microsecond, from 1950 to 2075.
 func TestGPSSecondsComeBack(test *testing.T) {
 	rapid.Check(test, gpsTrip{numbers: clockNumbers(test)}.check)
 }
 
-// gpsTrip draws gps times and goes there and back.
+// gpsTrip draws GPS times and goes there and back.
 type gpsTrip struct{ numbers clocked }
 
 // check is one draw of the property above.
@@ -91,9 +94,9 @@ func (trip gpsTrip) check(test *rapid.T) {
 	}
 }
 
-// The anti-test: a gps time or julian date that is no number, or so far
-// off its days cannot be counted, is refused and gives no instant; and
-// an instant that cannot reach gps, one on ut1, gives no gps seconds.
+// The anti-test: a GPS time or Julian date that is no number, or so far off its
+// days cannot be counted, is refused and gives no instant; and an instant that
+// cannot reach GPS, one on UT1, gives no GPS seconds.
 func TestNoGPSTimeIsRefused(test *testing.T) {
 	numbers := clockNumbers(test)
 	nonsense := []float64{math.NaN(), math.Inf(upward), math.Inf(-upward)}
@@ -110,6 +113,20 @@ func TestNoGPSTimeIsRefused(test *testing.T) {
 		if moment, err := sky.FromJulian(nought, julian, sky.TT()); err == nil || moment != nil {
 			test.Errorf("a julian fraction of %v gave %v", julian, err)
 		}
+	}
+	// from two to the 53rd days on, a float counts days no longer exactly
+	for _, fraction := range numbers.NotFractions {
+		if moment, err := sky.FromJulian(nought, fraction, sky.TT()); err ==
+			nil || moment != nil {
+			test.Errorf("a julian fraction of %v gave %v", fraction, err)
+		}
+	}
+	// a million days short of that, counted from the modified julian
+	// zero, a julian date is still counted
+	if _, err := sky.FromJulian(numbers.CountedJulian, nought,
+		sky.TT()); err != nil {
+		test.Errorf("julian date %v was refused: %v",
+			numbers.CountedJulian, err)
 	}
 	turning := at(test, numbers.UT1Day, sky.UT1())
 	if seconds, err := turning.GPSSeconds(); err == nil || seconds != nil {

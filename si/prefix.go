@@ -1,14 +1,11 @@
 package si
 
-// The si's decimal prefixes, from the SI Brochure, 9th edition (BIPM,
-// 2019), table 7. A unit has one name; its multiples are these functions
-// of it, so a kiloparsec is Kilo(length.Parsec) and a keV is
-// Kilo(radiation.Electronvolt). Nothing anywhere names a kilo-anything.
+// The SI’s decimal prefixes, from the SI Brochure, 9th edition (BIPM, 2019),
+// table 7. A unit has one name; its multiples use these functions, so a
+// kiloparsec is Kilo(length.Parsec) and a keV is Kilo(radiation.Electronvolt).
 //
-// Only the prefixes celestial uses are here. libtheme-css holds the
-// whole table; a prefix comes over when a caller needs it.
-//
-// Each is defined by the brochure's table 7.
+// Only the prefixes Celestial uses are here. Add another when a caller
+// needs it. Each is defined by the brochure’s table 7.
 const (
 	nano  = 1e-9 // defined: 10^-9
 	micro = 1e-6 // defined: 10^-6
@@ -30,7 +27,7 @@ func Micro(unit float64) float64 { return unit * micro }
 // jansky.
 func Milli(unit float64) float64 { return unit * milli }
 
-// Centi is a hundredth of the unit: the centimetre of cgs units.
+// Centi is a hundredth of the unit: the centimetre of CGS units.
 func Centi(unit float64) float64 { return unit * centi }
 
 // Kilo is a thousand of the unit.

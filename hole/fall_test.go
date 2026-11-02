@@ -72,11 +72,9 @@ func TestDroppedFromOffTheAxisIsAtRest(t *testing.T) {
 	}
 }
 
-// The anti-test: a body let go from rest does not start moving. Its velocity
-// in space, the inverse metric on its momentum, is nought at the start, at
-// the point it is Dropped and on the x axis where it Falls, round a hole with
-// spin as round one with none. A body let go as the normal observer, which
-// falls, has no angular momentum too, and passes the test above.
+// The anti-test: dropping from rest means zero initial spatial velocity, on and
+// off the x axis, with and without spin. Zero angular momentum alone is
+// insufficient: the normal observer also has it but is already falling.
 func TestDroppedFromRestHasNoVelocityInSpace(t *testing.T) {
 	numbers := pickedNumbers(t)
 	fall := numbers.Fall
@@ -97,8 +95,8 @@ func TestDroppedFromRestHasNoVelocityInSpace(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: a camera dropped from ten M reaches the horizon of a hole with no spin in
-// finite proper time, and not before.
+// The test and the anti-test: a camera dropped from ten M reaches the
+// horizon of a hole with no spin in finite proper time, and not before.
 func TestACameraFallsIn(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)
@@ -143,8 +141,8 @@ func TestTheFallTakesTheTimeItShould(t *testing.T) {
 	}
 }
 
-// A body is carried no further than the chart goes, however much proper
-// time it is given: it stops inside the horizon, still a body of unit mass.
+// A body must stop within the supported chart even if more proper time is
+// requested, remaining inside the horizon and unit timelike.
 func TestAdvanceStopsWhereTheChartEnds(t *testing.T) {
 	numbers := pickedNumbers(t)
 	fall := numbers.Fall
@@ -172,8 +170,8 @@ func TestAdvanceStopsWhereTheChartEnds(t *testing.T) {
 	}
 }
 
-// The anti-test: with no proper time, or less, a body stays where it is; a body already at
-// the margin is handed back as it is, inside.
+// The anti-test: with no proper time, or less, a body stays where it is;
+// a body already at the margin is handed back as it is, inside.
 func TestAdvanceWithNoTimeDoesNotMove(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)
@@ -187,7 +185,7 @@ func TestAdvanceWithNoTimeDoesNotMove(t *testing.T) {
 	}
 	at := still.Dropped(vec3(numbers.Fall.AtTheMargin))
 	moved, inside := still.Advance(at, numbers.Fall.Second)
-	// the momentum there is not a number, since nothing is still inside the
+	// The momentum there is not a number, since nothing is still inside the
 	// horizon, so the places are compared and not the rays
 	if moved.Position() != at.Position() || !inside {
 		t.Errorf("a body at the margin moved to %v, inside %v",
@@ -219,7 +217,7 @@ func TestAdvanceDoesNotSpendMoreTimeThanItIsGiven(t *testing.T) {
 
 // Light from a hundred M aimed at the hole plunges, aimed away escapes, and
 // aimed to miss escapes; matter going round on a circle circulates, and a
-// ray that is not a number does the same.
+// ray that is not a number is called circulating too.
 func TestClassifyRay(t *testing.T) {
 	numbers := pickedNumbers(t)
 	still := build(t, numbers.Holes.Still)

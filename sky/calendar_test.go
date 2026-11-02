@@ -27,16 +27,17 @@ func onDay(test *testing.T, date dated) sky.Instant {
 		sky.TT())
 }
 
-// Every date meeus gives is the julian date he gives, to the thousandth
-// of a day his figures are given to: his examples 7.a and 7.b and the
-// dates of his table 7.a. Before 1582 october 15 the calendar is the
-// julian one, as meeus has it.
+// Every date Meeus gives is the Julian date he gives, to the thousandth of a
+// day his figures are given to: his examples 7.a and 7.b and the dates of his
+// table 7.a. Before 1582 October 15 the calendar is the Julian one, as Meeus
+// has it.
 //
-// Each was read on 2026-10-31 as sonia keys transcribes it, with
-// meeus's pages 61 and 62, in her go implementation of the book
-// (github.com/soniakeys/meeus, mit licence, commit bfbd9ac; cited, not
-// copied: none of her code is here). Three, and the reform, were read
-// again in his earlier astronomical formulae for calculators (1980).
+// Each was read on 2026-10-31 as sonia keys transcribes it, with Meeus's pages
+// 61 and 62, in her go implementation of the book (github.com/soniakeys/meeus,
+// mit licence, commit bfbd9ac; cited, not copied: none of her code is here).
+//
+// Three, and the reform, were read again in his earlier astronomical formulae
+// for calculators (1980).
 func TestADateIsTheJulianDateMeeusGives(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, date := range numbers.MeeusDates {
@@ -49,9 +50,9 @@ func TestADateIsTheJulianDateMeeusGives(test *testing.T) {
 	}
 }
 
-// A julian date goes back to the calendar date it came from: meeus's
-// example 7.c, p. 64, as sonia keys transcribes it (cited above), and
-// the rest of his dates.
+// A Julian date goes back to the calendar date it came from: Meeus's example
+// 7.c, p. 64, as sonia keys transcribes it (cited above), and the rest of his
+// dates.
 func TestAJulianDateGoesBackToItsDate(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, date := range numbers.MeeusDates {
@@ -74,9 +75,31 @@ func TestAJulianDateGoesBackToItsDate(test *testing.T) {
 	}
 }
 
-// The anti-test: dates that are no date are refused and give no instant:
-// the ten days the gregorian calendar skipped, a thirteenth month,
-// february the thirtieth, a time past the day, and no scale.
+// Every calendar's leap year has a february 29: a gregorian fourth year,
+// the first gregorian leap year, a gregorian fourth century, and a
+// julian leap year before year one.
+func TestEveryLeapYearHasAFebruary29(test *testing.T) {
+	for _, leap := range clockNumbers(test).LeapDays {
+		at(test, leap, sky.TT())
+	}
+}
+
+// A date goes to its instant and back to itself: the last julian day and
+// the first gregorian one, a leap day and the day after it, and the end
+// of a february with no leap day.
+func TestADateGoesToItsInstantAndBack(test *testing.T) {
+	for _, date := range clockNumbers(test).RoundTrips {
+		year, month, day, _, _, _ := at(test, date, sky.TT()).Calendar()
+		if year != date.Year || month != date.Month || day != date.Day {
+			test.Errorf("%d-%d-%d came back %d-%d-%d", date.Year,
+				date.Month, date.Day, year, month, day)
+		}
+	}
+}
+
+// The anti-test: dates that are no date are refused and give no instant: the
+// ten days the Gregorian calendar skipped, a thirteenth month, February the
+// thirtieth, a time past the day, and no scale.
 func TestADateThatIsNoDateIsRefused(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, wrong := range numbers.NotDates {

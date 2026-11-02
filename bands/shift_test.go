@@ -58,8 +58,7 @@ func slidesAlong(test *rapid.T) {
 	}
 }
 
-// Twice the light is twice as strong in every band. The libtheme test
-// checked this through the luminance of daylight; that stays behind.
+// Twice the light is twice as strong in every band.
 func TestTwiceTheLight(test *testing.T) {
 	light := bands.Split(pickedNumbers(test).Spectrum)
 	first, last := light.Span()

@@ -7,15 +7,15 @@ import (
 	"github.com/janearc/celestial/radiation"
 )
 
-// Flux is a flux density and its error, held in W m^-2 Hz^-1.
+// Flux stores spectral flux density and its uncertainty in W m^-2 Hz^-1.
 type Flux struct{ density, sigma float64 }
 
-// InSI is the flux density and its error in W m^-2 Hz^-1.
+// InSI returns flux density and uncertainty in W m^-2 Hz^-1.
 func (flux *Flux) InSI() (density, sigma float64) {
 	return flux.density, flux.sigma
 }
 
-// InJanskys is the flux density and its error in janskys.
+// InJanskys returns flux density and uncertainty in janskys.
 func (flux *Flux) InJanskys() (density, sigma float64) {
 	perJansky := radiation.JanskyToSI(oneJansky)
 	return flux.density / perJansky, flux.sigma / perJansky
@@ -31,26 +31,16 @@ const nothing = 0.0
 // Defined by float64: its least normal number, 2^-1022.
 const leastNormal = 0x1p-1022
 
-// Flux is the flux density a magnitude in one of the survey's bands
-// stands for, and its error: F0 times 100 to the minus m over 5, where
-// F0 is the band's zero point.
+// Flux converts a magnitude and uncertainty in a survey band using F = F0 *
+// 100^(-m/5), with the band’s published zero point F0.
 //
-// The error is carried to first order: dF/dm is minus F times the
-// natural log of 100, over 5. That holds when the error is small, as it
-// is for a detection; an error near a magnitude makes a lopsided flux
-// error this does not describe.
+// Uncertainty is propagated to first order using dF/dm = -F*ln(100)/5. That
+// approximation suits small detection errors; uncertainty near one magnitude
+// produces an asymmetric flux interval this type cannot express.
 //
-// Flux refuses, and then gives no flux:
-//   - a band the survey does not have
-//   - an error below nothing
-//   - a magnitude whose flux a float64 cannot hold: too bright, past the
-//     largest, or too faint, below the least normal, where it would lose
-//     its digits
-//   - an error whose flux error a float64 cannot hold
-//
-// A magnitude that is not a number, or is either infinity, gives a flux
-// outside that range, and an error that is not a number is not at least
-// nothing, so they are refused with them.
+// Unknown bands, negative or NaN uncertainty, nonfinite magnitude, and fluxes
+// outside float64’s normal range return an error. The propagated uncertainty
+// must also be representable.
 func (survey *Survey) Flux(band string, magnitude,
 	magnitudeError float64) (*Flux, error) {
 	zero, held := survey.zeros[band]

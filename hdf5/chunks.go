@@ -3,6 +3,7 @@ package hdf5
 import (
 	"bytes"
 	"compress/zlib"
+	"fmt"
 	"io"
 	"slices"
 )
@@ -18,26 +19,26 @@ const (
 	rowAxes     = 2 // defined: the rows stop one short of the last axis
 )
 
-// rawChunked reads a chunked dataset: every chunk named by the B-tree is
-// read, unfiltered and placed in the result. IV.A.2.i chunked storage,
-// III.A.1 node type 1, IV.A.2.l.
+// rawChunked reads each indexed chunk, reverses its filters, and places it in
+// the result (IV.A.2.i, III.A.1 node type 1, and IV.A.2.l).
 //
-// It refuses a dataset with a chunk the tree does not name, whose bytes
-// would be the fill value; and, before any chunk is read, chunks or a
-// dataset of more elements than a uint64 counts or more bytes than a
-// file holds.
+// The index must cover the dataset; missing fill-value chunks are not
+// implemented. Element counts must fit uint64, and declared byte counts must
+// fit the file before any chunk allocation or read.
 func (set *dataset) rawChunked(from *source) ([]byte, error) {
 	elements, counted := elementCount(set.layout.chunk)
 	chunkBytes, fits := byteCount(elements, set.kind.size)
 	if !counted || !fits {
-		return nil, refuse(errCorrupt, set.layout.at, "IV.A.2.i",
-			"chunks of %v elements are too large", set.layout.chunk)
+		return nil, fmt.Errorf("hdf5: file is damaged: chunks of %v "+
+			"elements are too large, at address %#x (spec "+
+			"IV.A.2.i)", set.layout.chunk, set.layout.at)
 	}
 	total, fits := byteCount(set.count, set.kind.size)
 	if !fits {
-		return nil, refuse(errCorrupt, set.layout.at, "IV.A.2.i",
-			"%d elements of %d bytes are more than a file holds",
-			set.count, set.kind.size)
+		return nil, fmt.Errorf("hdf5: file is damaged: %d elements "+
+			"of %d bytes are more than a file holds, at address "+
+			"%#x (spec "+
+			"IV.A.2.i)", set.count, set.kind.size, set.layout.at)
 	}
 	if set.count == noBytes {
 		return []byte{}, nil
@@ -66,9 +67,8 @@ func (set *dataset) rawChunked(from *source) ([]byte, error) {
 	return out, nil
 }
 
-// checkChunks refuses a set of chunk entries that does not cover the
-// dataset exactly once: an entry off the chunk grid, a chunk named
-// twice, or a chunk of the grid that is not named.
+// checkChunks requires exact grid coverage: no off-grid entries, duplicate
+// chunks, or missing chunks.
 func (set *dataset) checkChunks(entries []chunkEntry) error {
 	grid := make([]uint64, len(set.shape))
 	want := uint64(oneChunk)
@@ -88,30 +88,30 @@ func (set *dataset) checkChunks(entries []chunkEntry) error {
 			index = index*grid[axis] + at/across
 		}
 		if seen[index] {
-			return refuse(errCorrupt, entry.at, "III.A.1",
-				"the chunk at %v is named twice", entry.origin)
+			return fmt.Errorf("hdf5: file is damaged: the chunk "+
+				"at %v is named twice, at address %#x (spec "+
+				"III.A.1)", entry.origin, entry.at)
 		}
 		seen[index] = true
 	}
 	if uint64(len(seen)) != want {
-		return refuse(errUnsupported, set.layout.address, "III.A.1",
-			"%d of the %d chunks are stored; the fill value of "+
-				"the rest is not read", len(seen), want)
+		return fmt.Errorf("hdf5: part of the format not read: %d of "+
+			"the %d chunks are stored; the fill value of the "+
+			"rest is not read, at address %#x (spec "+
+			"III.A.1)", len(seen), want, set.layout.address)
 	}
 	return nil
 }
 
-// offGrid is the refusal of a chunk entry that is not on the dataset's
-// grid of chunks.
+// offGrid reports a chunk origin outside the dataset’s chunk grid.
 func (set *dataset) offGrid(entry chunkEntry) error {
-	return refuse(errCorrupt, entry.at, "III.A.1",
-		"a chunk at %v is not on the grid of %v chunks of %v",
-		entry.origin, set.shape, set.layout.chunk)
+	return fmt.Errorf("hdf5: file is damaged: a chunk at %v is not on "+
+		"the grid of %v chunks of %v, at address %#x (spec "+
+		"III.A.1)", entry.origin, set.shape, set.layout.chunk, entry.at)
 }
 
-// unfilter reads one chunk's stored bytes and undoes the pipeline, last
-// filter first, so that the chunk comes out as so many bytes of
-// elements.
+// unfilter reads stored chunk bytes and reverses the filter pipeline in reverse
+// order to recover element bytes.
 func (set *dataset) unfilter(from *source, entry chunkEntry,
 	chunkBytes uint64) ([]byte, error) {
 	data, err := from.read(entry.address, uint64(entry.stored), "IV.B")
@@ -122,9 +122,10 @@ func (set *dataset) unfilter(from *source, entry chunkEntry,
 		return set.sized(data, chunkBytes, entry)
 	}
 	if entry.mask != noFilter {
-		return nil, refuse(errUnsupported, entry.at, "III.A.1",
-			"filter mask %#x: a chunk with filters skipped",
-			entry.mask)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"filter mask %#x: a chunk with filters skipped, at "+
+			"address %#x (spec "+
+			"III.A.1)", entry.mask, entry.at)
 	}
 	backward := slices.Clone(set.filters.ids)
 	slices.Reverse(backward)
@@ -143,46 +144,45 @@ func (set *dataset) unfilter(from *source, entry chunkEntry,
 	return set.sized(data, chunkBytes, entry)
 }
 
-// sized checks that a chunk, unfiltered, is exactly the bytes of a whole
-// chunk of elements.
+// sized requires the decoded bytes of one complete chunk.
 func (set *dataset) sized(data []byte, want uint64,
 	entry chunkEntry) ([]byte, error) {
 	if uint64(len(data)) != want {
-		return nil, refuse(errCorrupt, entry.at, "IV.B",
-			"the chunk at %v is %d bytes unfiltered, %d were "+
-				"expected", entry.origin, len(data), want)
+		return nil, fmt.Errorf("hdf5: file is damaged: the chunk at "+
+			"%v is %d bytes unfiltered, %d were expected, at "+
+			"address %#x (spec "+
+			"IV.B)", entry.origin, len(data), want, entry.at)
 	}
 	return data, nil
 }
 
-// inflate undoes the deflate filter, whose output is zlib's format
-// (IV.A.2.l, filter id 1). It reads no more than a limit of bytes: a
-// stream that would give more is damaged.
+// inflate reverses the zlib deflate filter (IV.A.2.l, filter ID 1). Output
+// beyond the declared byte limit is corrupt data.
 func inflate(data []byte, limit uint64, entry chunkEntry) ([]byte, error) {
 	stream, err := zlib.NewReader(bytes.NewReader(data))
 	if err != nil {
-		return nil, refuse(errCorrupt, entry.at, "IV.A.2.l",
-			"deflate stream of the chunk at %v: %v", entry.origin,
-			err)
+		return nil, fmt.Errorf("hdf5: file is damaged: deflate "+
+			"stream of the chunk at %v: %v, at address %#x (spec "+
+			"IV.A.2.l)", entry.origin, err, entry.at)
 	}
 	bounded := io.LimitReader(stream, int64(limit)+beyondLimit)
 	out, err := io.ReadAll(bounded)
 	if err != nil {
-		return nil, refuse(errCorrupt, entry.at, "IV.A.2.l",
-			"deflate stream of the chunk at %v: %v", entry.origin,
-			err)
+		return nil, fmt.Errorf("hdf5: file is damaged: deflate "+
+			"stream of the chunk at %v: %v, at address %#x (spec "+
+			"IV.A.2.l)", entry.origin, err, entry.at)
 	}
 	if uint64(len(out)) > limit {
-		return nil, refuse(errCorrupt, entry.at, "IV.A.2.l",
-			"deflate stream of the chunk at %v gives more than "+
-				"%d bytes", entry.origin, limit)
+		return nil, fmt.Errorf("hdf5: file is damaged: deflate "+
+			"stream of the chunk at %v gives more than %d bytes, "+
+			"at address %#x (spec "+
+			"IV.A.2.l)", entry.origin, limit, entry.at)
 	}
 	return out, nil
 }
 
-// place copies one chunk, whole, into the result at the chunk's origin.
-// A chunk on the far edge of the dataset reaches past it, and only the
-// part inside is copied.
+// place copies a decoded chunk at its dataset origin, clipping partial chunks
+// at the dataset’s far edges.
 func (set *dataset) place(out, chunk []byte, origin []uint64) {
 	rank := len(set.shape)
 	size := uint64(set.kind.size)
@@ -210,9 +210,8 @@ func (set *dataset) place(out, chunk []byte, origin []uint64) {
 	}
 }
 
-// next steps an index to the next row of a chunk, the last dimension
-// being the row itself and so not stepped. It says false when the rows
-// are done.
+// next advances to the next chunk row, excluding the last dimension whose
+// elements form the row. It returns false after the final row.
 func next(index, chunk []uint64) bool {
 	for axis := len(index) - rowAxes; axis >= firstPlace; axis-- {
 		index[axis]++

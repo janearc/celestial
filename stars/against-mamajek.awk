@@ -1,18 +1,17 @@
-# against-mamajek.awk: holds every row of stars/mainsequence.txt to the
-# row of the same type in mamajek's table, as game run sources fetches it.
-# game run extract runs it:
+# Compare every row in stars/mainsequence.txt with the same spectral type
+# in Mamajek’s published table. game run sources fetches the reference;
+# game run extract invokes this check:
 #
 #   awk -f stars/against-mamajek.awk \
 #     cited-sources/mamajek-dwarf-sequence-2022.txt stars/mainsequence.txt
 #
-# mainsequence.txt says its rows are mamajek's, unchanged, so each of its
-# mass, temperature, luminosity and radius must be the source's text,
-# character for character. it prints every row that differs, or is
-# missing from the source, and fails if there is one.
+# The embedded table claims unchanged source values. Mass, temperature,
+# luminosity, and radius must therefore match character for character.
+# Report missing or differing rows and fail if any are found.
 
-# the source's first table: its columns found by name from its header,
-# so a column moved in a later version is still found, and its rows kept
-# until the second table's header.
+# Read the first source table, finding columns by header name so a moved
+# column does not silently change its meaning. Stop collecting at the
+# second table header.
 FNR == NR && /^#SpT/ {
 	headers++
 	if (headers == 1) {
@@ -34,7 +33,7 @@ FNR == NR {
 	next
 }
 
-# celestial's rows: type, mass, temperature, luminosity, radius.
+# Celestial columns: spectral type, mass, temperature, luminosity, radius.
 /^#/ || NF == 0 { next }
 {
 	rows++

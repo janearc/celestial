@@ -38,12 +38,19 @@ type expected struct {
 	EveryRead   reads      `json:"every read"`
 	Signature   int        `json:"signature length"`
 	TooShort    string     `json:"shorter than a signature"`
+	Superblock  alone      `json:"superblock"`
 	Mutations   []mutation `json:"mutations"`
 }
 
+// alone is a superblock's length, and where its end of file address is.
+type alone struct {
+	Length int `json:"length"`
+	EndAt  int `json:"end of file at"`
+}
+
 // mutation is bytes of the real file changed at offsets; how the file is
-// then read, and at what path; and the cause and the section of the
-// specification its refusal must name.
+// then read, and at what path; and the cause, the section of the
+// specification and the address its refusal must name.
 type mutation struct {
 	Why     string   `json:"why"`
 	Changes []change `json:"changes"`
@@ -51,6 +58,7 @@ type mutation struct {
 	Path    string   `json:"path"`
 	Cause   string   `json:"cause"`
 	Section string   `json:"section"`
+	Address uint64   `json:"address"`
 }
 
 // reads is what the property reads of the file: groups' members,
@@ -91,7 +99,7 @@ func fileBytes(test *testing.T) []byte {
 	return raw
 }
 
-// opened is the hdf5 file of some bytes, or the test stops.
+// opened is the HDF5 file of some bytes, or the test stops.
 func opened(test *testing.T, raw []byte) *hdf5.File {
 	test.Helper()
 	size := int64(len(raw))
@@ -164,8 +172,8 @@ func integer(test *testing.T, values *hdf5.Values) int64 {
 	return got[firstValue]
 }
 
-// The file says what its name says: H1, from gps 1126259447, for 32
-// seconds; and its utc start is that gps time's, 17 s earlier.
+// The file says what its name says: H1, from GPS 1126259447, for 32 seconds;
+// and its UTC start is that GPS time's, 17 s earlier.
 func TestTheMetadataIsTheFilesName(test *testing.T) {
 	want := expectations(test)
 	file := opened(test, fileBytes(test))
@@ -187,9 +195,9 @@ func TestTheMetadataIsTheFilesName(test *testing.T) {
 	}
 }
 
-// The strain is the duration times the rate in samples, as its own
-// attributes say: from its gps start, a sample every 1/4096 s; each is a
-// number, and none is larger than a strain can be.
+// The strain is the duration times the rate in samples, as its own attributes
+// say: from its GPS start, a sample every 1/4096 s; each is a number, and none
+// is larger than a strain can be.
 func TestTheStrainIsWhole(test *testing.T) {
 	want := expectations(test)
 	file := opened(test, fileBytes(test))

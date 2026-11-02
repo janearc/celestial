@@ -1,18 +1,39 @@
 package sky_test
 
 import (
+	"fmt"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/janearc/celestial/measure"
+	"github.com/janearc/celestial/research"
 	"github.com/janearc/celestial/sky"
 )
 
-// Greenwich mean sidereal time on 1987 april 10 at 19h21m ut is
-// 8h34m57.0896s: meeus, astronomical algorithms, example 12.b, p. 89,
-// read on 2026-10-31 as sonia keys transcribes it in her go
-// implementation of the book (github.com/soniakeys/meeus, mit licence,
-// commit bfbd9ac). Cited, not copied: none of her code is here.
+// radiusName is the research data's name for the earth's mean radius,
+// where sky's places begin, below their own centre. Defined by the data.
+const radiusName = "earth-mean-radius-m"
+
+// The anti-test: a height below the earth's centre is refused, and the
+// refusal says where places begin: the earth's radius below the sea.
+func TestARefusedHeightSaysWherePlacesBegin(test *testing.T) {
+	below := clockNumbers(test).BelowTheCentre
+	_, err := sky.OnEarth(measure.Degrees(nought), measure.Degrees(nought),
+		measure.Metres(below))
+	lowest := fmt.Sprint(-research.Value(radiusName))
+	if err == nil || !strings.Contains(err.Error(), lowest) {
+		test.Errorf("a height of %v m: %v, which does not say %v", below,
+			err, lowest)
+	}
+}
+
+// Greenwich mean sidereal time on 1987 April 10 at 19h21m ut is 8h34m57.0896s:
+// Meeus, astronomical algorithms, example 12.b, p.
+//
+// 89, read on 2026-10-31 as sonia keys transcribes it in her go implementation
+// of the book (github.com/soniakeys/meeus, mit licence, commit bfbd9ac). Cited,
+// not copied: none of her code is here.
 func TestMeanSiderealTimeIsMeeussExample(test *testing.T) {
 	numbers := clockNumbers(test)
 	turned, err := at(test, numbers.Sidereal.At, sky.UT1()).MeanSidereal()
@@ -28,8 +49,42 @@ func TestMeanSiderealTimeIsMeeussExample(test *testing.T) {
 	}
 }
 
-// The anti-test: sidereal time is the earth's turning, so it is asked of
-// ut1 alone; ut1 is utc and a dut1 within 0.9 s, and no further.
+// A dut1 of the most the iers lets it reach, 0.9 s either way, is taken.
+func TestTheMostDUT1IsTaken(test *testing.T) {
+	numbers := clockNumbers(test)
+	civil := at(test, numbers.Sidereal.At, sky.UTC())
+	for _, most := range []float64{numbers.DUT1.Most, -numbers.DUT1.Most} {
+		if _, err := civil.UT1(measure.Seconds(most)); err != nil {
+			test.Errorf("a dut1 of %v s was refused: %v", most, err)
+		}
+	}
+}
+
+// Ten centuries from j2000 either way, greenwich mean sidereal time is
+// the iau's 1982 expression as it comes out worked with bc: there its
+// cubic term shows, well above the float's own error. The terms are the
+// code's own, so this holds the code to its expression.
+func TestMeanSiderealFarFromJ2000IsTheExpression(test *testing.T) {
+	far := clockNumbers(test).GMSTFar
+	for _, at := range far.At {
+		moment, err := sky.FromJulian(at.Julian, nought, sky.UT1())
+		if err != nil {
+			test.Fatal(err)
+		}
+		angle, err := moment.MeanSidereal()
+		if err != nil {
+			test.Fatal(err)
+		}
+		if got := angle.InDegrees(); !(math.Abs(got-at.Degrees) <=
+			far.Tolerance) {
+			test.Errorf("at julian %v gmst is %v degrees, worked %v",
+				at.Julian, got, at.Degrees)
+		}
+	}
+}
+
+// The anti-test: sidereal time is the Earth's turning, so it is asked of UT1
+// alone; UT1 is UTC and a dut1 within 0.9 s, and no further.
 func TestSiderealTimeIsAskedOfUT1(test *testing.T) {
 	numbers := clockNumbers(test)
 	civil := at(test, numbers.Sidereal.At, sky.UTC())
@@ -54,7 +109,7 @@ func TestSiderealTimeIsAskedOfUT1(test *testing.T) {
 	}
 }
 
-// washington is the us naval observatory, by meeus's example 13.b.
+// washington is the us naval observatory, by Meeus's example 13.b.
 func washington(test *testing.T) sky.Place {
 	test.Helper()
 	numbers := clockNumbers(test)
@@ -73,14 +128,15 @@ func washington(test *testing.T) sky.Place {
 	return *there
 }
 
-// Venus over washington on 1987 april 10 at 19h21m ut stands at azimuth
-// 248.034 from the north and altitude 15.125: meeus's example 13.b, p.
-// 95, read on 2026-10-31 as sonia keys transcribes it (soniakeys/meeus,
-// mit licence, commit bfbd9ac; cited, not copied), +68.034 from the south
-// and +15.125, to three decimals and with apparent sidereal time.
+// Venus over washington on 1987 April 10 at 19h21m ut stands at azimuth 248.034
+// from the north and altitude 15.125: Meeus's example 13.b, p.
 //
-// Apparent is 0.23 s off the mean; that moves these by under 0.001 deg,
-// and nutation is not held yet, so they are held to 0.002 deg.
+// 95, read on 2026-10-31 as sonia keys transcribes it (soniakeys/meeus, mit
+// licence, commit bfbd9ac; cited, not copied), +68.034 from the south and
+// +15.125, to three decimals and with apparent sidereal time.
+//
+// Apparent is 0.23 s off the mean; that moves these by under 0.001 deg, and
+// nutation is not held yet, so they are held to 0.002 deg.
 func TestVenusOverWashingtonIsMeeussExample(test *testing.T) {
 	numbers := clockNumbers(test)
 	turned, err := at(test, numbers.Sidereal.At, sky.UT1()).MeanSidereal()
@@ -118,9 +174,9 @@ func TestThePoleStandsAtTheLatitude(test *testing.T) {
 	}
 }
 
-// The anti-test: a place off the earth, a height that is no number,
-// below the earth's centre or above the highest a place stands, and a
-// direction off the sky are refused, and give nothing.
+// The anti-test: a place off the Earth, a height that is no number, below the
+// Earth's centre or above the highest a place stands, and a direction off the
+// sky are refused, and give nothing.
 func TestWhatIsNoPlaceIsRefused(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, place := range numbers.NotPlaces {

@@ -1,25 +1,25 @@
 # hole
 
-i have a lil ray tracer render thing and i think gravity is pretty cool so i
-wind up doing stuff with black holes and related pretty often. this is mstly
-an exercise in maths.
+I have a little ray tracer, and I think gravity is pretty cool, so I keep
+ending up here: black holes, bent light, and cameras falling into places
+you would not put an actual camera. Mostly, this is an exercise in maths.
 
-maths here are
-- kerr hole in kerr-schild form
-- geodesics by hamiltons equations
-- what a geodesic keeps
-- redshift
-- the frame of a camera falling in (because you *want* to see)
+The package covers:
 
-units: G and c are one; a hole of mass M has its lengths in M. the
-signature is minus, plus, plus, plus; a point is (t, x, y, z); a
-momentum is covariant. the spin axis is z.
+- Kerr geometry in Kerr–Schild coordinates.
+- Null and timelike geodesics from Hamilton’s equations.
+- Conserved quantities, their numerical drift, and redshift between observers.
+- A falling camera’s frame—because you *want* to see.
 
-the tests are the spec: [tests.md](tests.md). also [usage.md](usage.md)
-and [definitions.md](definitions.md).
+G = c = 1; mass sets the length scale. Coordinates are `(t, x, y, z)`,
+momentum is covariant, the signature is `(-, +, +, +)`, and spin is along z.
 
+Start with [usage](usage.md), consult the [API map](definitions.md), and
+read the [test guide](tests.md) for the checks behind it. The
+[roadmap](todo.md) separates current code from planned changes.
 
-# author
+## Author
 
-  jane michelle arc jmich@fastmail.nl
-  i am not a potato
+Jane Michelle Arc · jmich@fastmail.nl
+
+i am not a potato

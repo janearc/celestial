@@ -16,17 +16,17 @@ const protonsPerHelium = 4
 // of a star's mass that becomes helium on the main sequence.
 const burnedShareName = "burned-share"
 
-// burnedShare is the share of a star's mass that becomes helium while it
-// burns on the main sequence: about a tenth, picked from stellar models.
+// burnedShare is the chosen fraction of stellar mass converted to helium during
+// main-sequence burning, about one tenth.
 //
-// It is too small past about twenty suns, whose burning cores are
-// larger, so heavy stars die here up to four times too young. A
-// published table of lifetimes replaces it.
+// Above roughly twenty solar masses the fixed fraction underestimates core
+// size, shortening model lifetimes by up to a factor of four. Published
+// lifetime tracks are the intended replacement.
 func burnedShare() float64 { return research.Value(burnedShareName) }
 
-// fusionYield is the share of hydrogen's mass that becomes energy when
-// it burns to helium: what four hydrogens weigh, less one helium, over
-// the four. Neutrinos carry a little of it away.
+// fusionYield returns the fraction of hydrogen mass released by fusion: (four
+// hydrogen atoms minus one helium atom) divided by the four hydrogen atoms.
+// Neutrinos carry away some of that energy.
 func fusionYield() float64 {
 	burned := measure.Hydrogen1().Times(protonsPerHelium)
 	return burned.Minus(measure.Helium4()).Over(burned)

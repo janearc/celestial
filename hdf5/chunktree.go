@@ -1,7 +1,11 @@
 package hdf5
 
+import
+
 // treeTypeChunk is the node type of a B-tree that indexes the chunks of
 // a dataset. Defined by III.A.1.
+"fmt"
+
 const treeTypeChunk = 1
 
 // chunkKeyFixed is the part of a chunk B-tree key before the chunk's
@@ -17,9 +21,8 @@ const (
 	alongElement  = 0 // defined: the last offset, along the element, is 0
 )
 
-// chunkEntry is one chunk of a dataset as the B-tree describes it: where
-// its stored bytes are, how many, which filters were skipped, and where
-// the chunk sits in the dataset.
+// chunkEntry records stored address, byte count, skipped-filter mask, and
+// dataset origin for one indexed chunk.
 type chunkEntry struct {
 	address uint64
 	stored  uint32
@@ -31,10 +34,9 @@ type chunkEntry struct {
 	at uint64
 }
 
-// chunkEntries reads the chunk B-tree node at an address, and below it,
-// and gives the entry of every chunk in the order of the tree. rank is
-// the dataset's number of dimensions; want is the level the node must be
-// at, or noLevel. III.A.1.
+// chunkEntries traverses a chunk B-tree at address and returns entries in tree
+// order (III.A.1). rank is dataset dimensionality; want requires a node level
+// unless set to noLevel.
 func (from *source) chunkEntries(at uint64, want,
 	rank int) ([]chunkEntry, error) {
 	node, err := from.readTreeNode(at, treeTypeChunk, want)
@@ -74,10 +76,9 @@ func (from *source) chunkEntries(at uint64, want,
 	return found, nil
 }
 
-// chunkKey reads a key of a chunk B-tree, III.A.1 node type 1: the
-// chunk's stored size, the filter mask, and the offsets of the chunk in
-// the dataset, one more than the dataset's rank. It refuses a last
-// offset that is not nothing, and then gives none.
+// chunkKey parses stored size, filter mask, and rank+1 offsets from a
+// chunk-index key (III.A.1, node type 1). The final offset addresses the
+// element byte dimension and must be zero.
 func chunkKey(key []byte, rank int, at uint64) (*chunkEntry, error) {
 	walk := &cursor{data: key}
 	entry := chunkEntry{stored: walk.u32(), mask: walk.u32(), at: at}
@@ -85,9 +86,9 @@ func chunkKey(key []byte, rank int, at uint64) (*chunkEntry, error) {
 		entry.origin = append(entry.origin, walk.u64())
 	}
 	if last := walk.u64(); last != alongElement {
-		return nil, refuse(errCorrupt, at, "III.A.1",
-			"the offset along the element is %d, it is always 0",
-			last)
+		return nil, fmt.Errorf("hdf5: file is damaged: the offset "+
+			"along the element is %d, it is always 0, at address "+
+			"%#x (spec III.A.1)", last, at)
 	}
 	return &entry, nil
 }

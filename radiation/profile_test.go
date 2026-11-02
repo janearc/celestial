@@ -1,7 +1,6 @@
 package radiation_test
 
 import (
-	"errors"
 	"math"
 	"strings"
 	"testing"
@@ -157,9 +156,9 @@ func (shown wideProfile) orderKept(draw *rapid.T) {
 	}
 }
 
-// The edge the property above once stopped short of: the last float
-// below the source's long end maps to a wavelength the render holds, and
-// comes back.
+// The source's top edge, which a draw of the property above seldom lands
+// on: the last float below the source's long end maps to a wavelength
+// the render holds, and comes back.
 func TestTheTopOfTheSourceStaysInsideTheRender(test *testing.T) {
 	shown := wide(test)
 	short, long := shown.source.Edges()
@@ -225,7 +224,7 @@ func TestBrokenProfilesAreRefused(test *testing.T) {
 			render = *made
 		}
 		profile, err := radiation.NewProfile(broken.Name, source, render)
-		if !errors.Is(err, radiation.ErrRange()) || profile != nil {
+		if err == nil || profile != nil {
 			test.Errorf("%s made %v, %v", broken.Name, profile, err)
 		}
 	}

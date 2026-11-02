@@ -1,15 +1,12 @@
-// Package radiation speaks of radiation by its wavelength in nanometres,
-// from gamma rays to radio. It moves between wavelength, energy, frequency
-// and length in metres.
+// Package radiation describes light by wavelength, from gamma rays to radio,
+// and converts between nanometres, metres, frequency, and photon energy.
 //
-// It names the ranges of radiation under iso 21348's names, and the fermi
-// mission's. The iso ranges were never read against the standard, which
-// is not open; they are as libtheme-css typed them, and some overlap, as
-// each range's doc says.
+// Named ranges follow ISO 21348 terminology and the Fermi mission’s coverage.
+// The published ISO standard was not read. The ranges were checked against
+// Tobiska and Nusinov’s account of its draft; range comments record overlaps
+// and differences from the inherited libtheme-css values.
 //
-// A Profile maps one range of wavelengths onto another, which is what a
-// false color profile is made of.
-//
-// What the radiation looks like is not here. That is a colour, and colour
-// is libtheme's.
+// Profile maps wavelength intervals for false-colour use. The resulting colour
+// still belongs to libtheme; this package determines where each wavelength
+// goes, not how it looks on a screen.
 package radiation

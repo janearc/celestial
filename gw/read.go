@@ -24,11 +24,11 @@ const (
 	unitSuffix    = "_unit"
 )
 
-// fields is an object of the centre's json, each value as it was written.
+// fields retains JSON members in their original encoded form.
 type fields map[string]json.RawMessage
 
-// read decodes the field of a key into a place, leaving the place as it
-// was when the key is absent or null.
+// read decodes a member into its destination, leaving the destination unchanged
+// when the member is absent or null.
 func (object fields) read(key string, into any) error {
 	written, held := object[key]
 	if !held {
@@ -40,9 +40,8 @@ func (object fields) read(key string, into any) error {
 	return nil
 }
 
-// readEvent is one event of the centre's json, its estimates first from the
-// event's own preferred values and then from its preferred parameter
-// estimation, for any the first does not give.
+// readEvent prefers estimates on the event itself, then fills missing
+// parameters from the preferred parameter-estimation record.
 func readEvent(key string, object fields) (*Event, error) {
 	event := Event{}
 	var seconds *float64
@@ -70,8 +69,8 @@ func readEvent(key string, object fields) (*Event, error) {
 	return &event, nil
 }
 
-// estimatedFrom adds, from the event's preferred parameter estimation,
-// every estimate the event's own values do not give.
+// estimatedFrom fills parameters absent from the event’s own estimates using
+// its preferred parameter-estimation record.
 func (event *Event) estimatedFrom(object fields) error {
 	var pipelines map[string]fields
 	if err := object.read(parametersKey, &pipelines); err != nil {
@@ -102,8 +101,8 @@ func (event *Event) estimatedFrom(object fields) error {
 	return nil
 }
 
-// readEstimates is every estimate an object gives: each value that has a
-// unit beside it, with the bounds beside it too.
+// readEstimates reads values with accompanying unit fields and any reported
+// credible-interval offsets.
 func readEstimates(object fields) (map[string]*Estimate, error) {
 	estimates := map[string]*Estimate{}
 	for key := range object {
@@ -125,14 +124,12 @@ func readEstimates(object fields) (map[string]*Estimate, error) {
 // nothing is no reach at all. Defined by the scale.
 const nothing = 0.0
 
-// readEstimate is a parameter's estimate in si, from its value, its
-// bounds and its unit, or none when the centre left the value blank.
+// readEstimate converts a value, bounds, and unit to an SI estimate. Blank
+// values remain absent. The centre reports bounds as signed offsets, with the
+// lower offset nonpositive.
 //
-// The centre writes each bound as how far from the value it lies, the
-// lower one below nothing. returns nil and error for:
-//   - a value with no unit
-//   - a unit gw has no conversion for
-//   - a bound on the wrong side of the value
+// A missing unit, unknown conversion, or bound on the wrong side returns an
+// error.
 func readEstimate(object fields, parameter string) (*Estimate, error) {
 	var value, lower, upper *float64
 	var unit *string
@@ -160,7 +157,7 @@ func readEstimate(object fields, parameter string) (*Estimate, error) {
 	if lower == nil || upper == nil {
 		return &estimate, nil
 	}
-	// the centre writes each bound as an offset from the value, the lower
+	// The centre writes each bound as an offset from the value, the lower
 	// one below nothing; a reach is how far the interval runs each way
 	reachBelow, reachAbove := -*lower, *upper
 	if reachBelow < nothing || reachAbove < nothing {

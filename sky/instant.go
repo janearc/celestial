@@ -5,28 +5,26 @@ import (
 	"math"
 )
 
-// secondsADay is a day of tai, tt and tdb, and of utc without a leap
-// second. Defined by the si: a day of 86400 seconds.
+// secondsADay is a day of TAI, TT and TDB, and of UTC without a leap second.
+// Defined by the SI: a day of 86400 seconds.
 const secondsADay = 86400.0
 
-// mjdZero is the julian date at the start of modified julian day
-// nought: 1858 november 17, 0h. Defined by the modified julian date.
+// mjdZero is the Julian date at the start of modified Julian day zero: 1858
+// November 17, 0h. Defined by the modified Julian date.
 const mjdZero = 2400000.5
 
-// Instant is a moment on a scale, held in two parts so none of its
-// resolution is lost: a whole modified julian day, and how far through
-// that day it is, from nought up to one. On a utc day ending in a leap
-// second the day is 86401 s, and the fraction is of that.
+// Instant stores a time scale, whole modified Julian day, and fraction of that
+// day. A UTC leap-second day has 86401 seconds; its fraction is measured
+// against that longer day.
 type Instant struct {
 	scale Scale
 	day   int64
 	part  float64
 }
 
-// FromJulian is the instant at a julian date given in two parts whose
-// sum is the date; one part may carry it all and the other nought.
-// returns nil and error for a scale sky does not know, or a part with
-// more days than a float64 counts exactly.
+// FromJulian constructs an instant from two parts whose sum is a Julian date.
+// Either part may hold the whole date. It rejects unknown scales and parts
+// outside float64’s exact whole-day counting range.
 func FromJulian(whole, fraction float64, scale Scale) (*Instant, error) {
 	days := math.Floor(whole - mjdZero)
 	if !scale.known() || !countable(days) || !countable(fraction) {
@@ -39,25 +37,24 @@ func FromJulian(whole, fraction float64, scale Scale) (*Instant, error) {
 	return &moment, nil
 }
 
-// Julian is the instant's julian date in two parts: the julian date of
-// the start of its day, and the fraction of the day since.
+// Julian returns two parts: the Julian date at the start of the day and the
+// fraction elapsed since then.
 func (moment Instant) Julian() (whole, fraction float64) {
 	return float64(moment.day) + mjdZero, moment.part
 }
 
-// Scale is the clock the instant is on.
+// Scale returns the instant’s time scale.
 func (moment Instant) Scale() Scale { return moment.scale }
 
-// settled is a day and a fraction with the whole days moved out of the
-// fraction, on a scale whose days are all one length.
+// settled normalizes a day and fraction on a uniform-day scale, carrying whole
+// days out of the fraction.
 func settled(scale Scale, day int64, part float64) Instant {
 	whole := math.Floor(part)
 	day += int64(whole)
 	return Instant{scale: scale, day: day, part: part - whole}
 }
 
-// after is the instant so many seconds later, on a scale whose days are
-// all one length.
+// after shifts an instant by seconds on a uniform-day scale.
 func (moment Instant) after(seconds float64) Instant {
 	return settled(moment.scale, moment.day,
 		moment.part+seconds/secondsADay)

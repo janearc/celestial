@@ -102,14 +102,14 @@ func near(got, published, share float64) bool {
 	return math.Abs(got-published) <= share*math.Abs(published)
 }
 
-// eitherSign asks math.IsInf about both infinities. Defined by math.
-const eitherSign = 0
+// upward asks math.Inf for the endless above. Defined by math.Inf.
+const upward = 1
 
-// The anti-test: a star refuses what is no star's mass or no star's
-// age, a NaN or an endless one too, and then gives no star.
+// The anti-test: what is no star's mass or no star's age, a NaN or an
+// endless one among them, is refused, and gives no star.
 func TestAStarRefusesWhatIsNotAStar(test *testing.T) {
 	refused := pickedNumbers(test).Refused
-	for _, none := range []float64{math.NaN(), math.Inf(eitherSign)} {
+	for _, none := range []float64{math.NaN(), math.Inf(upward)} {
 		refused = append(refused, birth{Why: "no number", Suns: none,
 			Years: pickedNumbers(test).Sun.Years},
 			birth{Why: "no number of years", Suns: pickedNumbers(test).
@@ -125,7 +125,17 @@ func TestAStarRefusesWhatIsNotAStar(test *testing.T) {
 	}
 }
 
-// The sun at its age is burning, at its temperature, and shines a sun.
+// A star as old as the universe is the oldest made: its age at the
+// universe's own is taken.
+func TestAStarAsOldAsTheUniverseIsMade(test *testing.T) {
+	sun := pickedNumbers(test).Sun
+	if _, err := stars.NewStar(measure.SolarMasses(sun.Suns),
+		measure.Cosmos()); err != nil {
+		test.Errorf("a star as old as the universe was refused: %v", err)
+	}
+}
+
+// The Sun at its age is burning, at its temperature, and shines a sun.
 func TestTheSunIsTheSun(test *testing.T) {
 	want := pickedNumbers(test).Sun
 	sun := born(test, want.birth)
@@ -146,8 +156,7 @@ func TestTheSunIsTheSun(test *testing.T) {
 	}
 }
 
-// The sun burns for about ten billion years: burning at nine, ended at
-// eleven.
+// The Sun burns for about ten billion years: burning at nine, ended at eleven.
 func TestTheSunBurnsForAboutTenBillionYears(test *testing.T) {
 	numbers := pickedNumbers(test)
 	if life := born(test, numbers.SunBurning).Life(); life !=
@@ -224,18 +233,16 @@ func TestTheEndedGiveNoLight(test *testing.T) {
 // nothing is no amount at all. Defined by the scale.
 const nothing = 0.0
 
-// The property and its anti-test: any mass the main sequence reaches
-// makes a star that, newly born, is burning, and of two such masses the
-// heavier is the brighter; and any mass just past either end of the
-// table, which the fixed refusals stand well clear of, is refused and
-// gives no star.
+// The property and anti-test: every supported mass produces a newly burning
+// star; outside the table, construction fails. Larger masses should be brighter
+// except in the documented nonmonotonic stretch.
 //
-// Heavier is brighter is not held when both masses fall between A9V's
-// 1.75 suns and A2V's 1.98. Mamajek's published masses rise twice down
-// the sequence there, so in mass order his table dims twice. The rows
-// are kept as published, and this test gives way instead: a decision of
-// 2026-10-31, to be reviewed. The reasoning is in stars.json, "out of
-// order about".
+// Between A9V’s 1.75 and A2V’s 1.98 solar masses, Mamajek’s published masses
+// reverse order twice.
+//
+// Sorting by mass then reverses luminosity twice. The rows remain unchanged;
+// the property excludes pairs both in that interval. This 2026-10-31 choice
+// remains reviewable, with reasoning in stars.json under [out of order about].
 func TestEveryMassOnTheSequenceBurnsAndHeavierShinesMore(test *testing.T) {
 	numbers := pickedNumbers(test)
 	ends, odd := numbers.Sequence, numbers.OutOfOrder
@@ -317,10 +324,9 @@ func TestAStarBetweenTwoRowsIsBetweenThem(test *testing.T) {
 	}
 }
 
-// The anti-test: age moves a star only from one part of its life to the
-// next. While it burns, its light, size and heat are its birth's: the
-// sun newly born and the sun at its own age shine alike here, so age
-// cannot have crept into how a star shines.
+// The anti-test: age selects a life stage, not gradual evolution within the
+// current burning model. A newborn Sun and one at solar age have identical
+// luminosity, radius, and temperature here.
 func TestAgeMovesOnlyThePartOfLife(test *testing.T) {
 	numbers := pickedNumbers(test)
 	newborn := born(test, birth{Suns: numbers.Sun.Suns})

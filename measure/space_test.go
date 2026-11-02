@@ -23,13 +23,24 @@ type span struct{ Least, Most float64 }
 
 // spaced is the numbers space's tests use, from testdata/space.json.
 type spaced struct {
-	ThreeFour   three   `json:"three four"`
-	East        three   `json:"east"`
-	Five        float64 `json:"five"`
-	Along       float64 `json:"along"`
-	Here        three   `json:"here"`
-	There       three   `json:"there"`
-	NoWays      []three `json:"no ways"`
+	ThreeFour three   `json:"three four"`
+	East      three   `json:"east"`
+	Five      float64 `json:"five"`
+	Along     float64 `json:"along"`
+	Here      three   `json:"here"`
+	There     three   `json:"there"`
+	NoWays    []three `json:"no ways"`
+	Beyond    []three `json:"beyond squaring"`
+	Every     struct {
+		By      three   `json:"by m"`
+		Other   three   `json:"other m"`
+		Dot     float64 `json:"dot m2"`
+		Square  three   `json:"square m"`
+		Moving  three   `json:"moving km/s"`
+		North   three   `json:"north"`
+		Squared float64 `json:"sweep squared"`
+		Plus    three   `json:"plus m"`
+	} `json:"every part"`
 	TooFast     []three `json:"too fast km/s"`
 	EarthOut    three   `json:"earth out m"`
 	EarthMoving three   `json:"earth moving km/s"`
@@ -86,12 +97,35 @@ func TestADirectionIsOneLong(test *testing.T) {
 	}
 }
 
+// Parts too large or too small to square still point somewhere: their
+// direction is one long, and the way the same parts point at an everyday
+// size, scaled down by their largest.
+func TestPartsBeyondSquaringStillPoint(test *testing.T) {
+	numbers := spaceNumbers(test)
+	one := pickedNumbers(test).One
+	for _, parts := range numbers.Beyond {
+		way := direction(test, parts)
+		if self := way.Dot(way); !near(self, one, numbers.Tolerance) {
+			test.Errorf("a direction of %v is %v long", parts, self)
+		}
+		largest := math.Max(math.Abs(parts.OnX), math.Abs(parts.OnY))
+		largest = math.Max(largest, math.Abs(parts.OnZ))
+		everyday := direction(test, three{OnX: parts.OnX / largest,
+			OnY: parts.OnY / largest, OnZ: parts.OnZ / largest})
+		if along := way.Dot(everyday); !near(along, one,
+			numbers.Tolerance) {
+			test.Errorf("a direction of %v is %v along its own way",
+				parts, along)
+		}
+	}
+}
+
 // The anti-test: a direction refuses no way at all, a part that is not
 // a number and one that is endless, and gives no direction.
 func TestADirectionRefusesWhatHasNoWay(test *testing.T) {
 	numbers := spaceNumbers(test)
 	given := append(numbers.NoWays, three{OnX: math.NaN()},
-		three{OnX: math.Inf(eitherSign)})
+		three{OnX: math.Inf(upward)})
 	for _, parts := range given {
 		way, err := measure.NewDirection(parts.OnX, parts.OnY, parts.OnZ)
 		if err == nil || way != nil {
@@ -167,10 +201,9 @@ func TestAVelocityRefusesLightAndPast(test *testing.T) {
 	}
 }
 
-// The earth, an AU out along x and moving toward minus z, goes round
-// counterclockwise seen from above, so its sweep's north is the kit's
-// up; and the sweep is the distance times the speed, as a share of
-// light's.
+// The Earth, an AU out along x and moving toward minus z, goes round
+// counterclockwise seen from above, so its sweep's north is the kit's up; and
+// the sweep is the distance times the speed, as a share of light's.
 func TestTheEarthSweepsRoundTheKitsUp(test *testing.T) {
 	numbers := spaceNumbers(test)
 	out := numbers.EarthOut
@@ -202,6 +235,112 @@ func TestStraightAwayHasNoNorth(test *testing.T) {
 	away := velocity(test, three{OnX: numbers.EarthSpeed})
 	if north, err := apart.Cross(away).North(); err == nil || north != nil {
 		test.Errorf("moving straight away faces %v", north)
+	}
+}
+
+// offset is the displacement of three lengths in metres.
+func offset(parts three) measure.Displacement {
+	return measure.Offset(measure.Metres(parts.OnX),
+		measure.Metres(parts.OnY), measure.Metres(parts.OnZ))
+}
+
+// A displacement against another is each of its parts times the other's,
+// summed: one, two and three metres against four, five and six is 32
+// square metres, and with no part nought or one, every term shows.
+func TestADotIsEveryPartTimesTheOthers(test *testing.T) {
+	numbers := spaceNumbers(test)
+	every := numbers.Every
+	area := offset(every.By).Dot(offset(every.Other)).InSquareMetres()
+	if !near(area, every.Dot, numbers.Tolerance) {
+		test.Errorf("%v against %v is %v m^2, not %v", every.By,
+			every.Other, area, every.Dot)
+	}
+}
+
+// The anti-test: two displacements at a right angle have no area against
+// each other, though neither is nought. An area that is no number fails
+// it.
+func TestARightAngleHasNoDot(test *testing.T) {
+	numbers := spaceNumbers(test)
+	every := numbers.Every
+	area := offset(every.By).Dot(offset(every.Square)).InSquareMetres()
+	if !(math.Abs(area) <= numbers.Tolerance) {
+		test.Errorf("%v against %v is %v m^2", every.By, every.Square,
+			area)
+	}
+}
+
+// A displacement crossed with a velocity faces the way the right hand
+// says and sweeps the size of their cross: one, two and three metres by
+// four, five and six km/s faces minus one, two and minus one, and sweeps
+// the root of 54 m km/s, as a share of light's.
+func TestACrossIsEveryPartTimesTheOthers(test *testing.T) {
+	numbers := spaceNumbers(test)
+	every := numbers.Every
+	sweep := offset(every.By).Cross(velocity(test, every.Moving))
+	north, err := sweep.North()
+	if err != nil {
+		test.Fatal(err)
+	}
+	one := pickedNumbers(test).One
+	along := north.Dot(direction(test, every.North))
+	if !near(along, one, numbers.Tolerance) {
+		test.Errorf("the sweep faces %v of the way north", along)
+	}
+	size := sweep.Size().InMetres()
+	want := math.Sqrt(every.Squared) / numbers.Light
+	if !near(size, want, numbers.SweepTol) {
+		test.Errorf("the sweep is %v m, not %v", size, want)
+	}
+}
+
+// The anti-test: crossed the other way round, four, five and six metres
+// by one, two and three km/s, the sweep faces the other way.
+func TestACrossTheOtherWayRoundFacesTheOtherWay(test *testing.T) {
+	numbers := spaceNumbers(test)
+	every := numbers.Every
+	sweep := offset(every.Other).Cross(velocity(test, every.By))
+	north, err := sweep.North()
+	if err != nil {
+		test.Fatal(err)
+	}
+	one := pickedNumbers(test).One
+	along := north.Dot(direction(test, every.North))
+	if !near(along, -one, numbers.Tolerance) {
+		test.Errorf("the sweep faces %v of the way north", along)
+	}
+}
+
+// A place plus a displacement moves along every part of it: one, two and
+// three metres, and four, five and six more, is five, seven and nine.
+func TestAPlacePlusADisplacementMovesAlongEveryPart(test *testing.T) {
+	numbers := spaceNumbers(test)
+	every := numbers.Every
+	to := place(every.By).Plus(offset(every.Other)).Minus(measure.Origin())
+	for _, part := range []struct{ got, want float64 }{
+		{to.AlongX().InMetres(), every.Plus.OnX},
+		{to.AlongY().InMetres(), every.Plus.OnY},
+		{to.AlongZ().InMetres(), every.Plus.OnZ}} {
+		if !near(part.got, part.want, numbers.Tolerance) {
+			test.Errorf("%v plus %v is %v", every.By, every.Other, to)
+		}
+	}
+}
+
+// The anti-test: a place plus a displacement moves the whole of it, along
+// it: not nowhere, and not against it. The way from where the place was
+// to where it is, against the displacement, is the displacement's own
+// square.
+func TestAPlaceMovesAlongItsDisplacement(test *testing.T) {
+	numbers := spaceNumbers(test)
+	every := numbers.Every
+	by := offset(every.Other)
+	moved := place(every.By).Plus(by).Minus(place(every.By))
+	along := moved.Dot(by).InSquareMetres()
+	if want := by.Dot(by).InSquareMetres(); !near(along, want,
+		numbers.Tolerance) {
+		test.Errorf("a place moved %v m^2 along %v, not %v", along,
+			every.Other, want)
 	}
 }
 

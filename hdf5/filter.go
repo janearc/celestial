@@ -1,7 +1,11 @@
 package hdf5
 
+import
+
 // versionOneFilters is the version of the Filter Pipeline message that is
 // read. Defined by IV.A.2.l.
+"fmt"
+
 const versionOneFilters = 1
 
 // The filter identification numbers of IV.A.2.l's table of filter ids,
@@ -38,21 +42,23 @@ type filters struct {
 	ids []int
 }
 
-// readFilters parses a Filter Pipeline message. IV.A.2.l, version 1. It
-// refuses a message cut short, a version not read, and a filter not
-// undone here, and then gives none.
+// readFilters parses a version 1 Filter Pipeline message (IV.A.2.l).
+// Truncation, unsupported versions, and filters this reader cannot reverse
+// return an error.
 func readFilters(msg message) (*filters, error) {
 	walk := &cursor{data: msg.data}
 	version, count := walk.u8(), int(walk.u8())
 	walk.skip(filtersReserved)
 	if walk.short {
-		return nil, refuse(errCorrupt, msg.at, "IV.A.2.l",
-			"filter pipeline message is cut short")
+		return nil, fmt.Errorf("hdf5: file is damaged: filter "+
+			"pipeline message is cut short, at address %#x (spec "+
+			"IV.A.2.l)", msg.at)
 	}
 	if version != versionOneFilters {
-		return nil, refuse(errUnsupported, msg.at, "IV.A.2.l",
-			"filter pipeline version %d, only version 1 is read",
-			version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"filter pipeline version %d, only version 1 is read, "+
+			"at address %#x (spec "+
+			"IV.A.2.l)", version, msg.at)
 	}
 	found := &filters{}
 	for range count {
@@ -77,16 +83,17 @@ func readFilter(walk *cursor, at uint64) (int, error) {
 		walk.skip(clientValueSize)
 	}
 	if walk.short {
-		return noID, refuse(errCorrupt, at, "IV.A.2.l",
-			"filter description is cut short")
+		return noID, fmt.Errorf("hdf5: file is damaged: filter "+
+			"description is cut short, at address %#x (spec "+
+			"IV.A.2.l)", at)
 	}
 	switch id {
 	case filterDeflate, filterFletcher32:
 		return id, nil
 	}
-	return noID, refuse(errUnsupported, at, "IV.A.2.l",
-		"filter %d (%s), only deflate and Fletcher32 are read", id,
-		filterName(id))
+	return noID, fmt.Errorf("hdf5: part of the format not read: filter "+
+		"%d (%s), only deflate and Fletcher32 are read, at address "+
+		"%#x (spec IV.A.2.l)", id, filterName(id), at)
 }
 
 // filterNames is the name IV.A.2.l gives each filter id refused.

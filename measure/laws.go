@@ -6,19 +6,19 @@ import (
 	"github.com/janearc/celestial/research"
 )
 
-// What follows from measured.go and exact.go by physics alone. With the
-// speed of light, the reduced planck constant and boltzmann's constant
-// all one, the constants that are left are pure numbers.
+// What follows from measured.go and exact.go by physics alone. With the speed
+// of light, the reduced Planck constant and Boltzmann's constant all one, the
+// constants that are left are pure numbers.
 const (
-	// stefanDenominator is defined by planck's law: summed over every
-	// frequency and direction it gives pi to the fourth over fifteen,
-	// over the four pi squared the reduced constant brings, which is pi
-	// squared over sixty.
+	// stefanDenominator is defined by Planck's law: summed over every
+	// frequency and direction it gives pi to the fourth over fifteen, over
+	// the four pi squared the reduced constant brings, which is pi squared
+	// over sixty.
 	stefanDenominator = 60
-	// stefan is stefan and boltzmann's constant with no units at all.
+	// stefan is Stefan and Boltzmann's constant with no units at all.
 	// Defined by the one above.
 	stefan = math.Pi * math.Pi / stefanDenominator
-	// stefanPower is the power of the temperature in stefan's law: a hot
+	// stefanPower is the power of the temperature in Stefan's law: a hot
 	// surface gives off its temperature to the fourth. Defined by it.
 	stefanPower = 4
 	// steradiansOverTurns is the solid angle all round a point over a
@@ -31,8 +31,7 @@ const (
 	// in thirds of a sphere. Defined by its formula: eight pi over three
 	// is two thirds of four pi.
 	dipoleThirds = 2.0 / 3
-	// dipoleSphere makes thomson's cross-section. Defined by the two
-	// above.
+	// dipoleSphere makes Thomson's cross-section. Defined by the two above.
 	dipoleSphere = fullSphere * dipoleThirds
 )
 
@@ -48,8 +47,8 @@ func BlackBody(heat Temperature, area Area) Power {
 	return Power{stefan * glow * area.natural}
 }
 
-// SurfaceTemperature is how hot a black surface of an area must be to
-// give off a power: the fourth root of stefan's law, undone.
+// SurfaceTemperature is how hot a black surface of an area must be to give off
+// a power: the fourth root of Stefan's law, undone.
 func SurfaceTemperature(power Power, area Area) Temperature {
 	fourth := power.natural / (stefan * area.natural)
 	return Temperature{math.Sqrt(math.Sqrt(fourth))}

@@ -18,7 +18,7 @@ type base struct {
 	Pascals float64 `json:"pascals"`
 }
 
-// row is a row of bodhaine and the others' table 3.
+// row is a row of Bodhaine and the others' table 3.
 type row struct {
 	Microns      float64 `json:"microns"`
 	CrossSection float64 `json:"cross section cm2"`
@@ -42,15 +42,28 @@ type picked struct {
 		PascalTol  float64 `json:"pascal tolerance"`
 		DensityTol float64 `json:"density tolerance"`
 	} `json:"sea"`
-	Bases          []base    `json:"bases"`
-	BaseKelvinTol  float64   `json:"base kelvin tolerance"`
-	BasePascalTol  float64   `json:"base pascal tolerance"`
-	U2Feet         float64   `json:"u-2 feet"`
-	MetresAFoot    float64   `json:"metres a foot"`
-	U2Above        float64   `json:"u-2 air above"`
-	OutsideMetres  []float64 `json:"outside metres"`
-	CO2            float64   `json:"co2 ppm"`
-	NotCO2         []float64 `json:"not co2 ppm"`
+	Bases         []base    `json:"bases"`
+	BaseKelvinTol float64   `json:"base kelvin tolerance"`
+	BasePascalTol float64   `json:"base pascal tolerance"`
+	U2Feet        float64   `json:"u-2 feet"`
+	MetresAFoot   float64   `json:"metres a foot"`
+	U2Above       float64   `json:"u-2 air above"`
+	OutsideMetres []float64 `json:"outside metres"`
+	CO2           float64   `json:"co2 ppm"`
+	NotCO2        []float64 `json:"not co2 ppm"`
+	AllRound      struct {
+		Look      wayParts `json:"look"`
+		Sun       wayParts `json:"sun"`
+		Tolerance float64  `json:"tolerance"`
+	} `json:"all round"`
+	Three struct {
+		Metres    []float64 `json:"metres"`
+		Tolerance float64   `json:"tolerance"`
+	} `json:"three ways"`
+	Edges struct {
+		Metres []float64 `json:"metres"`
+		CO2    []float64 `json:"co2 ppm"`
+	} `json:"edges"`
 	Bodhaine       []row     `json:"bodhaine"`
 	BodhaineTol    float64   `json:"bodhaine tolerance"`
 	Latitude       float64   `json:"bodhaine latitude"`
@@ -79,11 +92,23 @@ type picked struct {
 	AfterSunset    float64   `json:"after sunset share"`
 	Drawn          drawn     `json:"drawn"`
 	Anti           anti      `json:"anti"`
+	Beyond         struct {
+		Up    wayParts `json:"up"`
+		Sun   wayParts `json:"sun"`
+		Level wayParts `json:"level"`
+	} `json:"beyond squaring"`
 }
 
-// anti is what the anti-tests compare: more co2, a share of the sea's
-// pressure and how near its depth must come, a way from higher up, and
-// the equator against a pole.
+// wayParts is a way's three parts as the test data writes them.
+type wayParts struct {
+	AlongX float64 `json:"x"`
+	AlongY float64 `json:"y"`
+	AlongZ float64 `json:"z"`
+}
+
+// anti is what the anti-tests compare: more CO2, a share of the sea's pressure
+// and how near its depth must come, a way from higher up, and the equator
+// against a pole.
 type anti struct {
 	MoreCO2  float64 `json:"more co2 ppm"`
 	Share    float64 `json:"share of pressure"`
@@ -121,12 +146,11 @@ func pickedNumbers(test *testing.T) picked {
 
 // The numbers the tests compare with, each defined.
 const (
-	nothing    = 0.0 // defined by the scale
-	whole      = 1.0 // defined: a ratio of a thing to itself
-	first      = 0   // defined by a slice's order
-	second     = 1   // defined by a slice's order
-	upward     = 1   // defined by math.Inf: the endless above
-	eitherSign = 0   // defined by math.IsInf: both infinities
+	nothing = 0.0 // defined by the scale
+	whole   = 1.0 // defined: a ratio of a thing to itself
+	first   = 0   // defined by a slice's order
+	second  = 1   // defined by a slice's order
+	upward  = 1   // defined by math.Inf: the endless above
 )
 
 // near is whether a value is within a share of what is expected.
@@ -144,7 +168,7 @@ func nanometres(amount float64) measure.Length {
 	return measure.Metres(si.Nano(amount))
 }
 
-// dry is dry air of the test data's co2, or the test stops.
+// dry is dry air of the test data's CO2, or the test stops.
 func dry(test *testing.T) atmosphere.Composition {
 	test.Helper()
 	air, err := atmosphere.DryAir(pickedNumbers(test).CO2)

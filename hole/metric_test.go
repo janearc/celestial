@@ -74,9 +74,8 @@ func TestTheMetricTimesItsInverseIsTheIdentity(t *testing.T) {
 	}
 }
 
-// The anti-test: a metric that was not its inverse's inverse would be caught by this: the
-// metric is not its own inverse near the hole, so the test above could not
-// pass by a metric and an inverse that are the same matrix.
+// The anti-test: near the hole, metric and inverse must differ. Otherwise the
+// identity-product test could pass with the same matrix returned for both.
 func TestTheMetricIsNotItsOwnInverseNearTheHole(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Spinning)
@@ -115,8 +114,8 @@ func TestTheMetricIsFlatFarAway(t *testing.T) {
 	}
 }
 
-// flatEntry is the flat metric's entry, which is also the flat inverse's:
-// minus one on the diagonal along time, one on the others, nought off it.
+// flatEntry is the flat metric's entry, which is also the flat inverse's: minus
+// one on the diagonal along time, one on the others, zero off it.
 func flatEntry(row, column int) float64 {
 	switch {
 	case row != column:
@@ -128,8 +127,8 @@ func flatEntry(row, column int) float64 {
 	}
 }
 
-// The anti-test: near the hole the metric is not the flat one, and the difference is the
-// hole's pull.
+// The anti-test: near the hole the metric is not the flat one, and the
+// difference is the hole's pull.
 func TestTheMetricIsNotFlatNearTheHole(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -141,9 +140,9 @@ func TestTheMetricIsNotFlatNearTheHole(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: on the disc inside the ring the radius is nought and the kernel has no
-// value: the metric is flat there, as Metric says, and a step from it into
-// the open is not.
+// The test and the anti-test: on the disc inside the ring the radius is zero
+// and the kernel has no value: the metric is flat there, as Metric says, and a
+// step from it into the open is not.
 func TestTheMetricOnTheDiscIsFlat(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Spinning)
@@ -226,8 +225,9 @@ func raiseUndoesLower(test *rapid.T) {
 	}
 }
 
-// The test and the anti-test: near a hole lowering is not the flat metric's minus-plus-plus-plus: a
-// Lower that only flipped the sign of time would be caught here.
+// The test and the anti-test: near a hole lowering is not the flat
+// metric's minus-plus-plus-plus: a Lower that only flipped the sign of
+// time would be caught here.
 func TestLowerIsNotFlatNearTheHole(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -273,9 +273,9 @@ func TestRadiusIsTheKerrSchildRadius(t *testing.T) {
 	}
 }
 
-// The test and the anti-test: a point within a hair of the disc has radius nought, not the root of a
-// negative that rounding left behind: rapid found one, and the radius
-// there was not a number. A point off the disc has a radius that is.
+// The test and anti-test: cancellation near the ring’s disc must round radius
+// to zero rather than take the square root of a negative residual. Points
+// away from the disc must still have finite radii.
 func TestRadiusNearTheDiscRoundsToNought(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Hair.Hole)

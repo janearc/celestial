@@ -1,6 +1,9 @@
 package hdf5
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // The sizes of the group structures with eight-byte offsets and lengths,
 // each defined by the section it names.
@@ -53,15 +56,15 @@ type groupTable struct {
 	tree, heap uint64
 }
 
-// parseSymbolTable reads the symbol table message's two addresses. It
-// refuses a message too short for them, and then gives none.
+// parseSymbolTable reads the symbol table message’s two addresses.
+// Truncated messages return an error.
 func parseSymbolTable(msg message) (*groupTable, error) {
 	walk := &cursor{data: msg.data}
 	table := groupTable{tree: walk.u64(), heap: walk.u64()}
 	if walk.short {
-		return nil, refuse(errCorrupt, msg.at, "IV.A.2.q",
-			"symbol table message is %d bytes, 16 are needed",
-			len(msg.data))
+		return nil, fmt.Errorf("hdf5: file is damaged: symbol table "+
+			"message is %d bytes, 16 are needed, at address %#x "+
+			"(spec IV.A.2.q)", len(msg.data), msg.at)
 	}
 	return &table, nil
 }
@@ -147,19 +150,21 @@ func (from *source) readNode(at uint64, leafK uint16) ([]symbol, error) {
 	}
 	walk := &cursor{data: raw}
 	if !walk.opens(nodeSignature) {
-		return nil, refuse(errCorrupt, at, "III.B", "no SNOD signature")
+		return nil, fmt.Errorf("hdf5: file is damaged: no SNOD "+
+			"signature, at address %#x (spec III.B)", at)
 	}
 	if version := walk.u8(); version != nodeVersion {
-		return nil, refuse(errUnsupported, at, "III.B",
-			"symbol table node version %d, only 1 exists", version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"symbol table node version %d, only 1 exists, at "+
+			"address %#x (spec III.B)", version, at)
 	}
 	walk.skip(byteWide) // reserved
 	count := uint64(walk.u16())
 	most := twiceK * uint64(leafK)
 	if count > most {
-		return nil, refuse(errCorrupt, at, "III.B",
-			"%d symbols in a node that holds at most 2K = %d",
-			count, most)
+		return nil, fmt.Errorf("hdf5: file is damaged: %d symbols in "+
+			"a node that holds at most 2K = %d, at address %#x "+
+			"(spec III.B)", count, most, at)
 	}
 	body, err := from.read(at+nodeHeaderSize, count*symbolEntrySize,
 		"III.C")
@@ -173,8 +178,9 @@ func (from *source) readNode(at uint64, leafK uint16) ([]symbol, error) {
 		made := symbol{nameOffset: entry.u64(), header: entry.u64(),
 			at: here}
 		if cache := entry.u32(); cache == cacheSymbolicLink {
-			return nil, refuse(errUnsupported, here, "III.C",
-				"a symbolic link in a group")
+			return nil, fmt.Errorf("hdf5: part of the format not "+
+				"read: a symbolic link in a group, at "+
+				"address %#x (spec III.C)", here)
 		}
 		found = append(found, made)
 	}
@@ -194,11 +200,13 @@ func (from *source) readHeap(at uint64) (*heap, error) {
 	}
 	walk := &cursor{data: raw}
 	if !walk.opens(heapSignature) {
-		return nil, refuse(errCorrupt, at, "III.D", "no HEAP signature")
+		return nil, fmt.Errorf("hdf5: file is damaged: no HEAP "+
+			"signature, at address %#x (spec III.D)", at)
 	}
 	if version := walk.u8(); version != heapVersion {
-		return nil, refuse(errUnsupported, at, "III.D",
-			"local heap version %d, only 0 exists", version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"local heap version %d, only 0 exists, at address "+
+			"%#x (spec III.D)", version, at)
 	}
 	walk.skip(heapReserved)
 	size := walk.u64()
@@ -215,15 +223,16 @@ func (from *source) readHeap(at uint64) (*heap, error) {
 // segment; at is where the offset was read, for a refusal.
 func (store *heap) name(offset, at uint64) (string, error) {
 	if offset >= uint64(len(store.data)) {
-		return "", refuse(errCorrupt, at, "III.D",
-			"name offset %d is outside the heap's %d bytes", offset,
-			len(store.data))
+		return "", fmt.Errorf("hdf5: file is damaged: name offset %d "+
+			"is outside the heap's %d bytes, at address %#x "+
+			"(spec III.D)", offset, len(store.data), at)
 	}
 	rest := store.data[offset:]
 	end := bytes.IndexByte(rest, nameEnd)
 	if end == notFound {
-		return "", refuse(errCorrupt, at, "III.D",
-			"the name at heap offset %d has no end", offset)
+		return "", fmt.Errorf("hdf5: file is damaged: the name at "+
+			"heap offset %d has no end, at address %#x (spec "+
+			"III.D)", offset, at)
 	}
 	return string(rest[:end]), nil
 }

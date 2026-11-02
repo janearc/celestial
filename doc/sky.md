@@ -1,106 +1,116 @@
-# sky: where things are, seen from places
+# Sky: where things are, seen from places
 
-every use of this package asks one question. where is a thing, seen
-from somewhere, at some instant, in some frame?
+The question is simple enough: where does an object appear from here,
+at this instant, in this frame? The Sun over a hillside, a star seen
+through the Sun’s gravitational lens, and a merger timed at two detectors
+all need some version of that answer.
 
-the sun over a hillside at dusk asks it. so does pointing at kepler-16b
-through the sun's gravitational lens from beyond pluto. so does a
-neutron star merger whose waves reach two detectors milliseconds apart.
+This note separates the current foundations from the broader design.
+`sky` is built on `measure`; ephemerides and detector waveforms are not
+implemented merely because the plan below describes them.
 
-these are one question with different arguments. the package is built
-around it.
+## What is implemented
 
-it is built on measure.
+- Two-part instants, calendar conversion, and named time scales.
+- UTC leap-second tables, GPS conversion, and TT/TDB conversion.
+- UT1 from a supplied DUT1, and Greenwich mean sidereal time.
+- Earth sites and equatorial-to-horizontal coordinates.
+- Gnomonic tangent planes, east/north offsets, and error ellipses.
 
-## the parts
+Calendar conversion uses the Julian calendar before 1582-10-15 and the
+Gregorian calendar afterward, rejecting the skipped reform dates. Years
+use astronomical numbering, including year zero. A UTC leap second is a
+real extra second in the day, not a duplicate timestamp.
 
-**an instant** is a moment, held as a julian date in two parts: a whole
-day and a fraction of it. one float64 date resolves about forty
-microseconds today. two parts resolve far below a nanosecond, and
-timing a wave between detectors needs that.
+## Instants and scales
 
-**a scale** says whose clock an instant is on:
+An `Instant` stores a whole modified Julian day and a fraction of that day.
+This avoids the roughly 40-microsecond resolution limit of one contemporary
+float64 Julian date. It preserves fine timing without claiming that the
+underlying clock or astronomical model is equally accurate.
 
-| scale | what it is |
+| Scale | Meaning |
 |---|---|
-| utc | civil time. it gains a leap second when the earth falls behind |
-| tai | atomic time. it never leaps; tai less utc is 37 s since 2017 |
-| tt | the clock the ephemerides run on. it is tai plus 32.184 s exactly |
-| tdb | tt as the solar system's centre keeps it. it differs by under 2 ms |
-| gps | the satellites' clock, and LIGO's and Virgo's. it is tai less 19 s exactly |
-| ut1 | the earth's own turning, which iers measures |
+| UTC | Civil time with leap seconds |
+| TAI | Continuous atomic time |
+| TT | TAI + 32.184 seconds |
+| TDB | Barycentric dynamical time, with a small periodic difference from TT |
+| GPS | TAI − 19 seconds; also used by the open science centre event times |
+| UT1 | Earth rotation time, related to UTC by measured DUT1 |
 
-**a thing** is anything that can say where it is at an instant. the
-sun, the moon, planets and stars are things. so are a body on an orbit,
-a fixed point, a place on earth and a spacecraft.
+The embedded leap table records TAI−UTC as 37 seconds from 2017 and limits
+UTC conversion to the dates covered by its bulletin. The offset is dated
+data, not a promise about all future time.
 
-a thing answers with its place and velocity from the solar system's
-barycentre, on the icrs axes.
+`On` converts supported scales. UT1 requires an external DUT1 measurement
+through `UT1`; the library does not silently assume Earth’s rotation
+matches UTC. TT/TDB uses the seven-term USNO Circular 179 approximation,
+with its documented validity and accuracy.
 
-**seeing** is one thing from another at an instant. the answer is a
-sighting: a direction, a distance and when the light left.
+## Sites, directions, and small fields
 
-each correction is named, and the caller says which are on: light
-time, aberration, the sun's bending of light and refraction. only a
-place on earth has refraction.
+An Earth `Place` carries latitude, longitude, and height. Equatorial
+coordinates use right ascension east along the equator and declination
+north of it. `Local` converts to azimuth measured from north toward east
+and altitude above the horizon, using the supplied sidereal angle.
 
-**a frame** turns a sighting into two angles and a distance. the frames
-are the sky's (right ascension and declination), the ecliptic, the
-galaxy's, and the local sky at a place (azimuth from north and
-altitude).
+A `Tangent` projects a small field onto the plane touching the sky sphere
+at its centre. East and north are gnomonic standard coordinates, stored
+as `measure.Angle` values. They approximate angular offsets only near
+the centre; the projection itself uses the full geometry.
 
-**accuracy** rides with every answer. every place, velocity and
-sighting says how far off it can be, as an angle and a length. the
-first answers carry meeus's figures. later ones are better.
+`Onto` rejects directions at or beyond a quarter-turn from the centre.
+`Back` reverses the projection. `Ellipse` describes positional uncertainty
+with major and minor semi-axes and a position angle east of north; its
+outline is returned as offsets on that plane.
 
-## places made from things
+## The larger design
 
-some places are worked out from things, not looked up:
+An object would provide barycentric ICRS position and velocity at an
+instant. Observing one object from another would return a sighting:
+direction, distance, and the time the light left.
 
-- a lagrange point of any two things on their orbit.
-- the sun's gravitational lens. light grazing the sun bends toward the
-  line through its middle. it meets that line at least 548 AU out. the lens
-  for a target is the line away from the sun opposite it. that distance
-  is the sun's radius squared times c squared, over four times its GM.
+Corrections would be explicit choices: light travel time, aberration,
+solar deflection, and refraction at terrestrial observing sites. Frames
+would then express the result in equatorial, ecliptic, galactic, or
+local horizontal coordinates.
 
-## gravitational waves
+Accuracy should travel with the result as angular and distance estimates.
+Initial Meeus-based models could carry his published estimates; later
+JPL ephemerides could improve them without changing what a sighting means.
 
-waves and light share the sky. a merger's light and its waves come from
-one thing, and sky gives both one place and one distance.
+## Derived locations and waves
 
-- **a merger** is a thing with a waveform: two polarisations over time
-  and the angle they are turned by.
-- **a detector** is an interferometer at a place with two arms along
-  the ground. its answer to a wave from a direction is the antenna
-  pattern, worked out in closed form.
-- **arrival** differs from detector to detector. the delay is how far
-  apart they stand along the wave's way, over c. that delay is how
-  detectors find a merger on the sky.
+Lagrange points derive from two orbiting bodies. The Sun’s gravitational
+lens derives from its mass and radius: grazing light reaches the axis at
+about 548 AU, with focal distance `R²c² / (4GM)`. A target’s focal line
+extends away from the Sun opposite the target direction.
 
-this is what the package must hold. it is built after the sun and the
-moon. rendering the waves is the tracer's work. this package tells it
-where and when.
+For gravitational waves, the plan adds a merger’s two polarizations and
+orientation, an interferometer’s site and arm directions, and the antenna
+pattern. Arrival delays follow the detector separation projected along
+the propagation direction, divided by c.
 
-## built first, in order
+Rendering those signals belongs
+to the application; geometry and timing belong here.
 
-each step has tests from published answers, and each test names its
-source:
+## Original implementation sequence
 
-1. instants: calendar dates to julian dates and back, held to meeus's
-   examples 7.a and 7.b. the scales follow, with the leap seconds as
-   iers publishes them.
-2. sidereal time (meeus 12.a and 12.b), places on earth, and the local
-   sky from the sky's frame (meeus 13.b).
-3. the sun at low accuracy, to about 0.01 degrees (meeus 25.a).
-4. the sun's lens: its focal distance from the iau's constants, and its
-   focal line for a target.
+Each stage uses externally published answers with citations:
 
-after those, behind the same doors: the moon (meeus 47.a), the planets,
-stars with their own motion, kepler orbits, kepler-16b round its two
-stars, lagrange points, detectors, and jpl's ephemerides for when meeus
-is not enough.
+1. Calendar and Julian dates: Meeus examples 7.a and 7.b; time scales
+   and leap seconds from IERS.
+2. Sidereal time and local coordinates: Meeus 12.a, 12.b, and 13.b.
+3. A low-accuracy Sun, around 0.01 degrees: Meeus 25.a.
+4. The solar lens: IAU constants and a target’s focal line.
 
-## rules
+The first two stages have current foundations in `sky`. Solar and lunar
+positions, planets, proper motion, Keplerian and circumbinary orbits,
+Lagrange points, detectors, and JPL ephemerides remain part of the plan.
 
-- tests hold published answers, never this package's own.
-- every number that is not nature's says where it came from.
+The proposed lunar reference is Meeus 47.a; Kepler-16b motivates the
+circumbinary work.
+
+Tests should compare published or independently derived expectations,
+not ask the implementation to supply its own answer. Every empirical
+value and chosen parameter should identify its origin.

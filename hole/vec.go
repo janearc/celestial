@@ -2,13 +2,9 @@ package hole
 
 import "math"
 
-// Vec3 is a point or a direction in space.
-//
-// Its parts are private so that its places are said by name, AlongX,
-// AlongY and AlongZ, and not by number.
-//
-// Any three numbers make one, a number that is not a number among them:
-// that is how a place with no value is carried.
+// Vec3 stores a spatial position or direction with named component accessors.
+// Construction permits NaN so invalid or undefined positions can propagate
+// explicitly.
 type Vec3 struct{ x, y, z float64 }
 
 // NewVec3 is the point or direction with the parts x, y and z.
@@ -45,18 +41,15 @@ func (vec Vec3) scaled(factor float64) Vec3 {
 	return Vec3{x: vec.x * factor, y: vec.y * factor, z: vec.z * factor}
 }
 
-// Vec4 is a point in spacetime, or a covariant or contravariant vector
-// there; which one is said where it is used. Its places are Time, AlongX,
-// AlongY and AlongZ, in that order.
+// Vec4 stores a spacetime point or vector, covariant or contravariant as
+// specified by the caller. Component order is (t, x, y, z).
 //
-// It is a struct of four numbers and not an array because the compiler
-// keeps a struct of up to four numbers in registers, in a function and
-// between functions, and sends an array through memory; with arrays that
-// traffic was more than half the cost of a step.
+// The four-field struct lets the compiler keep values in registers within and
+// between calls. In the measured array version, memory traffic accounted for
+// more than half the cost of a step.
 //
-// Its parts are private so that its places are said by name. Any four
-// numbers make one, a number that is not a number among them: that is how
-// a place with no value is carried.
+// Named accessors expose private components. NaN values are allowed to
+// represent undefined states.
 type Vec4 struct{ time, x, y, z float64 }
 
 // NewVec4 is the vector with the parts time, x, y and z.
@@ -109,18 +102,18 @@ func (vec Vec4) moved(rate Vec4, stepSize float64) Vec4 {
 	}
 }
 
-// Mat4 is a metric or its inverse, by row and column in the order
-// t, x, y, z.
+// Mat4 stores a metric or its inverse in (t, x, y, z) row and column order.
 type Mat4 [dimensions][dimensions]float64
 
-// Dot is the inner product of a covariant and a contravariant vector.
+// Dot contracts a covector with a contravariant vector. It applies no
+// additional metric sign; lowering supplies that beforehand.
 func Dot(covector, vector Vec4) float64 {
 	return covector.time*vector.time + covector.x*vector.x +
 		covector.y*vector.y + covector.z*vector.z
 }
 
-// rungeKutta is the four rates of a runge-kutta step weighed together:
-// six times the step's mean rate.
+// rungeKutta combines four derivatives with weights 1, 2, 2, 1, returning six
+// times their weighted mean.
 func rungeKutta(first, second, third, fourth Vec4) Vec4 {
 	return Vec4{
 		time: first.time + rungeKuttaDouble*(second.time+third.time) +

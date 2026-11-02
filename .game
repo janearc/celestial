@@ -1,6 +1,5 @@
 # vim: set filetype=game et ai ts=4 wrap
-# celestial: physics and maths and stuff for things that are bigger than you
-#
+# celestial: physics, maths, and things that are bigger than you.
 name celestial
 
 lint width 80
@@ -13,38 +12,38 @@ lint words hyperscaler enterprise-grade blazing-fast load-bearing
 lint paragraph 4
 
 lint allow README.md words paragraph rows
+lint allow PACKAGES.md words paragraph rows exclaim
 sweep allow README.md emails author
 sweep allow doc/hole/README.md emails author
 
-# this is binary files so sometimes it's going to match whatever
+# Binary fixtures can match text-oriented checks by accident. Keep them
+# out of linting and distribution.
 omit hdf5/testdata
 exclude hdf5/testdata
 
-# the mocks, generated from the interfaces a caller stands in for in its
-# tests. mockgen is pinned in go.mod as a tool, so every run uses the
-# same version. game run mocks makes them.
+# Generate test doubles from the interfaces clients use. mockgen is pinned
+# as a tool in go.mod so game run mocks uses a reproducible version.
 run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/photometry.go -package mocks github.com/janearc/celestial/photometry Photometer
 run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/sky.go -package mocks github.com/janearc/celestial/sky Projector
 run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/gw.go -package mocks github.com/janearc/celestial/gw Estimator
 
-# game allows us to have items in revision control which are excluded from
-# dist. we do this so we can verify the numbers we're using are those which
-# are cited in papers
+# Keep cited works available for source verification without distributing
+# them. Game can retain files in version control while excluding them
+# from dist.
 omit cited-sources
 exclude cited-sources
 
-# todo:
-#   - GW150914's event json and strain file, which are in
-#     gw/testdata and hdf5/testdata with their sha256;
-#   - meeus's astronomical formulae for calculators, 
-#   - the published iso 21348, which is paid
-#   - peck and reeder 1972
-#   - kasten and young 1989, 
-#   - teukolsky 1972
+# Source-verification work still recorded as outstanding:
+#   - GW150914 event JSON and strain files, with their SHA-256 records;
+#     the original note placed them in gw/testdata and hdf5/testdata.
+#   - Meeus, Astronomical Formulae for Calculators.
+#   - The published ISO 21348 standard, which requires purchase.
+#   - Peck and Reeder (1972).
+#   - Kasten and Young (1989).
+#   - Teukolsky (1972).
 
-# this is how we verify our numbers against the papers they are pulled from.
-# note: i'm not distributing this, i would prefer you be very careful with
-# this.
+# Fetch cited works for comparison with recorded values. These copies are
+# not for distribution; keep that boundary intact when using this target.
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/codata-2022-g.html https://physics.nist.gov/cgi-bin/cuu/Value?bg
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/codata-2022-alpha.html https://physics.nist.gov/cgi-bin/cuu/Value?alph
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/codata-2022-electron-mev.html https://physics.nist.gov/cgi-bin/cuu/Value?mec2mev
@@ -72,36 +71,35 @@ run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --creat
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/ame-2020.pdf https://amdc.impcas.ac.cn/masstables/Ame2020/Wang_2021_Chinese_Phys._C_45_030003.pdf
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/kerrgeodesic-gw-kerr-spacetime.html https://sagemanifolds.obspm.fr/kerrgeodesic_gw/reference/kerr_spacetime.html
 
-# sonia keys's go implementation of meeus's astronomical algorithms,
-# mit licence, at commit bfbd9ac: her tests transcribe his examples with
-# their pages. cited, not copied; none of her code is in celestial.
+# Sonia Keys’s MIT-licensed Go implementation of Meeus, at bfbd9ac.
+# Her tests transcribe the examples with page references. Cited, not
+# copied: none of her implementation is included in Celestial.
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/soniakeys-meeus-julian-test.go.txt https://raw.githubusercontent.com/soniakeys/meeus/bfbd9ac2c7f709c94f1dee190c633d24a723f628/v3/julian/julian_test.go
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/soniakeys-meeus-sidereal-test.go.txt https://raw.githubusercontent.com/soniakeys/meeus/bfbd9ac2c7f709c94f1dee190c633d24a723f628/v3/sidereal/sidereal_test.go
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/soniakeys-meeus-coord-test.go.txt https://raw.githubusercontent.com/soniakeys/meeus/bfbd9ac2c7f709c94f1dee190c633d24a723f628/v3/coord/coord_test.go
 
-# tobiska and nusinov 2004, iso 21348's authors on its draft
+# Tobiska and Nusinov (2004), the ISO 21348 authors describing its draft.
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/tobiska-nusinov-2004.pdf https://spacewx.com/wp-content/uploads/2024/02/P_HEL_ST_2004_C01_0014_04.pdf
 
-# bardeen, press and teukolsky 1972 as ads scans it: its text layer is
-# ocr, so its equations are read by eye (pages 349 and 351, pdf 3 and
-# 5); extract finds only its title and its horizon, equation 2.6.
+# Bardeen, Press, and Teukolsky (1972), scanned by ADS. The text layer is
+# OCR; equations were read visually on pages 349 and 351 (PDF pages 3
+# and 5). Extraction finds the title and horizon equation 2.6 only.
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/bardeen-press-teukolsky-1972.pdf https://articles.adsabs.harvard.edu/pdf/1972ApJ...178..347B
 
-# aoki and others 1982, the iau's sidereal time, as ads scans it: three
-# pages with no text layer, so equation 14 is read by eye, not extracted.
+# Aoki et al. (1982), the IAU sidereal-time definition, scanned by ADS.
+# The three-page scan has no text layer; equation 14 was read visually.
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/aoki-1982.pdf https://articles.adsabs.harvard.edu/pdf/1982A%26A...105..359A
 
-# us standard atmosphere, 1976, nasa's scanned copy, 18 MB. its text layer
-# is noise, so no extract step can read it: tables 2 and 4 are read by
-# eye, on pdf pages 18 and 19.
+# US Standard Atmosphere (1976), NASA’s 18 MB scan. Its text layer is
+# unusable; tables 2 and 4 were read visually on PDF pages 18 and 19.
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/us-standard-atmosphere-1976.pdf https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf
 
-# this step takes data we've pulled down and extracts the records to verify
-# the numbers/equations used in the code.
+# Extract source records for comparison with the values and equations
+# used in code.
 #
-# wise's zero points are in table 1, an image (the -table-1.png above):
-# no step can read it, so it is read by eye against research's wise
-# numbers, 309.540, 171.787, 31.674 and 8.363 jy.
+# WISE zero points are in an image, table 1 (-table-1.png above), rather
+# than extractable text. Compare it visually with research values
+# 309.540, 171.787, 31.674, and 8.363 Jy.
 run extract . :: grep -n -o -E 6[.]674&nbsp;30&nbsp;x&nbsp;10<sup>-11</sup> cited-sources/codata-2022-g.html
 run extract . :: grep -n -o -E Source:[[:space:]]2022[[:space:]]CODATA cited-sources/codata-2022-g.html
 run extract . :: grep -n -o -E 7[.]297&nbsp;352&nbsp;5643&nbsp;x&nbsp;10<sup>-3</sup> cited-sources/codata-2022-alpha.html
@@ -171,10 +169,10 @@ run extract . :: grep -n -E GEODETIC[[:space:]]REFERENCE[[:space:]]SYSTEM[[:spac
 run extract . :: grep -n -E XVII[[:space:]]General[[:space:]]Assembly[[:space:]]of[[:space:]]the[[:space:]]IUGG cited-sources/moritz-grs80.txt
 run extract . :: grep -n -E R1[[:space:]]=[[:space:]]6[[:space:]]371[[:space:]]008[.]7714[[:space:]]m[[:space:]]+mean[[:space:]]radius cited-sources/moritz-grs80.txt
 run extract . :: grep -n -E R1[[:space:]]=[[:space:]][(]2a[+]b[)]/3 cited-sources/moritz-grs80.txt
-# bodhaine's paper sets = + - and x in a symbol font that pdftotext
-# writes as 5 1 2 and 3, and a power of ten such as 10^-4 as 1024, so the
-# patterns below carry those: "1.034 1 3.17 3 1024" is 1.034 + 3.17 x
-# 10^-4. its table 3 writes E-26 as E226.
+# Bodhaine’s symbol font extracts =, +, -, and × as 5, 1, 2, and 3.
+# Powers such as 10^-4 become 1024. These patterns retain that extracted
+# spelling: "1.034 1 3.17 3 1024" means 1.034 + 3.17 × 10^-4.
+# Table 3 similarly extracts E-26 as E226.
 run extract . :: pdftotext -layout cited-sources/bodhaine-1999.pdf cited-sources/bodhaine-1999.txt
 run extract . :: grep -n -m1 -E On[[:space:]]Rayleigh[[:space:]]Optical[[:space:]]Depth[[:space:]]Calculations cited-sources/bodhaine-1999.txt
 run extract . :: grep -n -E ^[[:space:]]+78[.]084[[:space:]]*$ cited-sources/bodhaine-1999.txt

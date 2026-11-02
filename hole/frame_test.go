@@ -51,9 +51,9 @@ func TestFrameOfKeepsItsObserver(t *testing.T) {
 	}
 }
 
-// The anti-test: near a hole the axes are not the coordinate axes: gram and schmidt carry
-// time into them. A frame that only copied the coordinate axes would be
-// caught here.
+// The anti-test: near a hole the axes are not the coordinate axes: gram
+// and schmidt carry time into them. A frame that only copied the
+// coordinate axes would be caught here.
 func TestFrameOfAxesAreNotTheCoordinateAxesNearTheHole(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -89,8 +89,8 @@ func nullIsNullWithUnitEnergy(test *rapid.T) {
 	}
 }
 
-// The anti-test: with no direction to aim at a ray has the observer's own momentum, which
-// is timelike and not null.
+// The anti-test: with no direction to aim at a ray has the observer's
+// own momentum, which is timelike and not null.
 func TestNullWithNoDirectionIsNotNull(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)
@@ -103,7 +103,7 @@ func TestNullWithNoDirectionIsNotNull(t *testing.T) {
 	}
 }
 
-// A ray starts at time nought, at the point it was sent from.
+// A ray starts at time zero, at the point it was sent from.
 func TestNullStartsAtTimeNought(t *testing.T) {
 	numbers := pickedNumbers(t)
 	black := build(t, numbers.Holes.Still)

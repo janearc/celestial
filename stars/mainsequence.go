@@ -25,8 +25,8 @@ var columns = []string{"type", "mass", "teff", "logL", "radius"}
 // is one of columns.
 func column(name string) int { return slices.Index(columns, name) }
 
-// tableLogBase is the base of the table's logarithm of luminosity.
-// Defined by the table, which gives log10 of the sun's.
+// tableLogBase is the base of the table's logarithm of luminosity. Defined by
+// the table, which gives log10 of the Sun's.
 const tableLogBase = 10
 
 // dwarf is a mean star of the main sequence: one of the table's rows, or
@@ -42,8 +42,8 @@ type dwarf struct {
 // readTable is the table, lightest first.
 func readTable() ([]dwarf, error) { return readDwarfs(mainSequenceText) }
 
-// mainSequence is the table, read once and sorted lightest first, since
-// the published masses rise a little in two places.
+// mainSequence loads the table once and sorts by increasing mass. Two stretches
+// of published masses are not monotonic in spectral type.
 var mainSequence = sync.OnceValues(readTable)
 
 // lighter orders two rows by mass, lightest first.
@@ -82,12 +82,12 @@ func readDwarfs(text string) ([]dwarf, error) {
 	return rows, nil
 }
 
-// readDwarf is one row, from its fields in the order of columns, each in
-// the table's own units: the sun's, kelvin, and log10 of the sun's. It
-// refuses a row that is not one, and then gives none.
+// readDwarf parses one row in column order, retaining the table’s units: solar
+// mass and radius, kelvin, and log10 solar luminosity. Malformed rows return an
+// error.
 func readDwarf(fields []string) (*dwarf, error) {
 	if len(fields) != len(columns) {
-		return nil, refuse("a main sequence row %q", fields)
+		return nil, fmt.Errorf("stars: a main sequence row %q", fields)
 	}
 	kind := fields[column("type")]
 	numbers := make(map[string]float64, len(fields))
@@ -119,15 +119,15 @@ func ends(table []dwarf) (lightest, heaviest dwarf) {
 	return slices.MinFunc(table, lighter), slices.MaxFunc(table, lighter)
 }
 
-// newDwarf returns the main-sequence star at a mass: brightness and
-// radius each found between the two rows either side, in the
-// logarithms, where the main sequence runs nearly straight. returns nil
-// and error for a mass the table does not reach, either way, or NaN.
+// newDwarf interpolates luminosity and radius between bracketing masses in log
+// space, where the sequence is approximately straight. Masses outside the table
+// and NaN return an error.
 func newDwarf(table []dwarf, mass measure.Mass) (*dwarf, error) {
 	lightest, heaviest := ends(table)
 	if !(mass.Over(lightest.mass) >= whole &&
 		mass.Over(heaviest.mass) <= whole) {
-		return nil, refuse("%v suns: the main sequence runs from %v "+
+		return nil, fmt.Errorf("stars: %v suns: the main sequence "+
+			"runs from %v "+
 			"(%s) to %v (%s)", mass.InSolarMasses(),
 			lightest.mass.InSolarMasses(), lightest.kind,
 			heaviest.mass.InSolarMasses(), heaviest.kind)

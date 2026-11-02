@@ -1,6 +1,9 @@
 package hdf5
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // signature is the eight bytes every HDF5 file starts with, as the
 // specification's section II.A, Format Signature and Superblock, gives
@@ -41,22 +44,24 @@ type superblock struct {
 	leafK uint16
 }
 
-// readSuperblock reads and checks the superblock at the start of the
-// file. Specification II.A, version 0. It refuses bytes that do not start
-// with the signature as not HDF5, and then gives none.
+// readSuperblock validates the version 0 superblock at the start of the
+// file (II.A). A missing signature returns an error identifying the input
+// as non-HDF5.
 func readSuperblock(from *source) (*superblock, error) {
 	signed := uint64(len(signature))
 	if from.size < signed {
-		return nil, refuse(errNotHDF5, fileStart, "II.A",
-			"%d bytes, too few for the format signature", from.size)
+		return nil, fmt.Errorf("hdf5: not an HDF5 file: %d bytes, "+
+			"too few for the format signature, at address %#x "+
+			"(spec II.A)", from.size, fileStart)
 	}
 	start, err := from.read(fileStart, signed, "II.A")
 	if err != nil {
 		return nil, err
 	}
 	if !bytes.Equal(start, signature) {
-		return nil, refuse(errNotHDF5, fileStart, "II.A",
-			"the format signature is %x", start)
+		return nil, fmt.Errorf("hdf5: not an HDF5 file: the format "+
+			"signature is %x, at address %#x (spec "+
+			"II.A)", start, fileStart)
 	}
 	raw, err := from.read(fileStart, superblock0Size, "II.A")
 	if err != nil {
@@ -65,9 +70,9 @@ func readSuperblock(from *source) (*superblock, error) {
 	walk := &cursor{data: raw, at: len(signature)}
 	version := walk.u8()
 	if version != superblockVersion {
-		return nil, refuse(errUnsupported, signed, "II.A",
-			"superblock version %d, only version 0 is read",
-			version)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"superblock version %d, only version 0 is read, at "+
+			"address %#x (spec II.A)", version, signed)
 	}
 	return readSuperblockFields(from, walk)
 }
@@ -83,24 +88,26 @@ func readSuperblockFields(from *source, walk *cursor) (*superblock,
 		"shared header message format version"} {
 		if got := walk.u8(); got != versionField {
 			field := uint64(walk.at - backOne)
-			return nil, refuse(errUnsupported, field, "II.A",
-				"%s is %d, only 0 is read", name, got)
+			return nil, fmt.Errorf("hdf5: part of the format not "+
+				"read: %s is %d, only 0 is read, at address "+
+				"%#x (spec II.A)", name, got, field)
 		}
 	}
 	offsets, lengths := walk.u8(), walk.u8()
 	if offsets != addressSize || lengths != addressSize {
 		field := uint64(walk.at - backTwo)
-		return nil, refuse(errUnsupported, field, "II.A",
-			"size of offsets %d and of lengths %d, only %d is read",
-			offsets, lengths, addressSize)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"size of offsets %d and of lengths %d, only %d is "+
+			"read, at address %#x (spec "+
+			"II.A)", offsets, lengths, addressSize, field)
 	}
 	walk.skip(byteWide) // reserved, zero
 	leaf, internal := walk.u16(), walk.u16()
 	if leaf == noK || internal == noK {
 		field := uint64(walk.at - backFour)
-		return nil, refuse(errCorrupt, field, "II.A",
-			"group leaf node K %d or internal node K %d is zero",
-			leaf, internal)
+		return nil, fmt.Errorf("hdf5: file is damaged: group leaf "+
+			"node K %d or internal node K %d is zero, at address "+
+			"%#x (spec II.A)", leaf, internal, field)
 	}
 	walk.skip(consistencyFlags)
 	found, err := readSuperblockAddresses(from, walk)
@@ -118,22 +125,25 @@ func readSuperblockAddresses(from *source, walk *cursor) (*superblock,
 	base := walk.u64()
 	if base != noBase {
 		field := uint64(walk.at - addressSize)
-		return nil, refuse(errUnsupported, field, "II.A",
-			"base address %#x, only 0 is read", base)
+		return nil, fmt.Errorf("hdf5: part of the format not read: "+
+			"base address %#x, only 0 is read, at address %#x "+
+			"(spec II.A)", base, field)
 	}
 	walk.skip(addressSize) // free-space index, unused in version 0
 	end := walk.u64()
 	if end > from.size {
 		field := uint64(walk.at - addressSize)
-		return nil, refuse(errCorrupt, field, "II.A",
-			"end of file address %d is past the file's %d bytes: "+
-				"truncated", end, from.size)
+		return nil, fmt.Errorf("hdf5: file is damaged: end of file "+
+			"address %d is past the file's %d bytes: truncated, "+
+			"at address %#x (spec "+
+			"II.A)", end, from.size, field)
 	}
 	driver := walk.u64()
 	if driver != undefinedAddress {
 		field := uint64(walk.at - addressSize)
-		return nil, refuse(errUnsupported, field, "II.A",
-			"a driver information block at %#x", driver)
+		return nil, fmt.Errorf("hdf5: part of the format not read: a "+
+			"driver information block at %#x, at address %#x "+
+			"(spec II.A)", driver, field)
 	}
 	// Root group symbol table entry, III.C: link name offset, object
 	// header address, cache type, 4 reserved bytes, 16 scratch-pad bytes.

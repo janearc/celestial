@@ -1,14 +1,12 @@
-// Package gw is gravitational waves as the LIGO, Virgo and Kagra
-// detectors publish them through the gravitational wave open science
-// centre, called the centre here: the events of its catalogues, each
-// with its estimates and their credible intervals, read into si units.
+// Package gw reads LIGO, Virgo, and Kagra catalogue events from the
+// Gravitational Wave Open Science Center, called the centre here. Estimates and
+// credible intervals are converted to SI as they are read; event times become
+// sky.Instant values on the GPS scale.
 //
-// gw knows the centre's format, not its parameters' meanings: an event
-// holds every estimate the centre gives under the centre's own name for
-// it, and a caller asks for one by that name. A value the centre leaves
-// blank is absent, never nought, and a bound it leaves blank is unknown.
+// Parameters retain the centre’s names. A caller chooses which estimates to
+// interpret; the reader does not guess their meaning. Missing values remain
+// absent rather than becoming zero, and missing interval bounds remain unknown.
 //
-// Units arrive as strings, M_sun or Mpc; each is turned into si as it is
-// read, by a table of the strings the centre writes, and a string not in
-// the table is refused. Time is the event's gps time, as a sky.Instant.
+// Unit strings such as M_sun and Mpc use explicit conversions. Unknown unit
+// strings return an error instead of leaving a value in ambiguous units.
 package gw

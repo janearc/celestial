@@ -18,27 +18,26 @@ const (
 	cosmosYears      = "cosmos-years"
 )
 
-// The IAU's nominal solar values, 2015 resolution B3. Each is defined:
-// the resolution fixes them as exact conversion constants, whatever the
-// sun is measured to be. Read on 2026-10-31 in its solar conversion
-// constants, from the copy at arXiv:1510.07674; game run extract prints them.
+// The IAU's nominal solar values, 2015 resolution B3. Each is defined: the
+// resolution fixes them as exact conversion constants, whatever the Sun is
+// measured to be. Read on 2026-10-31 in its solar conversion constants, from
+// the copy at arXiv:1510.07674; game run extract prints them.
 const (
-	// sunGravitySI is the nominal GM of the sun, in m3 s-2. Defined.
+	// sunGravitySI is the nominal GM of the Sun, in m3 s-2. Defined.
 	sunGravitySI = 1.3271244e20
-	// sunRadiusSI is the nominal radius of the sun, in m. Defined.
+	// sunRadiusSI is the nominal radius of the Sun, in m. Defined.
 	sunRadiusSI = 6.957e8
-	// sunLuminositySI is the nominal luminosity of the sun, in W.
-	// Defined.
+	// sunLuminositySI is the nominal luminosity of the Sun, in W. Defined.
 	sunLuminositySI = 3.828e26
 )
 
-// sunGM is the sun's GM in natural units, where it is a length: half the
-// radius of the horizon a hole of the sun's mass would have.
+// sunGM is the Sun's GM in natural units, where it is a length: half the radius
+// of the horizon a hole of the Sun's mass would have.
 const sunGM = sunGravitySI * metre * metre * metre / (second * second)
 
-// gravitation is G in natural units, MeV-2: one over the planck mass
-// squared. A body's mass found from its orbit carries G's doubt, so a
-// body keeps its measured GM.
+// gravitation is G in natural units, MeV-2: one over the Planck mass squared. A
+// body's mass found from its orbit carries G's uncertainty, so a body keeps its
+// measured GM.
 func gravitation() float64 {
 	return si.Gravitation() * metre * metre * metre /
 		(kilogram * second * second)
@@ -56,8 +55,8 @@ func Hydrogen1() Mass { return Daltons(research.Value(hydrogen1Daltons)) }
 // Helium4 is the mass of a helium 4 atom, its electrons and all.
 func Helium4() Mass { return Daltons(research.Value(helium4Daltons)) }
 
-// Sun is the IAU's nominal sun: its GM, radius and luminosity as the IAU
-// fixes them, and its mass from its GM over G.
+// Sun is the IAU's nominal Sun: its GM, radius and luminosity as the IAU fixes
+// them, and its mass from its GM over G.
 func Sun() Nominal {
 	return Nominal{gm: Length{sunGM}, radius: Length{sunRadiusSI * metre},
 		luminosity: Power{sunLuminositySI * watt},

@@ -71,8 +71,7 @@ func TestLinesKeepsAFractionOfANanometre(test *testing.T) {
 }
 
 // Lines carries radiation far shorter than a nanometre: a gamma ray at a
-// ten-thousandth of one is in its own band, with all its power. The
-// libtheme test also said it has no colour; that stays behind.
+// ten-thousandth of one is in its own band, with all its power.
 func TestLinesCarriesGamma(test *testing.T) {
 	numbers := pickedNumbers(test)
 	light := bands.Lines(map[float64]float64{numbers.GammaNM: numbers.GammaPower})
@@ -86,8 +85,7 @@ func TestLinesCarriesGamma(test *testing.T) {
 }
 
 // Power of exactly one is light and counts: it is in its band, and the
-// band is the whole span. The libtheme test went on to say it is a colour;
-// that stays behind.
+// band is the whole span.
 func TestAPowerOfOneCounts(test *testing.T) {
 	numbers := pickedNumbers(test)
 	light := lineOf(numbers.LineNM, unitPower)
@@ -132,8 +130,8 @@ func TestLinesOfNothingAreNoLight(test *testing.T) {
 }
 
 // The anti-test: light at an endless wavelength, or at none that is a
-// number, is no light either, and the rest is the same without it. The
-// endless one once panicked, asking for a band past every band.
+// number, is no light either, and the rest is the same without it: no
+// band holds either.
 func TestLinesIgnoreAnEndlessWavelength(test *testing.T) {
 	numbers := pickedNumbers(test)
 	spectrum := map[float64]float64{numbers.LineNM: unitPower}
@@ -151,7 +149,7 @@ func TestLinesIgnoreAnEndlessWavelength(test *testing.T) {
 	}
 }
 
-// endless asks math.Inf for the infinity above. Defined by math.
+// endless asks math.Inf for the infinity above. Defined by math.Inf.
 const endless = 1
 
 // The anti-test: Lines reads the spectrum it is given and leaves it as it

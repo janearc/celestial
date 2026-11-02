@@ -11,15 +11,14 @@ import (
 // nextStep is the step after one in a list. Defined by counting.
 const nextStep = 1
 
-// taiOf is a utc reading as an instant on tai, or the test stops.
+// taiOf is a UTC reading as an instant on TAI, or the test stops.
 func taiOf(test stopper, when timed) sky.Instant {
 	test.Helper()
 	civil := at(test, when, sky.UTC())
 	return on(test, civil, sky.TAI())
 }
 
-// aheadOf is how many seconds tai is past a utc reading, or the test
-// stops.
+// aheadOf is how many seconds TAI is past a UTC reading, or the test stops.
 func aheadOf(test *testing.T, when timed) float64 {
 	test.Helper()
 	atomic := taiOf(test, when)
@@ -60,9 +59,9 @@ func TestTheTableEndsWhereItEnds(test *testing.T) {
 	}
 }
 
-// The anti-test: tt, gps and tdb carry no leap seconds, so an instant on
-// any of them is taken to tai wherever it falls, years outside the table
-// utc keeps; only utc is refused there.
+// The anti-test: TT, GPS and TDB carry no leap seconds, so an instant on any of
+// them is taken to TAI wherever it falls, years outside the table UTC keeps;
+// only UTC is refused there.
 func TestScalesWithoutLeapSecondsNeedNoTable(test *testing.T) {
 	numbers := clockNumbers(test)
 	shift := map[string]float64{"tt": -numbers.TT.Ahead,
@@ -86,9 +85,9 @@ func TestScalesWithoutLeapSecondsNeedNoTable(test *testing.T) {
 	}
 }
 
-// The anti-test: tdb is not tt under another name. Over the year the
-// wobble reaches a millisecond, so a conversion that leaves the reading
-// alone is caught.
+// The anti-test: TDB is not TT under another name. Over the year the wobble
+// reaches a millisecond, so a conversion that leaves the reading alone is
+// caught.
 func TestTDBIsNotTT(test *testing.T) {
 	numbers := clockNumbers(test)
 	whole, fraction := at(test, numbers.TDB.From, sky.TT()).Julian()
@@ -109,10 +108,9 @@ func TestTDBIsNotTT(test *testing.T) {
 	}
 }
 
-// The anti-test: no time is made or lost across the leap second. The
-// readings on utc, each taken to tai, are as far apart as the clock says,
-// and the day that ends in a leap second is 86401 s long where its
-// neighbour is 86400.
+// The anti-test: no time is made or lost across the leap second. The readings
+// on UTC, each taken to TAI, are as far apart as the clock says, and the day
+// that ends in a leap second is 86401 s long where its neighbour is 86400.
 func TestNoTimeIsMadeOrLostAcrossALeapSecond(test *testing.T) {
 	numbers := clockNumbers(test)
 	steps := numbers.AcrossLeap
@@ -135,9 +133,9 @@ func TestNoTimeIsMadeOrLostAcrossALeapSecond(test *testing.T) {
 	}
 }
 
-// The anti-test: gps time takes no leap second. Whatever the date, in
-// 1980 or after the leap seconds of 1999 and 2016, the same instant is 19
-// s apart on gps and tai, not more as utc has fallen behind.
+// The anti-test: GPS time takes no leap second. Whatever the date, in 1980 or
+// after the leap seconds of 1999 and 2016, the same instant is 19 s apart on
+// GPS and TAI, not more as UTC has fallen behind.
 func TestGPSTakesNoLeapSecond(test *testing.T) {
 	numbers := clockNumbers(test)
 	whens := []timed{numbers.GPS.Epoch}
@@ -159,8 +157,8 @@ func TestGPSTakesNoLeapSecond(test *testing.T) {
 	}
 }
 
-// The anti-test: utc that the leap-second table does not speak for has no
-// gps seconds, and nothing is given beside the refusal.
+// The anti-test: UTC that the leap-second table does not speak for has no GPS
+// seconds, and nothing is given beside the refusal.
 func TestNoGPSSecondsWhereUTCIsNotKnown(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, when := range []timed{numbers.TooEarly, numbers.TooLate} {
@@ -171,10 +169,10 @@ func TestNoGPSSecondsWhereUTCIsNotKnown(test *testing.T) {
 	}
 }
 
-// The anti-test: the ten days the gregorian calendar skipped are skipped
-// and no more. The day after 1582 october 4 is october 15, and every day
-// round the reform and round the leap days, julian and gregorian, is one
-// day, 86400 s, after the one before it.
+// The anti-test: the ten days the Gregorian calendar skipped are skipped and no
+// more. The day after 1582 October 4 is October 15, and every day round the
+// reform and round the leap days, Julian and Gregorian, is one day, 86400 s,
+// after the one before it.
 func TestTheReformSkipsTenDaysAndNoMore(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, pair := range numbers.Consecutive {
@@ -188,10 +186,10 @@ func TestTheReformSkipsTenDaysAndNoMore(test *testing.T) {
 	}
 }
 
-// The anti-test: a julian date a hair before midnight is the day before,
-// at its last second, and not the next day with a time below nothing;
-// the same date to the instant is midnight, and the two parts a date is
-// given in make no difference.
+// The anti-test: a Julian date a hair before midnight is the day before, at its
+// last second, and not the next day with a time below nothing; the same date to
+// the instant is midnight, and the two parts a date is given in make no
+// difference.
 func TestAJulianDateAHairBeforeMidnightIsTheDayBefore(test *testing.T) {
 	numbers := clockNumbers(test)
 	hair := numbers.Hair
@@ -223,8 +221,8 @@ func TestAJulianDateAHairBeforeMidnightIsTheDayBefore(test *testing.T) {
 	}
 }
 
-// The anti-test: sidereal time is the earth's turning and no other clock's
-// to give: tai, tt, tdb, gps and utc each give none, and no angle.
+// The anti-test: sidereal time is the Earth's turning and no other clock's to
+// give: TAI, TT, TDB, GPS and UTC each give none, and no angle.
 func TestOnlyUT1HasASiderealTime(test *testing.T) {
 	numbers := clockNumbers(test)
 	for _, scale := range []sky.Scale{sky.UTC(), sky.TAI(), sky.TT(),
