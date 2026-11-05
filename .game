@@ -2,6 +2,12 @@
 # celestial: physics, maths, and things that are bigger than you.
 name celestial
 
+# the member celestial ships with, beside it as a stack lays it:
+# celestial-data, which finds and fetches what the archives hold for
+# celestial's tests and for whoever reads the sky with it. it ships as
+# its main has it; work lands there first.
+stack celestial-data main
+
 lint width 80
 lint rows 25
 lint comments

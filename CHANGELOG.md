@@ -1,4 +1,4 @@
-## v0.0.5 nov 5
+## v0.0.5 - v0.0.6 05 november
 
 changed:
 
@@ -8,6 +8,8 @@ changed:
   ledger, each end cited to the page of the standard it was read on:
   the published standard's first pages to clause 6.5, its proof past
   that, and heasarc for fermi. ranges.json is gone
+
+- added celestial-data member
 
 ## v0.0.4 1 nov
 
