@@ -1,4 +1,4 @@
-## unreleased
+## v0.0.5 nov 5
 
 changed:
 
