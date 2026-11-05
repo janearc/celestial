@@ -114,3 +114,31 @@ sources:
     size: 9317371
     licence: "not stated here: cited, not copied"
     read: "2026-10-31, table 2, from the arXiv copy, v4 of 9 aug 2021; the doi answers curl with 403 and was not read"
+
+  - key: iso-21348-2007
+    title: "ISO 21348:2007 Space environment (natural and artificial): Process for determining solar irradiances"
+    by: "ISO/TC 20/SC 14/WG 4; W. Kent Tobiska is its lead author"
+    year: 2007
+    from: https://cdn.standards.iteh.ai/samples/39911/7088f5099b2343c3810f06b6ca9bc35b/ISO-21348-2007.pdf
+    catalogue: https://standards.iteh.ai/catalog/standards/iso/53aee542-8f22-4f5f-ba6b-f83d55fd21d6/iso-21348-2007
+    sha256: 2e73b665d042b9c37e8a098ea16770150b903bc972acef8f27e91dfde343205d
+    size: 336953
+    licence: "copyright iso 2007, all rights reserved: the free preview a reseller serves, cited, not copied, and omitted from dist"
+    read: "2026-11-04, clauses 6.3 to 6.5 of the published standard, from the preview's pages 10 and 11. the standard itself is sold, so its own first pages are cited where they reach; the preview stops after 6.5, and the clauses past it are read in iso-21348-2007-proof"
+
+  - key: iso-21348-2007-proof
+    title: "ISO 21348:2007(E), first edition, proof: Space environment (natural and artificial): Process for determining solar irradiances"
+    by: "ISO/TC 20/SC 14/WG 4, as served by Space Environment Technologies, the lead author's company"
+    year: 2007
+    from: https://spacewx.com/wp-content/uploads/2024/02/ISO_PRF_21348_e_review-1.pdf
+    sha256: f703d9e30faa84f6348843ac747d397a962b8998b0a9f0cd38095f7adbeb3baf
+    size: 944282
+    licence: "copyright iso 2007, marked not official standard, for review only: cited, not copied, and omitted from dist"
+    read: "2026-11-04, clauses 6.7 to 6.9, on its pages 12 and 13: the ones the published standard's preview does not reach. it is the proof, not the published text; it is cited because the published text past 6.5 is sold, and where the two overlap they agree, so the published preview is cited there"
+
+  - key: heasarc-fermi
+    title: "Fermi Gamma-ray Space Telescope"
+    by: "NASA's High Energy Astrophysics Science Archive Research Center (HEASARC)"
+    from: https://heasarc.gsfc.nasa.gov/docs/heasarc/missions/fermi.html
+    licence: "public: a work of the us government (nasa)"
+    read: 2026-10-31

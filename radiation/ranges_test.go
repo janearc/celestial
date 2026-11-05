@@ -27,9 +27,9 @@ func named() map[string]radiation.Range {
 	return ranges
 }
 
-// The ranges are as ranges.json holds them, and every one the test data names
-// is there. The test data says where they were read: tobiska and nusinov's
-// account of ISO 21348's draft (cospar 2004), section 3.
+// The ranges are as the research ledger holds them, and every one the test
+// data names is there. The ledger says where each end was read in ISO
+// 21348:2007.
 func TestTheNamedRanges(test *testing.T) {
 	want := pickedNumbers(test).Named
 	ranges := isoRanges()

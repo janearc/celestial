@@ -16,6 +16,7 @@ implemented merely because the plan below describes them.
 - UT1 from a supplied DUT1, and Greenwich mean sidereal time.
 - Earth sites and equatorial-to-horizontal coordinates.
 - Gnomonic tangent planes, east/north offsets, and error ellipses.
+- The galactic frame, both ways, by the Hipparcos definition.
 
 Calendar conversion uses the Julian calendar before 1582-10-15 and the
 Gregorian calendar afterward, rejecting the skipped reform dates. Years

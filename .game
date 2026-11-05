@@ -21,6 +21,9 @@ sweep allow doc/hole/README.md emails author
 omit hdf5/testdata
 exclude hdf5/testdata
 
+omit fits/testdata
+exclude fits/testdata
+
 # Generate test doubles from the interfaces clients use. mockgen is pinned
 # as a tool in go.mod so game run mocks uses a reproducible version.
 run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/photometry.go -package mocks github.com/janearc/celestial/photometry Photometer
@@ -93,6 +96,12 @@ run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --creat
 # US Standard Atmosphere (1976), NASA’s 18 MB scan. Its text layer is
 # unusable; tables 2 and 4 were read visually on PDF pages 18 and 19.
 run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/us-standard-atmosphere-1976.pdf https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf
+
+# ISO 21348:2007 is sold, not open. A reseller serves the published
+# standard's first pages free, and they reach clause 6.5; the lead
+# author's company serves the proof, which reaches 6.9.
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/iso-21348-2007.pdf https://cdn.standards.iteh.ai/samples/39911/7088f5099b2343c3810f06b6ca9bc35b/ISO-21348-2007.pdf
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/iso-21348-2007-proof.pdf https://spacewx.com/wp-content/uploads/2024/02/ISO_PRF_21348_e_review-1.pdf
 
 # Extract source records for comparison with the values and equations
 # used in code.
@@ -224,6 +233,19 @@ run extract . :: grep -n -E =[[:space:]]+3[.]828[^0-9]+1026[[:space:]]W cited-so
 run extract . :: grep -n -E =[[:space:]]+5772[[:space:]]K cited-sources/iau-2015-b3.txt
 run extract . :: grep -n -E =[[:space:]]+1[.]327[[:space:]]124[[:space:]]4[^0-9]+1020[[:space:]]m3 cited-sources/iau-2015-b3.txt
 run extract . :: grep -n -o -E studies[[:space:]]the[[:space:]]cosmos[[:space:]]in[[:space:]]the[[:space:]]energy[[:space:]]range[[:space:]]10[[:space:]]keV[[:space:]]&ndash;[[:space:]]300[[:space:]]GeV cited-sources/heasarc-fermi.html
+# iso 21348's ranges: the published preview's 6.3 to 6.5, then the
+# proof's 6.7 to 6.9. pdftotext writes the standard's less-than-or-equal
+# as u.
+run extract . :: pdftotext -layout cited-sources/iso-21348-2007.pdf cited-sources/iso-21348-2007.txt
+run extract . :: grep -n -o -E [(]0,000[[:space:]]01[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]0,001[)][[:space:]]nm cited-sources/iso-21348-2007.txt
+run extract . :: grep -n -o -E Hard[[:space:]]X-ray[^(]*[(]0,001[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]0,1[)][[:space:]]nm cited-sources/iso-21348-2007.txt
+run extract . :: grep -n -o -E Soft[[:space:]]X-ray[^(]*[(][^(]*[(]0,1[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]10[)][[:space:]]nm cited-sources/iso-21348-2007.txt
+run extract . :: grep -n -o -E Ultraviolet[[:space:]][(]UV[)][^(]*[(]100[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]400[)][[:space:]]nm cited-sources/iso-21348-2007.txt
+run extract . :: grep -n -o -E Extreme[[:space:]]Ultraviolet[^(]*[(]EUV[)][^(]*[(]10[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]121[)][[:space:]]nm cited-sources/iso-21348-2007.txt
+run extract . :: pdftotext -layout cited-sources/iso-21348-2007-proof.pdf cited-sources/iso-21348-2007-proof.txt
+run extract . :: grep -n -o -E Infrared[[:space:]][(]IR[)][^(]*[(]760[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]1[[:space:]]000[[:space:]]000[)][[:space:]]nm cited-sources/iso-21348-2007-proof.txt
+run extract . :: grep -n -o -E Microwave[[:space:]]irradiances[^(]*[(]1[[:space:]]000[[:space:]]000[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]15[[:space:]]000[[:space:]]000[)][[:space:]]nm cited-sources/iso-21348-2007-proof.txt
+run extract . :: grep -n -o -E Solar[[:space:]]radio[[:space:]]irradiances[^(]*[(]100[[:space:]]000[[:space:]]u[[:space:]]λ[[:space:]]<[[:space:]]100[[:space:]]000[[:space:]]000[[:space:]]000[)][[:space:]]nm cited-sources/iso-21348-2007-proof.txt
 run extract . :: pdftotext -layout cited-sources/ame-2020.pdf cited-sources/ame-2020.txt
 run extract . :: grep -n -m1 -o -E The[[:space:]]2020[[:space:]]Atomic[[:space:]]mass[[:space:]]table cited-sources/ame-2020.txt
 run extract . :: grep -n -m1 -o -E Atomic[[:space:]]mass[[:space:]]M[[:space:]]and[[:space:]]its[[:space:]]uncertainty[[:space:]]in[[:space:]]µu cited-sources/ame-2020.txt

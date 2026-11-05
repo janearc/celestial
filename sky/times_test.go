@@ -96,17 +96,21 @@ type clocked struct {
 	AboveTheHighest float64   `json:"above the highest metres"`
 	MeeusDates      []dated   `json:"meeus dates"`
 	DateTolerance   float64   `json:"date tolerance"`
-	NotDates        []timed   `json:"not dates"`
-	LeapDays        []timed   `json:"leap days"`
-	RoundTrips      []timed   `json:"round trips"`
-	NotFractions    []float64 `json:"not fractions"`
-	NotLeapSeconds  []timed   `json:"not leap seconds"`
-	LeapDay         timed     `json:"leap day"`
-	JulianLeapDay   timed     `json:"julian leap day"`
-	WashingtonUp    float64   `json:"washington height"`
-	NotTimes        []timed   `json:"not times"`
-	Noon            int       `json:"noon"`
-	TAILessUTC      []struct {
+	PastOne         struct {
+		Ascension   float64 `json:"ascension"`
+		Declination float64 `json:"declination"`
+	} `json:"past one"`
+	NotDates       []timed   `json:"not dates"`
+	LeapDays       []timed   `json:"leap days"`
+	RoundTrips     []timed   `json:"round trips"`
+	NotFractions   []float64 `json:"not fractions"`
+	NotLeapSeconds []timed   `json:"not leap seconds"`
+	LeapDay        timed     `json:"leap day"`
+	JulianLeapDay  timed     `json:"julian leap day"`
+	WashingtonUp   float64   `json:"washington height"`
+	NotTimes       []timed   `json:"not times"`
+	Noon           int       `json:"noon"`
+	TAILessUTC     []struct {
 		timed
 		Ahead float64 `json:"ahead"`
 	} `json:"tai less utc"`

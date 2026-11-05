@@ -1,0 +1,27 @@
+# numbers.yaml: the numbers the layer's tests are held to.
+
+numbers:
+  - name: centre-ra
+    value: 83.8221
+    unit: degrees
+    says: the right ascension the hand-built images are centred on, the Orion Nebula's as recalled; any place would do
+    kind: picked
+    by: celestial's grissom layer tests, 2026-11-02
+  - name: centre-dec
+    value: -5.3911
+    unit: degrees
+    says: the declination the hand-built images are centred on, the Orion Nebula's as recalled
+    kind: picked
+    by: celestial's grissom layer tests, 2026-11-02
+  - name: pixel-scale
+    value: 0.01
+    unit: degrees a pixel
+    says: the scale of the drawn images, so an image of a few pixels spans cells at some depths and sits inside one at others
+    kind: picked
+    by: celestial's grissom layer tests, 2026-11-02
+  - name: sum-rounding
+    value: 1e-12
+    unit: a share of the pixels' summed sizes
+    says: how far the cells' means times their counts may sum from the pixels' own sum; float64 leaves about 1e-14 over the few dozen pixels drawn
+    kind: picked
+    by: celestial's grissom layer tests, 2026-11-02

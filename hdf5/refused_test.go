@@ -49,11 +49,16 @@ func mutated(test *testing.T, want mutation) []byte {
 	return raw
 }
 
-// refusal is what reading a mutated file the way the mutation says gives:
-// whether it gave a file, members or values, and its error.
+// refusal is what reading the real file, mutated, the way the mutation
+// says gives: whether it gave a file, members or values, and its error.
 func refusal(test *testing.T, want mutation) (bool, error) {
 	test.Helper()
-	raw := mutated(test, want)
+	return refusalOf(test, mutated(test, want), want)
+}
+
+// refusalOf is what reading changed bytes the way a mutation says gives.
+func refusalOf(test *testing.T, raw []byte, want mutation) (bool, error) {
+	test.Helper()
 	if want.Through == "open" {
 		file, err := opening(raw)
 		return file != nil, err

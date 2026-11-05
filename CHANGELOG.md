@@ -1,4 +1,17 @@
+## unreleased
+
+changed:
+
+- radiation: ExtremeUltraviolet ends at 121 nm, as iso 21348:2007
+  publishes it (6.5.3). it ended at 120, the draft's number
+- radiation's named ranges, and fermi's, are read from the research
+  ledger, each end cited to the page of the standard it was read on:
+  the published standard's first pages to clause 6.5, its proof past
+  that, and heasarc for fermi. ranges.json is gone
+
 ## v0.0.4 1 nov
+
+- whole bunch of doc changes for clarity
 
 breaking:
 

@@ -38,6 +38,8 @@
     {"year": -4712, "month": 1, "day": 1.5, "julian": 0.0}
   ],
   "date tolerance": 1e-6,
+  "past one about": "a place a hair from the north galactic pole where float64 rounding pushes the galactic latitude's sine to 1.0000000000000002, found by a search on 2026-11-02; picked",
+  "past one": {"ascension": 192.8594794, "declination": 27.12824999999879},
   "not dates": [
     {"year": 1582, "month": 10, "day": 10}, {"year": 2000, "month": 13, "day": 1},
     {"year": 2001, "month": 2, "day": 29}, {"year": 1900, "month": 2, "day": 29},

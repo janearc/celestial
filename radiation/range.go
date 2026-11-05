@@ -1,11 +1,10 @@
 package radiation
 
 import (
-	_ "embed"
-	"encoding/json"
 	"fmt"
 	"math"
-	"sync"
+
+	"github.com/janearc/celestial/research"
 )
 
 // Range is a half-open interval of wavelengths in nanometres: the short
@@ -61,75 +60,31 @@ func (span Range) at(fraction float64) float64 {
 	return span.short * math.Pow(span.long/span.short, fraction)
 }
 
-// rangesText is the named ranges, as ranges.json holds them.
+// iso is the range iso 21348 gives a name, as celestial's research
+// ledger holds its two ends: name-short and name-long, in nanometres. A
+// name the ledger does not hold is a mistake in radiation's code, which
+// its tests find; research stops the program and says which.
 //
-//go:embed ranges.json
-var rangesText []byte
-
-// edges is a range as ranges.json writes it.
-type edges struct {
-	Short float64 `json:"short"`
-	Long  float64 `json:"long"`
-}
-
-// named is ranges.json, read.
-type named struct {
-	ISO   map[string]edges `json:"iso"`
-	Fermi struct {
-		Highest float64 `json:"highest"`
-		Lowest  float64 `json:"lowest"`
-	} `json:"fermi ev"`
-}
-
-// readNamed is ranges.json read, or nil and the error that stopped it.
-func readNamed() (*named, error) {
-	var ranges named
-	if err := json.Unmarshal(rangesText, &ranges); err != nil {
-		return nil, err
-	}
-	return &ranges, nil
-}
-
-// namedRanges is ranges.json, read once.
-var namedRanges = sync.OnceValues(readNamed)
-
-// loaded reads the embedded range data. Invalid data is an internal error and
-// panics with the cause.
-func loaded() *named {
-	ranges, err := namedRanges()
-	if err != nil {
-		panic(fmt.Errorf("radiation: ranges.json: %w", err))
-	}
-	return ranges
-}
-
-// iso is the range ranges.json holds under a name of iso 21348's. A name
-// it does not hold is a mistake in radiation's code, which its tests
-// find, so asking for one stops the program and says which.
-//
-// Each was read on 2026-10-31 in tobiska and nusinov's account of the
-// standard's draft (cospar 2004), by its authors, since the published
-// standard is not open; ranges.json's about says where.
+// The ledger says where each end was read: the published standard's own
+// first pages to clause 6.5, and the proof its lead author's company
+// serves past that, since the standard itself is sold.
 //
 // They overlap, ultraviolet with extreme ultraviolet and radio with
 // infrared and microwave, so a wavelength may be in two.
 func iso(name string) Range {
-	written, held := loaded().ISO[name]
-	if !held {
-		panic(fmt.Errorf("radiation: ranges.json has no %q", name))
-	}
-	return Range{short: written.Short, long: written.Long}
+	return Range{short: research.Value(name + "-short"),
+		long: research.Value(name + "-long")}
 }
 
 // Gamma is gamma rays, under ISO 21348's name: see iso.
-func Gamma() Range { return iso("gamma ray") }
+func Gamma() Range { return iso("gamma-ray") }
 
 // XRay is x-rays, hard and soft together, under ISO 21348's name: see iso.
 func XRay() Range { return iso("x-ray") }
 
-// ExtremeUltraviolet is the extreme ultraviolet, under ISO 21348's name, as its
-// draft gives it: see iso. It overlaps Ultraviolet.
-func ExtremeUltraviolet() Range { return iso("extreme ultraviolet") }
+// ExtremeUltraviolet is the extreme ultraviolet, under ISO 21348's name, as
+// published: see iso. It overlaps Ultraviolet.
+func ExtremeUltraviolet() Range { return iso("extreme-ultraviolet") }
 
 // Ultraviolet is the ultraviolet, under ISO 21348's name: see iso. It overlaps
 // ExtremeUltraviolet.
@@ -154,7 +109,6 @@ func Radio() Range { return iso("radio") }
 // 10 keV to 300 GeV, read on 2026-10-31. Use this interval when matching
 // observations collected by the mission.
 func Fermi() Range {
-	energies := loaded().Fermi
-	return Range{short: FromEnergy(energies.Highest),
-		long: FromEnergy(energies.Lowest)}
+	return Range{short: FromEnergy(research.Value("fermi-highest-ev")),
+		long: FromEnergy(research.Value("fermi-lowest-ev"))}
 }

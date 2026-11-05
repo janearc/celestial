@@ -15,11 +15,11 @@
     "gamma nm": 1e-4,
     "ten metres": 10
   },
-  "named ranges source": "the ranges as ranges.json holds them, there to catch a change to it nobody meant: iso 21348's, as tobiska and nusinov's account of its draft (cospar 2004, section 3) gives them, read 2026-10-31; ranges.json's about says where. Extreme ultraviolet ends at 120 nm there; libtheme-css had 121, as its author recalled the published standard, which was not read. They overlap each other in places (ultraviolet and extreme ultraviolet; radio and microwave).",
+  "named ranges source": "the ranges as the research ledger holds them, there to catch a change to it nobody meant: iso 21348:2007's, read 2026-11-04 in the published standard's first pages to clause 6.5 and in its proof past that; the ledger says where each end was read. Extreme ultraviolet ends at 121 nm, as published (6.5.3); the draft's account had 120. They overlap each other in places (ultraviolet and extreme ultraviolet; radio and microwave).",
   "named ranges": {
     "gamma ray": {"lo": 1e-5, "hi": 1e-3},
     "x-ray": {"lo": 1e-3, "hi": 10},
-    "extreme ultraviolet": {"lo": 10, "hi": 120},
+    "extreme ultraviolet": {"lo": 10, "hi": 121},
     "ultraviolet": {"lo": 100, "hi": 400},
     "infrared": {"lo": 760, "hi": 1e6},
     "microwave": {"lo": 1e6, "hi": 1.5e7},
@@ -65,7 +65,7 @@
     "no light kelvin": [0, -5]
   },
   "fermi": {
-    "about": "the short edge is 300 GeV and the long edge is 10 keV: the fermi mission's range as nasa's heasarc gives it, 10 keV to 300 GeV, read 2026-10-31 (ranges.json says where)",
+    "about": "the short edge is 300 GeV and the long edge is 10 keV: the fermi mission's range as nasa's heasarc gives it, 10 keV to 300 GeV, read 2026-10-31 (the research ledger says where)",
     "highest ev": 300e9,
     "lowest ev": 10e3,
     "tolerance": 1e-9

@@ -171,6 +171,16 @@ numbers:
     kind: picked
     by: "libtheme-css's bands (2026-10), chosen against colours drawn whole; its FUDGE.md, under bands, holds the steps tried"
 
+  # how steep grissom's logarithmic stretch is: picked, as saoimage ds9's
+  # default log exponent was recalled, not read from ds9.
+
+  - name: log-stretch
+    value: 1000
+    unit: ""
+    says: how steep grissom's logarithmic stretch is; a value x shows as log(1 + 1000 x) / log(1 + 1000)
+    kind: picked
+    by: "celestial's grissom composite (2026-11-02), as saoimage ds9's default log exponent is recalled; not read from ds9, and the curve is not held to ds9's"
+
   - name: cosmos-years
     value: 13.787e9
     unit: yr
@@ -491,3 +501,132 @@ numbers:
     says: the highest a place on the earth stands above sea level
     kind: picked
     by: "celestial's sky (2026-10-31): the top of the u.s. standard atmosphere, 1976, whose abstract (p. v) gives its main tables \"to 1000 km\""
+
+  # radiation's named ranges, iso 21348:2007's, in nanometres, each from
+  # its short end up to but not including its long end, as the standard
+  # writes them. the standard is sold, not open, so each is read in a
+  # copy that is: the published text's own first pages, which a reseller
+  # serves free and which reach clause 6.5, and past 6.5 the proof the
+  # lead author's company serves. where the two overlap, 6.3 to 6.5,
+  # they agree word for word. pdftotext writes the standard's
+  # less-than-or-equal as u, and the text here is as it reads there.
+  #
+  # x-rays are hard and soft together: hard's short end, soft's long.
+  # extreme ultraviolet ends at 121, as published (6.5.3); the draft's
+  # account (tobiska and nusinov, cospar 2004, section 3, in
+  # cited-sources) said 120, and radiation carried 120 until this.
+
+  - name: gamma-ray-short
+    value: 1e-5
+    unit: nm
+    says: where iso 21348's gamma rays begin, their shortest wavelength
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.3, gamma-rays", page: 10, text: "(0,000 01 u λ < 0,001) nm"}
+
+  - name: gamma-ray-long
+    value: 1e-3
+    unit: nm
+    says: where iso 21348's gamma rays end and x-rays begin
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.3, gamma-rays", page: 10, text: "(0,000 01 u λ < 0,001) nm"}
+
+  - name: x-ray-short
+    value: 1e-3
+    unit: nm
+    says: where iso 21348's hard x-rays, and so all its x-rays, begin
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.4.1, hard x-ray irradiances", page: 11, text: "(0,001 u λ < 0,1) nm"}
+
+  - name: x-ray-long
+    value: 10
+    unit: nm
+    says: where iso 21348's soft x-rays, and so all its x-rays, end
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.4.2, soft x-ray irradiances", page: 11, text: "(0,1 u λ < 10) nm"}
+
+  - name: extreme-ultraviolet-short
+    value: 10
+    unit: nm
+    says: where iso 21348's extreme ultraviolet begins
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.5.3, extreme ultraviolet (euv) irradiances", page: 11, text: "(10 u λ < 121) nm"}
+
+  - name: extreme-ultraviolet-long
+    value: 121
+    unit: nm
+    says: where iso 21348's extreme ultraviolet ends, just short of lyman-alpha
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.5.3, extreme ultraviolet (euv) irradiances", page: 11, text: "(10 u λ < 121) nm"}
+
+  - name: ultraviolet-short
+    value: 100
+    unit: nm
+    says: where iso 21348's ultraviolet begins
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.5.1, ultraviolet (uv) irradiances", page: 11, text: "(100 u λ < 400) nm"}
+
+  - name: ultraviolet-long
+    value: 400
+    unit: nm
+    says: where iso 21348's ultraviolet ends
+    kind: measured
+    source: {key: iso-21348-2007, where: "clause 6.5.1, ultraviolet (uv) irradiances", page: 11, text: "(100 u λ < 400) nm"}
+
+  - name: infrared-short
+    value: 760
+    unit: nm
+    says: where iso 21348's infrared begins
+    kind: measured
+    source: {key: iso-21348-2007-proof, where: "clause 6.7.1, infrared (ir) irradiances", page: 12, text: "(760 u λ < 1 000 000) nm"}
+
+  - name: infrared-long
+    value: 1e6
+    unit: nm
+    says: where iso 21348's infrared ends, a millimetre
+    kind: measured
+    source: {key: iso-21348-2007-proof, where: "clause 6.7.1, infrared (ir) irradiances", page: 12, text: "(760 u λ < 1 000 000) nm"}
+
+  - name: microwave-short
+    value: 1e6
+    unit: nm
+    says: where iso 21348's microwaves begin, a millimetre
+    kind: measured
+    source: {key: iso-21348-2007-proof, where: "clause 6.8, microwave irradiances", page: 12, text: "(1 000 000 u λ < 15 000 000) nm"}
+
+  - name: microwave-long
+    value: 1.5e7
+    unit: nm
+    says: where iso 21348's microwaves end, fifteen millimetres
+    kind: measured
+    source: {key: iso-21348-2007-proof, where: "clause 6.8, microwave irradiances", page: 12, text: "(1 000 000 u λ < 15 000 000) nm"}
+
+  - name: radio-short
+    value: 1e5
+    unit: nm
+    says: where iso 21348's solar radio begins, a tenth of a millimetre, inside the infrared
+    kind: measured
+    source: {key: iso-21348-2007-proof, where: "clause 6.9, solar radio irradiances", page: 13, text: "(100 000 u λ < 100 000 000 000) nm"}
+
+  - name: radio-long
+    value: 1e11
+    unit: nm
+    says: where iso 21348's solar radio ends, a hundred metres
+    kind: measured
+    source: {key: iso-21348-2007-proof, where: "clause 6.9, solar radio irradiances", page: 13, text: "(100 000 u λ < 100 000 000 000) nm"}
+
+  # fermi's whole range as nasa's heasarc states it, in energies: 10 keV
+  # to 300 GeV, read 2026-10-31. its instruments each cover a part.
+
+  - name: fermi-lowest-ev
+    value: 10e3
+    unit: eV
+    says: the lowest photon energy the fermi mission studies
+    kind: measured
+    source: {key: heasarc-fermi, where: "the mission's description, its first paragraph", text: "studies the cosmos in the energy range 10 keV &ndash; 300 GeV"}
+
+  - name: fermi-highest-ev
+    value: 300e9
+    unit: eV
+    says: the highest photon energy the fermi mission studies
+    kind: measured
+    source: {key: heasarc-fermi, where: "the mission's description, its first paragraph", text: "studies the cosmos in the energy range 10 keV &ndash; 300 GeV"}
