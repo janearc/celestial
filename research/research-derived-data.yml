@@ -480,6 +480,19 @@ numbers:
     kind: picked
     by: "slayer's atmosphere (2026-10)"
 
+  # how many steps gpu/orbit takes in one command before the batch comes
+  # back to go: picked. a command of these steps over a million stars
+  # took about two milliseconds on 2026-11-05 (gpu/orbit's heavy
+  # benchmark: four commands in eight); the seconds after which the
+  # system stops a command were not measured.
+
+  - name: orbit-steps-a-command
+    value: 256
+    unit: steps
+    says: how many leapfrog steps one gpu command takes for every star before the batch comes back
+    kind: picked
+    by: "celestial's gpu/orbit (2026-11-05); about two milliseconds a command over a million stars by the heavy benchmark, on an apple m3 max; the system's limit on a command was not measured"
+
   # the earth's mean radius, R1 of the geodetic reference system 1980,
   # which the iugg adopted in 1979, read on 2026-10-31 from moritz's
   # account of it. slayer's atmosphere carried 6371 km, rounded to the
@@ -630,3 +643,187 @@ numbers:
     says: the highest photon energy the fermi mission studies
     kind: measured
     source: {key: heasarc-fermi, where: "the mission's description, its first paragraph", text: "studies the cosmos in the energy range 10 keV &ndash; 300 GeV"}
+
+  # the galactic centre: the sun's distance from sgr a* and sgr a*'s
+  # mass, read on 2026-11-05 from the gravity collaboration's 2022
+  # paper, its best-fit sentence and its table b.1. the errors are the
+  # statistical ones printed there; the systematic ones are cited to
+  # the collaboration's 2021 paper, not read. the 2019 paper's distance,
+  # 8178 ± 13 ± 22 pc, is superseded and kept only as a source.
+
+  - name: sgr-a-distance
+    value: 8277
+    unit: pc
+    says: the sun's distance from sgr a*, R0, the galactic centre's black hole
+    kind: measured
+    source: {key: gravity-2022-mass, where: "the best-fit sentence in the body, and table B.1, R0 [pc], the four-star fit's first columns", text: "R0 = (8277 ± 9) pc"}
+
+  - name: sgr-a-mass
+    value: 4.297e6
+    unit: Msun
+    says: the mass of sgr a*, the galactic centre's black hole, in suns
+    kind: measured
+    source: {key: gravity-2022-mass, where: "the best-fit sentence in the body, and table B.1, M• [10^6 M☉], the four-star fit's first columns", text: "M• = (4.297±0.012)×106 M"}
+
+  # sgr a*'s apparent motion on the sky, which is the sun's motion
+  # about the centre seen from the sun: read on 2026-11-05 from reid
+  # and brunthaler's abstract and the fitted components in their body.
+
+  - name: sgr-a-motion-longitude
+    value: -6.411
+    unit: mas yr^-1
+    says: sgr a*'s apparent proper motion along the galactic plane, in galactic longitude
+    kind: measured
+    source: {key: reid-brunthaler-2020, where: "the abstract, and the fitted components in the body", text: "in Galactic longitude of −6.411 ± 0.008 mas yr−1"}
+
+  - name: sgr-a-motion-latitude
+    value: -0.219
+    unit: mas yr^-1
+    says: sgr a*'s apparent proper motion toward the north galactic pole, in galactic latitude
+    kind: measured
+    source: {key: reid-brunthaler-2020, where: "the abstract, and the fitted components in the body", text: "in latitude of −0.219 ± 0.007 mas yr−1"}
+
+  # sgr a*'s place on the sky, j2000, from the note under reid and
+  # brunthaler's table 1, read on 2026-11-05: 17h 45m 40.0409s and
+  # −29° 00′ 28.118″, as degrees.
+  - name: sgr-a-ascension
+    value: 266.416837
+    unit: deg
+    says: sgr a*'s right ascension, j2000, from its sexagesimal hours
+    kind: measured
+    source: {key: reid-brunthaler-2020, where: "the note under table 1, the j2000 positions the offsets are relative to", text: "Sgr A* (17 45 40.0409, –29 00 28.118)"}
+
+  - name: sgr-a-declination
+    value: -29.007811
+    unit: deg
+    says: sgr a*'s declination, j2000, from its sexagesimal degrees
+    kind: measured
+    source: {key: reid-brunthaler-2020, where: "the note under table 1, the j2000 positions the offsets are relative to", text: "Sgr A* (17 45 40.0409, –29 00 28.118)"}
+
+  # the sun's motion with respect to the local standard of rest, (U,
+  # V, W): read on 2026-11-05 from schoenrich, binney and dehnen's
+  # abstract. U toward the centre, V along the rotation, W toward the
+  # north galactic pole. their systematic uncertainties are about (1,
+  # 2, 0.5) km/s, printed in the same sentence.
+
+  - name: sun-motion-u
+    value: 11.1
+    unit: km s^-1
+    says: the sun's motion toward the galactic centre, U, with respect to the local standard of rest
+    kind: measured
+    source: {key: schoenrich-binney-dehnen-2010, where: "the abstract", text: "(U, V, W)⊙ = (11.1+0.69−0.75, 12.24+0.47−0.47, 7.25+0.37−0.36) km s−1"}
+
+  - name: sun-motion-v
+    value: 12.24
+    unit: km s^-1
+    says: the sun's motion along the galactic rotation, V, with respect to the local standard of rest
+    kind: measured
+    source: {key: schoenrich-binney-dehnen-2010, where: "the abstract", text: "(U, V, W)⊙ = (11.1+0.69−0.75, 12.24+0.47−0.47, 7.25+0.37−0.36) km s−1"}
+
+  - name: sun-motion-w
+    value: 7.25
+    unit: km s^-1
+    says: the sun's motion toward the north galactic pole, W, with respect to the local standard of rest
+    kind: measured
+    source: {key: schoenrich-binney-dehnen-2010, where: "the abstract", text: "(U, V, W)⊙ = (11.1+0.69−0.75, 12.24+0.47−0.47, 7.25+0.37−0.36) km s−1"}
+
+  # the sun's height above the galactic mid-plane: read on 2026-11-05
+  # from bennett and bovy's abstract.
+
+  - name: sun-height
+    value: 20.8
+    unit: pc
+    says: the sun's height above the galactic mid-plane, z⊙
+    kind: measured
+    source: {key: bennett-bovy-2019, where: "the abstract", text: "z = 20.8 ± 0.3 pc"}
+
+  # mwpotential2014, bovy's milky way potential: a power-law bulge with
+  # an exponential cut-off, a miyamoto-nagai disc and an nfw halo, each
+  # a closed form a kernel can take. read on 2026-11-05 from the galpy
+  # paper's table 1. the model is defined at its own R0 and circular
+  # speed, 8 kpc and 220 km/s, with each component's share of the
+  # radial force there; how to place it at gravity's 8277 pc is a
+  # choice to make when the potential is built, and is not made here.
+  # nor is the speed: the galactocentric frame's sun goes 251.5 km/s
+  # along the rotation (sgr-a-motion-longitude reflected at 8277 pc),
+  # the model's sun at 8277 pc about 231 (its circular speed there,
+  # about 219, plus sun-motion-v); 20 km/s apart until the model is
+  # placed at the frame's sun or the frame's sun given the model's
+  # speed. every star the frame places carries the difference.
+
+  - name: mw2014-sun-distance
+    value: 8
+    unit: kpc
+    says: the sun's distance from the centre at which mwpotential2014 is defined, fixed by the model
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, R0 (kpc)", text: "R0 ( kpc) 8 fixed"}
+
+  - name: mw2014-circular-speed
+    value: 220
+    unit: km s^-1
+    says: the circular speed at R0 at which mwpotential2014 is defined, fixed by the model
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, vc(R0) (km s^-1)", text: "vc (R0 ) ( km s−1 ) 220 fixed"}
+
+  - name: mw2014-bulge-share
+    value: 0.05
+    unit: ""
+    says: the bulge's share of the radial force at R0 in mwpotential2014, fb
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, fb", text: "fb 0.05"}
+
+  - name: mw2014-disc-share
+    value: 0.60
+    unit: ""
+    says: the disc's share of the radial force at R0 in mwpotential2014, fd
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, fd", text: "fd 0.60"}
+
+  - name: mw2014-halo-share
+    value: 0.35
+    unit: ""
+    says: the halo's share of the radial force at R0 in mwpotential2014, fh
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, fh", text: "fh 0.35"}
+
+  - name: mw2014-bulge-exponent
+    value: -1.8
+    unit: ""
+    says: the power-law exponent of the bulge's density in mwpotential2014, fixed by the model
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, bulge power-law exponent", text: "Bulge power−law exponent −1.8 fixed"}
+
+  - name: mw2014-bulge-cutoff
+    value: 1.9
+    unit: kpc
+    says: the exponential cut-off radius of the bulge's density in mwpotential2014, fixed by the model
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, bulge cut-off radius (kpc)", text: "Bulge cut−off radius ( kpc) 1.9 fixed"}
+
+  - name: mw2014-disc-length
+    value: 3.0
+    unit: kpc
+    says: the scale length a of mwpotential2014's miyamoto-nagai disc
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, a (kpc)", text: "a ( kpc) 3.0"}
+
+  - name: mw2014-disc-height
+    value: 280
+    unit: pc
+    says: the scale height b of mwpotential2014's miyamoto-nagai disc
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, b (pc)", text: "b ( pc) 280"}
+
+  - name: mw2014-halo-scale
+    value: 16
+    unit: kpc
+    says: the scale radius rs of mwpotential2014's nfw halo
+    kind: measured
+    source: {key: bovy-2015-galpy, where: "table 1, halo rs (kpc)", text: "Halo rs ( kpc) 16"}
+
+  - name: sgr-a-distance-2019
+    value: 8178
+    unit: pc
+    says: the sun's distance from sgr a* as the gravity collaboration measured it in 2019, superseded by sgr-a-distance and kept for the measurement's history
+    kind: measured
+    source: {key: gravity-2019-distance, where: "the abstract", text: "R0 = 8178 ± 13stat. ± 22sys. pc"}

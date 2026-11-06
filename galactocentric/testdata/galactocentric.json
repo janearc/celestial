@@ -1,0 +1,14 @@
+{
+  "about": "numbers galactocentric's tests use, picked 2026-11-05: the ledger's numbers the published frame is built from, repeated here so the frame is held to numbers it did not read from itself (sgr a*'s distance, gravity 2022; its place on the sky and its apparent motion along the galactic plane and toward the pole, reid and brunthaler 2020, with the equatorial components of that same motion from the same paper, for the test that closes the loop; the sun's height, bennett and bovy 2019; the sun's motion toward the centre, schoenrich, binney and dehnen 2010); an astronomical unit a julian year in kilometres a second, the speed a milliarcsecond a year at a kiloparsec is, from the iau's definitions (149597870700 m over 365.25 days of 86400 s), and the share it may be off by; the rooms, rounding where a number follows from the same ones (the sun's place, the lengths and speeds the property keeps, the iau centre's offset, the pole star's place), and half a kilometre a second where the loop closes through the paper's two fits of one motion, three times the largest residual the loop leaves (0.14 km/s toward the pole); the star half way to sgr a*, with sgr a*'s proper motion and a radial velocity, held to the hand's place and motion within a tenth of a parsec and 0.3 km/s, under the tilt's one kilometre a second in its motion toward the pole; the drawn ranges; and what the refusals are given",
+  "sun": {"distance kpc": 8.277, "height kpc": 0.0208, "toward centre": 11.1, "room kpc": 1e-9, "room km/s": 1e-3},
+  "sgr a": {"ascension": 266.416837, "declination": -29.007811, "longitude motion": -6.411, "latitude motion": -0.219, "ascension motion": -3.156, "declination motion": -5.585, "room kpc": 1e-9, "room km/s": 0.5},
+  "au a year": 4.740470464,
+  "au room": 1e-9,
+  "iau centre": {"room kpc": 1e-6},
+  "pole": {"distance kpc": 1, "room kpc": 1e-6},
+  "half way": {"share": 0.5, "radial km/s": 400, "room kpc": 1e-4, "room km/s": 0.3},
+  "drawn": {"nearest mas": 0.01, "farthest mas": 1000, "fastest mas a year": 10000, "fastest km/s": 1000, "turn": 360, "pole": 90},
+  "property room": 1e-9,
+  "refused": {"parallax": 0, "radial": 3e5, "distance": 0, "height": 9, "declination": 91, "speed": 3e5},
+  "none": 0
+}

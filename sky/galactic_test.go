@@ -160,3 +160,20 @@ func TestASinePastOneIsThePole(test *testing.T) {
 		test.Errorf("latitude %v", seen.Latitude())
 	}
 }
+
+// the north galactic pole is the definition's: at its ascension and
+// declination on the equatorial frame, and a quarter turn up the
+// galactic one.
+func TestTheNorthGalacticPoleIsTheDefinitions(test *testing.T) {
+	within := clockNumbers(test).PoleTolerance
+	pole := sky.NorthGalacticPole()
+	if !(math.Abs(pole.Ascension().InDegrees()-northGalacticAscension) <=
+		within) || !(math.Abs(pole.Declination().InDegrees()-
+		northGalacticDeclination) <= within) {
+		test.Errorf("the north galactic pole is at %v", pole)
+	}
+	if up := pole.Galactic().Latitude().InDegrees(); !(math.Abs(up-
+		quarterTurn) <= within) {
+		test.Errorf("the north galactic pole is at latitude %g", up)
+	}
+}

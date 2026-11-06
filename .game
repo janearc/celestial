@@ -17,6 +17,18 @@ lint shout
 lint words hyperscaler enterprise-grade blazing-fast load-bearing
 lint paragraph 4
 
+# lord this is some shouty data, feels like working on oracle back in 2001
+# all over again. heckin TSQL feelin caps havin larry smellin stuff btw
+# still mad over you guys ending sun microsystems, still mad, ok
+lint abbreviations GRAVITY BITPIX PCOUNT GCOUNT BZERO TTYPE
+lint abbreviations CFLAGS LDFLAGS CTYPE LONPOLE APOGEE TFORM CDELT
+lint abbreviations TNULL TSCAL TUNIT BINTABLE TZERO BSCALE IMAGE
+
+# a property test draws fresh cases every run, so one that passes a
+# hundred checks on one machine can fail at the gate on another; game
+# runs them harder than go test's hundred
+rapid checks 2000
+
 lint allow README.md words paragraph rows
 lint allow PACKAGES.md words paragraph rows exclaim
 sweep allow README.md emails author
@@ -35,6 +47,8 @@ exclude fits/testdata
 run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/photometry.go -package mocks github.com/janearc/celestial/photometry Photometer
 run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/sky.go -package mocks github.com/janearc/celestial/sky Projector
 run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/gw.go -package mocks github.com/janearc/celestial/gw Estimator
+run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/orbit.go -package mocks github.com/janearc/celestial/orbit Potential
+run mocks . :: go tool mockgen -write_package_comment=false -destination mocks/gpu.go -package mocks github.com/janearc/celestial/gpu Device
 
 # Keep cited works available for source verification without distributing
 # them. Game can retain files in version control while excluding them
@@ -261,3 +275,41 @@ run extract . :: grep -n -o -E KerrBH[^)]*mf">[0-9.]+ cited-sources/kerrgeodesic
 run extract . :: grep -n -o -E mf">4[.]23300252953083 cited-sources/kerrgeodesic-gw-kerr-spacetime.html
 run extract . :: grep -n -o -E mf">2[.]32088304176189 cited-sources/kerrgeodesic-gw-kerr-spacetime.html
 run extract . :: grep -n -o -E mf">1[.]61402966763547 cited-sources/kerrgeodesic-gw-kerr-spacetime.html
+
+# the galactic centre and the sun's place and motion in the galaxy, and
+# two milky way potentials, for the orbits run back from gaia's stars:
+# fetched 2026-11-05 from arxiv, each read against as sources.yaml says.
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/gravity-2019-distance.pdf https://arxiv.org/pdf/1904.05721
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/gravity-2022-mass.pdf https://arxiv.org/pdf/2112.07478
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/reid-brunthaler-2020.pdf https://arxiv.org/pdf/2001.04386
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/schoenrich-binney-dehnen-2010.pdf https://arxiv.org/pdf/0912.3693
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/bennett-bovy-2019.pdf https://arxiv.org/pdf/1809.03507
+run sources . :: curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 --create-dirs -o cited-sources/bovy-2015-galpy.pdf https://arxiv.org/pdf/1412.3451
+run extract . :: pdftotext -layout cited-sources/gravity-2019-distance.pdf cited-sources/gravity-2019-distance.txt
+run extract . :: grep -n -m1 -o -E R0[[:space:]]=[[:space:]]8178[[:space:]]±[[:space:]]13stat[.][[:space:]]±[[:space:]]22sys[.][[:space:]]pc cited-sources/gravity-2019-distance.txt
+run extract . :: pdftotext -layout cited-sources/gravity-2022-mass.pdf cited-sources/gravity-2022-mass.txt
+run extract . :: grep -n -m1 -o -E R0[[:space:]]=[[:space:]][(]8277[[:space:]]±[[:space:]]9[)][[:space:]]pc cited-sources/gravity-2022-mass.txt
+run extract . :: grep -n -m1 -o -E M•[[:space:]]=[[:space:]][(]4[.]297±0[.]012[)]×106 cited-sources/gravity-2022-mass.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*R0[[:space:]][[]pc[]][[:space:]]+8277[[:space:]]+9[[:space:]] cited-sources/gravity-2022-mass.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*M•[[:space:]][[]106[[:space:]]M[[:space:]][]][[:space:]]+4[.]297[[:space:]]+0[.]012[[:space:]] cited-sources/gravity-2022-mass.txt
+run extract . :: pdftotext -layout cited-sources/reid-brunthaler-2020.pdf cited-sources/reid-brunthaler-2020.txt
+run extract . :: grep -n -m1 -o -E longitude[[:space:]]of[[:space:]]−6[.]411[[:space:]]±[[:space:]]0[.]008[[:space:]]mas[[:space:]]yr−1 cited-sources/reid-brunthaler-2020.txt
+run extract . :: grep -n -m1 -o -E −0[.]219[[:space:]]±[[:space:]]0[.]007[[:space:]]mas[[:space:]]yr−1 cited-sources/reid-brunthaler-2020.txt
+run extract . :: pdftotext -layout cited-sources/schoenrich-binney-dehnen-2010.pdf cited-sources/schoenrich-binney-dehnen-2010.txt
+run extract . :: grep -n -m1 -o -E [(]U,[[:space:]]V,[[:space:]]W[)]⊙[[:space:]]=[[:space:]][(]11[.]1[+]0[.]69 cited-sources/schoenrich-binney-dehnen-2010.txt
+run extract . :: grep -n -m1 -o -E 12[.]24−0[.]47,[[:space:]]7[.]25−0[.]36[[:space:]][)][[:space:]]km[[:space:]]s cited-sources/schoenrich-binney-dehnen-2010.txt
+run extract . :: grep -n -m1 -o -E ∼[[:space:]][(]1,[[:space:]]2,[[:space:]]0[.]5[)][[:space:]]km[[:space:]]s cited-sources/schoenrich-binney-dehnen-2010.txt
+run extract . :: pdftotext -layout cited-sources/bennett-bovy-2019.pdf cited-sources/bennett-bovy-2019.txt
+run extract . :: grep -n -m1 -o -E z[[:space:]]=[[:space:]]20[.]8[[:space:]]±[[:space:]]0[.]3[[:space:]]pc cited-sources/bennett-bovy-2019.txt
+run extract . :: pdftotext -layout cited-sources/bovy-2015-galpy.pdf cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -o -E Parameters[[:space:]]and[[:space:]]properties[[:space:]]of[[:space:]]MWPotential2014 cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*R0[[:space:]][(][[:space:]]kpc[)][[:space:]]+8[[:space:]]+fixed cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*vc[[:space:]][(]R0[[:space:]][)][[:space:]][(][[:space:]]km[[:space:]]s−1[[:space:]][)][[:space:]]+220[[:space:]]+fixed cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*fb[[:space:]]+0[.]05[[:space:]] cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*fd[[:space:]]+0[.]60[[:space:]] cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*fh[[:space:]]+0[.]35[[:space:]] cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E Bulge[[:space:]]power−law[[:space:]]exponent[[:space:]]+−1[.]8[[:space:]]+fixed cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E Bulge[[:space:]]cut−off[[:space:]]radius[[:space:]][(][[:space:]]kpc[)][[:space:]]+1[.]9[[:space:]]+fixed cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*a[[:space:]][(][[:space:]]kpc[)][[:space:]]+3[.]0[[:space:]] cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*b[[:space:]][(][[:space:]]pc[)][[:space:]]+280[[:space:]] cited-sources/bovy-2015-galpy.txt
+run extract . :: grep -n -m1 -E ^[[:space:]]*Halo[[:space:]]rs[[:space:]][(][[:space:]]kpc[)][[:space:]]+16[[:space:]] cited-sources/bovy-2015-galpy.txt

@@ -26,7 +26,8 @@ func FromGPS(seconds float64) (*Instant, error) {
 }
 
 // mostDays is the largest whole day count representable exactly by float64 in
-// either direction.
+// either direction. Defined by IEEE 754's binary64: its significand is 53 bits,
+// 52 stored and one implied, so every whole number to 2^53 is held exactly.
 const mostDays = 1 << 53
 
 // countable checks that a day count is finite and within exact integer range.

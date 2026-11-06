@@ -1,0 +1,10 @@
+{
+  "about": "numbers gpu's tests use, picked 2026-11-05: how many numbers a test buffer holds, how many batches to run over it, what the scale kernel doubles by and scales by, a buffer of so many numbers no gpu holds, and none and one as the tests need them",
+  "count": 8,
+  "batches": 2,
+  "doubling": 2,
+  "scale": 3,
+  "huge": 1099511627776,
+  "none": 0,
+  "one": 1
+}

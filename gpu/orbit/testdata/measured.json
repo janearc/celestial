@@ -1,0 +1,18 @@
+{
+  "about": "what gpu/orbit's tests and benchmarks measured on 2026-11-05 on an apple m3 max (40 gpu cores, macos 27.2), so the rooms in orbit.json and the words in its about rest on numbers anyone can rerun with the commands here. the errors are the kernel's against closed forms at the steps orbit.json gives: the pass's distance, its step, the end, and the pass's two step shares, moved and pulled, off by so much (the circles' as they are, the ellipse's as a share of the closed form's); the shares of room are the agreement property's, logged on every run, the pass's and its two step shares' each in its own room; the seconds are the gpu's own, by the system's timestamps on its commands",
+  "device": "Apple M3 Max",
+  "date": "2026-11-05",
+  "circle": {"end off kpc": 1.72e-5, "nearest off kpc": 5.4e-6, "end speed off km/s": 7.7e-5, "moved off": 1.4e-8, "pulled off": 5.6e-12},
+  "inner circle": {"end off kpc": 2.7e-8, "nearest off kpc": 5.8e-9, "end speed off km/s": 3.1e-3, "moved off": 1.5e-8, "pulled off": 5.7e-12},
+  "ellipse": {"pericentre off kpc": 2.0e-6, "pericentre off steps": 2.8e-5, "end off kpc": 3.0e-5, "moved off as a share": 6.3e-6, "pulled off as a share": 1.2e-5},
+  "agreement": {"worst pass as a share of its room": "0.05 to 0.08", "worst step share as a share of its room": "0.05 to 0.08", "stars compared of drawn": 0.90, "by": "four runs of 2026-11-05 at 3000 checks, about 64,000 stars drawn each, stars at rest among them, after a review found the share rooms not finite at rest, the last with the gate on the reference pass's own shares; the draws are fresh each run and the worst varies between runs by about a factor of two: a reviewer's runs the same day gave 0.054 to 0.074 for the share and 0.12 for both once, and an earlier run of the kernel without the shares 0.04 for the pass"},
+  "galaxy agreement": {"worst pass as a share of its room": 0.047, "worst step share as a share of its room": 0.054, "stars compared of drawn": 0.78, "by": "a run of 2026-11-05 at 3000 checks, 63,825 stars drawn, in the Milky Way field with Sgr A*; the gate is the reference pass's own shares, so fewer are resolved than in the point mass's field"},
+  "parity": {"point mass, worst pull as a share of its room": 0.039, "galaxy, worst pull as a share of its room": 0.27, "by": "a run of 2026-11-05 at 3000 checks, batches of up to 64 places from a tenth of a kiloparsec to fifty out; the galaxy's worst is most likely the halo's share just past a tenth of a scale radius, where the direct form's two terms cancel a digit in 32 bits, as a reviewer's reader worked it"},
+  "benchmarks": {"heavy gpu seconds": 0.0084, "heavy wall seconds": 0.039, "heavier gpu seconds": 0.075, "heavier wall seconds": 0.179, "with the step shares": "the heavy batch took 0.010 to 0.013 gpu seconds over three runs later the same day, when the kernel without them took 0.011 in the same minutes: the shares cost nothing a step"},
+  "commands": {
+    "errors": "go test -count=1 -v -run 'Circle|Ellipse' ./gpu/orbit/ (each test logs its measurement)",
+    "agreement": "go test -count=1 -v -run TheKernelAgrees ./gpu/orbit/ -rapid.checks=3000 (logs the stars compared, the worst pass and the worst step share, each as a share of its room; the point mass's field and the galaxy's, each its own test)",
+    "parity": "go test -count=1 -v -run PullIsTheReferences ./gpu/orbit/ -rapid.checks=3000 (logs each field's worst pull as a share of its room)",
+    "benchmarks": "go test -run none -bench Heav -benchtime 1x ./gpu/orbit/"
+  }
+}

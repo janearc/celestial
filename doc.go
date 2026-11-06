@@ -3,9 +3,9 @@
 // runtime API; each subject lives in its own package.
 //
 // The implemented foundations include units and constants, time and sky
-// coordinates, spectra and atmospheres, stars, point-mass gravity, Kerr
-// geometry, HDF5 reading, and the open science centre event estimates. FITS and
-// strain analysis remain planned work.
+// coordinates, spectra and atmospheres, stars, point-mass gravity, orbits
+// through a potential (on the gpu too), Kerr geometry, HDF5 reading, and
+// the open science centre event estimates. Strain analysis remains planned.
 //
 // Most public quantities use SI. Packages using natural units convert at the
 // boundary. The documented exceptions are hole, which uses geometric units set

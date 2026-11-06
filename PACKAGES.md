@@ -55,7 +55,19 @@ this lil document has the breakdown of what each of these packages does, and
   Horizontal and Tangent
 - the black body model is radiation's Planck
 - `astropy.io.fits` and `astropy.wcs` are fits, for two-dimensional
-  images and their TAN and CAR grids
+  images and their TAN and CAR grids, and for binary tables of one
+  value a column, read a few thousand rows at a time
+- galpy's orbit integration, which astropy leaves to it, is orbit:
+  stars run back through a potential to their nearest pass by the
+  galactic centre, each pass carrying the step's shares of it, so a
+  caller can tell a resolved pass from a plunge the steps missed.
+  gpu/orbit does every star at once on the gpu. the potentials are a
+  point mass and galpy's MWPotential2014 (Bovy 2015) with Sgr A* added,
+  each part with its pull and its well
+- astropy's Galactocentric frame is galactocentric: a star as Gaia
+  sees it, by its place on the sky, parallax, proper motion and radial
+  velocity, to its place and motion about Sgr A*, with the Sun's place
+  and motion from the research ledger
 
 planned, not built:
 - the ecliptic frame

@@ -1,11 +1,23 @@
-// Package fits reads the images in FITS files as the FITS Standard 4.0
-// describes them, and refuses the rest. It reads a header's cards and an
-// image's pixels a row at a time. It reads where the image lies on the
-// sky.
+// Package fits reads the images and binary tables in FITS files as the
+// FITS Standard 4.0 describes them, and refuses the rest. It reads a
+// header's cards, an image's pixels a row at a time, a table's cells a
+// few thousand rows at a time, and where an image lies on the sky.
 //
 // The image is the primary array or an `IMAGE` extension. Its pixels
 // are any of the six types the standard allows. They are scaled by
 // `BSCALE` and `BZERO`, and `BLANK` is read as no value.
+//
+// The table is the first `BINTABLE` extension. A column is read when it
+// holds one value a row: a logical, an integer of one to eight bytes, a
+// single or double float, or text. `TSCAL` and `TZERO` scale the numbers.
+//
+// A column of many values a row is stepped over: the table opens and its
+// other columns read, and a read of it is refused.
+//
+// An integer equal to its column's `TNULL`, and a float that is not a
+// number, are read as no value. A `TNULL` on a float column is ignored:
+// archives write one on every column, and a float's null is not a
+// number whatever the card says.
 //
 // Where it lies on the sky is read from the world coordinate cards. The
 // projections read are TAN and CAR, in equatorial or galactic
@@ -147,5 +159,25 @@ func (read *Header) Number(key string) (float64, error) {
 	return number, nil
 }
 
-// bits is the size a number is read at. It's defined: a float64.
-const bits = 64
+// Integer is a keyword's value as a whole number, read whole: one too
+// large for a float to hold is read exactly. It refuses a value that is
+// not a whole number.
+func (read *Header) Integer(key string) (int64, error) {
+	kept, held := read.values[key]
+	if !held {
+		return noInteger, fmt.Errorf("%w: no %s card", errRefused, key)
+	}
+	number, err := strconv.ParseInt(kept, decimal, bits)
+	if err != nil {
+		return noInteger, fmt.Errorf("%w: %s is %q, not a whole number",
+			errRefused, key, kept)
+	}
+	return number, nil
+}
+
+// How numbers are read, each defined.
+const (
+	bits      = 64 // defined: a float64, and an int64, are 64 bits
+	decimal   = 10 // defined: the base cards write whole numbers in
+	noInteger = 0  // defined: the whole number given beside a refusal
+)

@@ -1,0 +1,24 @@
+{
+  "about": "numbers orbit's galaxy tests use, picked 2026-11-05 from bovy 2015's table 1 (cited-sources/bovy-2015-galpy.txt), the paper that defines MWPotential2014, and from the ledger: the model's sun distance and circular speed, the three shares, each part's shape, and the properties the paper lists for the model, each with the room its digits allow, half of the last one, but the circular speed's, which the black hole lifts by its part in twenty thousand, and the escape speed's and the vertical force's, held to half a unit of the paper's rounding; the bulge's mass is held to the arithmetic as well, its share of the force times the circle's speed squared times the sun's distance over G, 4.501e9, which the table rounds to 0.5e10, since the digit alone would pass 0.55e10 too. the hole's suns are sgr a*'s measured mass (gravity 2022), the ledger's, repeated here so the field is held to a number it did not read from the field, with G from si and a sun from measure; near is where the hole rules, a parsec out, and its shares of the pull there and at the sun. the masses are read from the pulls far out, where every part is a point mass, and within is the paper's mass within sixty kiloparsecs with the disc counted whole: its mass past there is a few hundred million suns by its density's fall as the fifth power of the distance, under a tenth of the room. the density places are where each part's density, from the divergence of its pull by central differences of the step, is held to its definition within a share: the bulge's stop at five kiloparsecs, inside where the differences resolve its density to the room, which they do to about seven, past which the density is a residual on a point mass's pull; the drawn ranges are the property's, for places where minus the well's gradient is held to the pull within a share of it. the refused numbers each break one of the model's, for the refusals; halved is a share every part's is scaled to, for the normalisation",
+  "sun": {"distance": 8, "speed": 220, "speed room": 0.01},
+  "shares": {"bulge": 0.05, "disc": 0.60, "halo": 0.35, "room": 1e-12},
+  "shape": {"exponent": -1.8, "cutoff": 1.9, "length": 3.0, "height": 0.28, "scale": 16},
+  "hole": {"suns": 4.297e6, "gm room": 1e-9, "share at the sun": 1e-4, "near": 0.001, "share near": 0.85},
+  "masses": {"bulge": 5e9, "disc": 6.8e10, "virial": 8e11, "virial radius": 245, "within": 4.1e11, "within radius": 60, "far": 1e6, "point room": 1e-5, "cut-offs": 10, "room": {"bulge": 5e8, "disc": 5e8, "virial": 5e10, "within": 5e9, "arithmetic": 1e-6}},
+  "densities": {"total": 0.10, "dark": 0.008, "room": {"total": 0.005, "dark": 0.0005}},
+  "vertical force": {"height": 1.1, "want": 72, "room": 0.5},
+  "slope": {"want": -0.10, "room": 0.005, "step": 0.01},
+  "escape": {"want": 513, "room": 0.5},
+  "difference step": 1e-4,
+  "density places": {
+    "bulge": [[0.1, 0, 0], [1, 0, 0], [1.9, 0, 0], [3, 0, 0], [5, 0, 0], [0.3, 0.4, 0.5]],
+    "disc": [[0.1, 0, 0], [1, 0, 0], [3, 0, 0], [8, 0, 0], [0.3, 0.4, 0.5], [8, 0, 1.1], [0, 0, 2]],
+    "halo": [[0.1, 0, 0], [1, 0, 0], [8, 0, 0], [16, 0, 0], [0.3, 0.4, 0.5], [8, 0, 1.1], [100, 0, 0]]
+  },
+  "definition room": 1e-5,
+  "drawn": {"farthest": 50, "nearest": 0.1},
+  "gradient room": 1e-4,
+  "halved": 0.5,
+  "refused": {"sun": 0, "circular": 0, "share": -0.1, "exponent": -2, "cutoff": 0, "length": -1, "height": 0, "scale": 0},
+  "none": 0
+}

@@ -93,6 +93,34 @@ func TestNumbersAreReadAsTheStandardWritesThem(t *testing.T) {
 	}
 }
 
+// The whole numbers the header tests read, each defined.
+const (
+	largestWhole = 1<<63 - 1 // defined: the largest int64, which a float rounds
+	minusOne     = -1        // defined: a whole number below none
+)
+
+// the test and the anti-test: whole numbers are read whole, one too
+// large for a float exactly; a fraction, text and a missing card are
+// refused by name.
+func TestWholeNumbersAreReadWhole(t *testing.T) {
+	header := headerOf(t, card("TNULL1", "9223372036854775807"),
+		card("TNULL2", "-1"), card("TNULL3", "1.5"), card("TNULL4", "'x'"))
+	if got, err := header.Integer("TNULL1"); err != nil ||
+		got != largestWhole {
+		t.Errorf("%v, %v", got, err)
+	}
+	if got, err := header.Integer("TNULL2"); err != nil || got != minusOne {
+		t.Errorf("%v, %v", got, err)
+	}
+	for key, said := range map[string]string{"TNULL3": "TNULL3 is",
+		"TNULL4": "TNULL4 is", "TNULL5": "no TNULL5 card"} {
+		if _, err := header.Integer(key); !errors.Is(err, fits.Refused()) ||
+			!strings.Contains(err.Error(), said) {
+			t.Errorf("%s: %v", key, err)
+		}
+	}
+}
+
 // Anti-tests: missing cards are refused by name. So are numbers asked as
 // text and text asked as a number.
 func TestAskingForWhatIsNotThereIsRefused(t *testing.T) {

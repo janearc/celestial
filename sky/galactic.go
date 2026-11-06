@@ -88,3 +88,11 @@ func turned(lon, lat, poleLon, poleLat, backLon float64) (measure.Angle,
 	latitude := math.Asin(sine)
 	return measure.Radians(longitude), measure.Radians(latitude)
 }
+
+// NorthGalacticPole is the direction of the north galactic pole on the
+// equatorial frame, by the Hipparcos definition: the direction a
+// galactic latitude of a right angle converts to.
+func NorthGalacticPole() Equatorial {
+	return Equatorial{measure.Degrees(galacticPoleAscension),
+		measure.Degrees(galacticPoleDeclination)}
+}

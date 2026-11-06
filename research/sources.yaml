@@ -142,3 +142,69 @@ sources:
     from: https://heasarc.gsfc.nasa.gov/docs/heasarc/missions/fermi.html
     licence: "public: a work of the us government (nasa)"
     read: 2026-10-31
+
+  - key: gravity-2019-distance
+    title: "A geometric distance measurement to the Galactic center black hole with 0.3% uncertainty"
+    by: "GRAVITY Collaboration"
+    year: 2019
+    from: https://arxiv.org/pdf/1904.05721
+    doi: https://doi.org/10.1051/0004-6361/201935656
+    sha256: c9a033d3753754740fe994e1a9d20b9b5c9b5d55c34b401802bd9139653062ff
+    size: 2536311
+    licence: "not stated here: cited, not copied"
+    read: "2026-11-05, the abstract, from the arXiv copy. its R0 of 8178 pc is superseded by gravity-2022-mass's, which celestial uses; kept so the measurement's history is on hand"
+
+  - key: gravity-2022-mass
+    title: "The mass distribution in the Galactic Centre from interferometric astrometry of multiple stellar orbits"
+    by: "GRAVITY Collaboration"
+    year: 2022
+    from: https://arxiv.org/pdf/2112.07478
+    doi: https://doi.org/10.1051/0004-6361/202142465
+    sha256: 541a6bcd46fdcb76a399e166f01742abafa3f3afbb528013a00c7e91d37651e4
+    size: 7691083
+    licence: "not stated here: cited, not copied"
+    read: "2026-11-05, the best-fit sentence in the body and table B.1, from the arXiv copy. the errors read are the statistical ones the paper prints there; its systematic error is given by reference to the collaboration's 2021 paper, not read"
+
+  - key: reid-brunthaler-2020
+    title: "The Proper Motion of Sagittarius A*: III. The Case for a Supermassive Black Hole"
+    by: "M. J. Reid and A. Brunthaler"
+    year: 2020
+    from: https://arxiv.org/pdf/2001.04386
+    doi: https://doi.org/10.3847/1538-4357/ab76cd
+    sha256: f42bf983822651ca2b77f6c3e46da12d71b81abc8b6d6c74ae5981b5b75aacd3
+    size: 314463
+    licence: "not stated here: cited, not copied"
+    read: "2026-11-05, the abstract and the fitted components in the body, from the arXiv copy"
+
+  - key: schoenrich-binney-dehnen-2010
+    title: "Local Kinematics and the Local Standard of Rest"
+    by: "Ralph Schönrich, James Binney and Walter Dehnen"
+    year: 2010
+    from: https://arxiv.org/pdf/0912.3693
+    doi: https://doi.org/10.1111/j.1365-2966.2010.16253.x
+    sha256: e5d74d488b955faa175630fa4b8f5929ce7f53bed5baa2489c5767232011c305
+    size: 244070
+    licence: "not stated here: cited, not copied"
+    read: "2026-11-05, the abstract, from the arXiv copy; pdftotext splits its superscripts and subscripts over two lines, so the extract greps match the pieces"
+
+  - key: bennett-bovy-2019
+    title: "Vertical waves in the solar neighbourhood in Gaia DR2"
+    by: "Morgan Bennett and Jo Bovy"
+    year: 2019
+    from: https://arxiv.org/pdf/1809.03507
+    doi: https://doi.org/10.1093/mnras/sty2813
+    sha256: b44754407d561758e53d455da26ee71b5e7ba377dfb047cc21be0e38ddfa63cb
+    size: 1295771
+    licence: "not stated here: cited, not copied"
+    read: "2026-11-05, the abstract, from the arXiv copy; pdftotext drops the sun sign from z⊙, so the extract reads z"
+
+  - key: bovy-2015-galpy
+    title: "galpy: A Python Library for Galactic Dynamics"
+    by: "Jo Bovy"
+    year: 2015
+    from: https://arxiv.org/pdf/1412.3451
+    doi: https://doi.org/10.1088/0067-0049/216/2/29
+    sha256: 92bd724b272f61a41db63a8b0c79c4a6b49ca0b1d73e40dfd261f425b91fe25f
+    size: 3157060
+    licence: "not stated here: cited, not copied"
+    read: "2026-11-05, table 1, parameters and properties of MWPotential2014, from the arXiv copy: the model's own R0 and circular speed, the three components' shares of the radial force at R0, the bulge's exponent and cut-off, the disc's scale length and height, and the halo's scale radius"
